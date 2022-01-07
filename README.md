@@ -47,7 +47,7 @@ $ pnpm dev
 
 # TODO
 
-1. [ ] P2P Messaging
+1. [x] P2P Messaging
 2. [ ] Automerge
 3. [ ] Connect Editor to Automerge
 4. [ ] Implement Data Model
