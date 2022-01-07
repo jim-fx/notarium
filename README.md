@@ -1,0 +1,56 @@
+# Notarium
+
+<div align="center">
+
+<img src="apps/editor/static/favicon.svg" width="30%"/>
+
+<a href="https://notes.jim-fx.com/"><h2 align="center">Notarium</h2></a>
+
+  <p align="center">
+		Notarium is a selfhosted note taking app.
+	</p>
+</div>
+
+# Table of contents
+
+- [What is Notarium](#WhatIsNotarium?)
+- [Architecture](#Architecture)
+- [Developing](#Developing)
+- [Roadmap](#Roadmap)
+
+# What is Notarium?
+
+Notarium is a note taking and organizing application which uses a folder as a database. Because of this you can easily use a third party program like syncthing to keep your notes synchronised across all your devices.
+
+# Architecture
+
+See [Architecture.md](./ARCHITECTURE.md)
+
+# Developing
+
+### Install prerequesits:
+
+- Node.js
+- pnpm
+
+### Install dependancies
+
+```bash
+$ pnpm i -r
+```
+
+### Start the dev server
+
+```bash
+$ pnpm dev
+```
+
+# TODO
+
+1. [ ] P2P Messaging
+2. [ ] Automerge
+3. [ ] Connect Editor to Automerge
+4. [ ] Implement Data Model
+   1. [ ] Tree
+   2. [ ] Document
+   3. [ ] Block
