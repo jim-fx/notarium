@@ -44,13 +44,15 @@ function connectToPeer(
   });
 
   peer.on("error", (err) => console.error(err));
-
   peer.on("connect", () => {
-    console.log("p2p::connected");
     peer.send(JSON.stringify({ type: "connect", data: "hello" }));
+    if ("connect" in callbacks) {
+      callbacks["connect"].forEach((cb) => cb(id));
+    }
   });
 
   peer.on("data", (d) => {
+    console.log("p2p::received data");
     handleMessage(d.toString(), id);
   });
 
@@ -60,8 +62,6 @@ function connectToPeer(
 async function handleMessage(msg: string, peerId?: string) {
   try {
     const { type, data } = typeof msg === "string" ? JSON.parse(msg) : msg;
-
-    // console.log(type, data);
 
     if (type === "p2p-id") {
       setId(data);
@@ -114,6 +114,9 @@ export async function connectWebSocket(url: string) {
     _ws.onopen = () => {
       console.log("ws::open");
       if (id) _ws.send(JSON.stringify({ type: "p2p-id", data: id }));
+      if ("connect" in callbacks) {
+        callbacks["connect"].forEach((cb) => cb("server"));
+      }
       res(_ws);
     };
   });
@@ -133,13 +136,21 @@ export function on(
   };
 }
 
-export async function send(type: string, data: unknown) {
+export async function sendToServer(eventType: string, data: unknown) {
+  (await ws).send(JSON.stringify({ type: eventType, data }));
+}
+
+export async function broadcast(type: string, data: unknown) {
   peers.forEach((p) => {
     p.peer.send(JSON.stringify({ type, data }));
   });
 }
 
 export async function sendTo(id: string, type: string, data: unknown) {
+  if (id === "server") {
+    return sendToServer(type, data);
+  }
+
   const p = peers.find((p) => p.id === id);
   if (p) {
     p.peer.send(JSON.stringify({ type, data }));

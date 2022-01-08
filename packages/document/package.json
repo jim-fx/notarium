@@ -6,6 +6,7 @@
   "scripts": {},
   "dependencies": {
     "@notarium/p2p-client": "link:../p2p-client",
+    "automerge": "^1.0.1-preview.6",
     "svelte": "^3.45.0"
   },
   "keywords": [],

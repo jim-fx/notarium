@@ -12,14 +12,18 @@
 		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. ."
 	},
 	"dependencies": {
-		"@notarium/p2p-client": "link:../../packages/p2p-client",
 		"@notarium/document": "link:../../packages/document",
+		"@notarium/p2p-client": "link:../../packages/p2p-client",
+		"@notarium/tree": "link:../../packages/tree",
 		"@sveltejs/adapter-static": "^1.0.0-next.24",
+		"diff-match-patch": "^1.0.5",
+		"idb": "^7.0.0",
 		"simple-peer": "^9.11.0"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "next",
 		"@sveltejs/kit": "next",
+		"@types/diff-match-patch": "^1.0.32",
 		"@typescript-eslint/eslint-plugin": "^4.31.1",
 		"@typescript-eslint/parser": "^4.31.1",
 		"eslint": "^7.32.0",

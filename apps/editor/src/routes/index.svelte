@@ -1,32 +1,27 @@
 <script lang="ts">
-	import p2p from '@notarium/p2p-client';
-	import { store, setTitle } from '@notarium/document';
+	import File from '$lib/elements/File.svelte';
+import p2p from '@notarium/p2p-client';
+import { createSvelteStore } from '@notarium/tree';
+	import { IDBAdapter} from '@notarium/tree/src/IDBAdapter';
+	import { createTree} from '@notarium/tree/src/Tree';
+  import { onMount } from 'svelte';
 
-	let messages = [];
+  const t = createTree(IDBAdapter, p2p);
 
-	p2p.on('sync', (msg) => {
-		messages = [...messages, msg];
-	});
+  const store = createSvelteStore(t);
 
-	let inputText;
-	function handleKeyDown(ev) {
-		if (ev.key === 'Enter') {
-			setTitle(inputText);
-			inputText = '';
-		}
-	}
+  function handleDelete(path){
+    t.deleteNode(path)
+}
+
+$: console.log($store);
+
+  onMount(() => {
+    t.load()
+    window["t"] = t;
+})
+
 </script>
 
-<h1>hi from root</h1>
 
-<pre>
-
-	<code>
-
-		{JSON.stringify($store, null, 2)}
-
-	</code>
-
-</pre>
-
-<input type="text" bind:value={inputText} on:keydown={handleKeyDown} />
+<File file={$store} {handleDelete}></File>

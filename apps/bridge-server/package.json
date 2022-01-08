@@ -19,8 +19,8 @@
     "polka": "^0.5.2",
     "tinyws": "^0.1.0",
     "uuid": "^8.3.2",
-    "wrtc": "^0.4.7",
-    "ws": "^8.4.0"
+    "ws": "^8.4.0",
+    "@notarium/tree": "link:../../packages/tree"
   },
   "devDependencies": {
     "@types/polka": "^0.5.4",

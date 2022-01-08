@@ -49,8 +49,8 @@ $ pnpm dev
 
 1. [x] P2P Messaging
 2. [x] Automerge
-3. [ ] Connect Editor to Automerge
+3. [x] Connect Editor to Automerge
 4. [ ] Implement Data Model
-   1. [ ] Tree
+   1. [ ] Tree (Half implemented)
    2. [ ] Document
    3. [ ] Block
