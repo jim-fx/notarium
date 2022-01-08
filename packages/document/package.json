@@ -1,10 +1,12 @@
 {
-  "name": "document",
+  "name": "@notarium/document",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "main": "index.ts",
+  "scripts": {},
+  "dependencies": {
+    "@notarium/p2p-client": "link:../p2p-client",
+    "svelte": "^3.45.0"
   },
   "keywords": [],
   "author": "",

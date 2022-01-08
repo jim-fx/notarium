@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@notarium/p2p-client": "link:../../packages/p2p-client",
+		"@notarium/document": "link:../../packages/document",
 		"@sveltejs/adapter-static": "^1.0.0-next.24",
 		"simple-peer": "^9.11.0"
 	},

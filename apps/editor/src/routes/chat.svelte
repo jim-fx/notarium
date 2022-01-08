@@ -1,17 +1,17 @@
 <script lang="ts">
 	import p2p from '@notarium/p2p-client';
-	import { store, setTitle } from '@notarium/document';
 
 	let messages = [];
 
-	p2p.on('sync', (msg) => {
+	p2p.on('message', (msg) => {
 		messages = [...messages, msg];
 	});
 
 	let inputText;
 	function handleKeyDown(ev) {
 		if (ev.key === 'Enter') {
-			setTitle(inputText);
+			messages = [...messages, inputText];
+			p2p.send('message', inputText);
 			inputText = '';
 		}
 	}
@@ -19,14 +19,8 @@
 
 <h1>hi from root</h1>
 
-<pre>
-
-	<code>
-
-		{JSON.stringify($store, null, 2)}
-
-	</code>
-
-</pre>
+{#each messages as msg}
+	<p>{msg}</p>
+{/each}
 
 <input type="text" bind:value={inputText} on:keydown={handleKeyDown} />

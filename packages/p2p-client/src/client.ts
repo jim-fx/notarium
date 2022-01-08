@@ -5,6 +5,21 @@ const peers: { peer: SimplePeer.Instance; id: string }[] = [];
 const callbacks: Record<string, ((data: unknown, peerId?: string) => void)[]> =
   {};
 
+function getId() {
+  if ("p2p-id" in localStorage) {
+    let id = localStorage.getItem("p2p-id");
+    if (id === "undefined" || id === "null") {
+      localStorage.removeItem("p2p-id");
+      return undefined;
+    }
+    return id;
+  }
+}
+
+function setId(id: string) {
+  id && localStorage.setItem("p2p-id", id);
+}
+
 function connectToPeer(
   id: string,
   signal?: SimplePeer.SignalData
@@ -28,10 +43,11 @@ function connectToPeer(
     );
   });
 
-  peer.on("error", (err) => console.log("error", err));
+  peer.on("error", (err) => console.error(err));
 
   peer.on("connect", () => {
-    console.log("connected");
+    console.log("p2p::connected");
+    peer.send(JSON.stringify({ type: "connect", data: "hello" }));
   });
 
   peer.on("data", (d) => {
@@ -43,9 +59,13 @@ function connectToPeer(
 
 async function handleMessage(msg: string, peerId?: string) {
   try {
-    const { type, data } = JSON.parse(msg);
+    const { type, data } = typeof msg === "string" ? JSON.parse(msg) : msg;
 
-    console.log(type, data);
+    // console.log(type, data);
+
+    if (type === "p2p-id") {
+      setId(data);
+    }
 
     if (type === "p2p-signal") {
       const { signal, id } = data;
@@ -80,16 +100,20 @@ async function handleMessage(msg: string, peerId?: string) {
       callbacks[type].forEach((cb) => cb(data, peerId));
     }
   } catch (error) {
+    console.error(error);
     console.log("received non json message", msg);
   }
 }
 
 export async function connectWebSocket(url: string) {
+  const id = getId();
+
   const _ws = new WebSocket(url);
 
   ws = new Promise((res) => {
     _ws.onopen = () => {
       console.log("ws::open");
+      if (id) _ws.send(JSON.stringify({ type: "p2p-id", data: id }));
       res(_ws);
     };
   });
@@ -99,7 +123,10 @@ export async function connectWebSocket(url: string) {
   };
 }
 
-export function on(event: string, cb: (data: unknown) => void): () => void {
+export function on(
+  event: string,
+  cb: (data: unknown, peerId?: string) => void
+): () => void {
   callbacks[event] = event in callbacks ? [...callbacks[event], cb] : [cb];
   return () => {
     callbacks[event] = callbacks[event].filter((c) => c !== cb);
@@ -110,4 +137,11 @@ export async function send(type: string, data: unknown) {
   peers.forEach((p) => {
     p.peer.send(JSON.stringify({ type, data }));
   });
+}
+
+export async function sendTo(id: string, type: string, data: unknown) {
+  const p = peers.find((p) => p.id === id);
+  if (p) {
+    p.peer.send(JSON.stringify({ type, data }));
+  }
 }
