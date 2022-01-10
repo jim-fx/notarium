@@ -1,10 +1,9 @@
 <script lang="ts">
 	import File from '$lib/elements/File.svelte';
 import p2p from '@notarium/p2p-client';
-import { createSvelteStore } from '@notarium/tree';
-	import { IDBAdapter} from '@notarium/tree/src/IDBAdapter';
-	import { createTree} from '@notarium/tree/src/Tree';
-  import { onMount } from 'svelte';
+import { createSvelteStore,createTree } from '@notarium/tree';
+import {IDBAdapter} from "@notarium/adapters/IDBAdapter"
+	import { onMount } from 'svelte';
 
   const t = createTree(IDBAdapter, p2p);
 

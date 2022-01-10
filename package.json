@@ -15,6 +15,7 @@
     "simple-peer": "^9.11.0"
   },
   "devDependencies": {
-    "@types/simple-peer": "^9.11.4"
+    "@types/simple-peer": "^9.11.4",
+    "eslint": "^8.6.0"
   }
 }

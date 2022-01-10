@@ -1,1 +1,2 @@
-interface ISy
+export * from "./FSAdapter";
+export * from "./IDBAdapter";

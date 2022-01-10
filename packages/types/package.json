@@ -1,5 +1,5 @@
 {
-  "name": "@notarium/tree",
+  "name": "types",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
@@ -9,10 +9,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "@notarium/types": "link:../types/",
-    "automerge": "^1.0.1-preview.6",
-    "idb": "^7.0.0",
-    "svelte": "^3.45.0"
+  "devDependencies": {
+    "automerge": "^1.0.1-preview.6"
   }
 }

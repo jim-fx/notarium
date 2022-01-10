@@ -1,4 +1,5 @@
-import {
+import { ITreeAdapter, TreeData } from "@notarium/types";
+import Automerge, {
   BinarySyncMessage,
   from,
   load,
@@ -10,23 +11,67 @@ import {
   BinaryDocument,
   FreezeObject,
   init,
+  merge,
 } from "automerge";
 
+function getId() {
+  if ("localStorage" in globalThis && "p2p-id" in localStorage) {
+    let id = localStorage.getItem("p2p-id");
+    if (id === "undefined" || id === "null") {
+      localStorage.removeItem("p2p-id");
+      return undefined;
+    }
+    return id;
+  }
+}
+
+const hexEncode = function (input: string) {
+  let hex, i;
+  let result = "";
+  for (i = 0; i < input.length; i++) {
+    hex = input.charCodeAt(i).toString(16);
+    result += ("000" + hex).slice(-4);
+  }
+  return result;
+};
+
 export default function createDataStore(
-  initialData: Uint8Array,
+  initialData: BinaryDocument | TreeData | null,
   adapter: ITreeAdapter
 ) {
-  console.log("crdt:: load", initialData);
+  let id = getId() as string | undefined;
+  if (id) id = hexEncode(id);
 
   type TreeDoc = FreezeObject<TreeData>;
 
   let currentDoc: TreeDoc;
   if (initialData instanceof Uint8Array) {
-    currentDoc = load(initialData as BinaryDocument);
-  } else if (typeof initialData === "object") {
-    currentDoc = from(initialData);
+    console.log("crdt::init from serialized");
+    currentDoc = load(initialData as BinaryDocument, id);
+  } else if (initialData) {
+    console.log("crdt::init load from object");
+    currentDoc = merge(init(id), from(initialData, id));
   } else {
-    currentDoc = init();
+    console.log("crdt::init empty document");
+    currentDoc = init(id);
+  }
+
+  async function readSyncState(peerId: string): Promise<SyncState> {
+    let peerSyncState = await adapter.readSyncData(peerId);
+    if (!peerSyncState) {
+      console.log("crdt::init sync data for " + peerId);
+      return initSyncState();
+    } else {
+      console.log("crdt::found sync data for " + peerId);
+      return Automerge.Backend.decodeSyncState(peerSyncState);
+    }
+  }
+
+  async function writeSyncData(peerId: string, syncState: SyncState) {
+    return adapter.writeSyncData(
+      peerId,
+      Automerge.Backend.encodeSyncState(syncState)
+    );
   }
 
   function update(cb: (d: TreeDoc) => void) {
@@ -38,17 +83,22 @@ export default function createDataStore(
     syncMessage: BinarySyncMessage,
     peerId: string = "server"
   ) {
-    const [newDoc, newSyncState] = receiveSyncMessage(
+    const [newDoc, newSyncState, patch] = receiveSyncMessage(
       currentDoc,
-      ((await adapter.readSyncData(peerId)) as SyncState) || initSyncState(),
+      await readSyncState(peerId),
       syncMessage
     );
+
+    console.log(receiveSyncMessage);
+
+    console.log("crdt::received change, patch:", patch);
 
     currentDoc = newDoc;
 
     const newSyncMessage = await getSyncForPeer(peerId);
 
-    adapter.writeSyncData(peerId, newSyncState);
+    console.log("crdt:writesync data for " + peerId);
+    await writeSyncData(peerId, newSyncState);
 
     if (newSyncMessage) {
       return newSyncMessage.toString();
@@ -58,17 +108,14 @@ export default function createDataStore(
   }
 
   async function getSyncForPeer(peerId: string = "server") {
-    let peerSyncState = (await adapter.readSyncData(peerId)) as SyncState;
-    if (!peerSyncState) {
-      peerSyncState = initSyncState();
-    }
+    console.log("crdt::get sync for peer", peerId);
 
     const [newSyncState, syncMessage] = generateSyncMessage(
       currentDoc,
-      peerSyncState
+      await readSyncState(peerId)
     );
 
-    await adapter.writeSyncData(peerId, newSyncState);
+    await writeSyncData(peerId, newSyncState);
 
     if (syncMessage) {
       return syncMessage.toString();

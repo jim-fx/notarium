@@ -2,6 +2,7 @@ import { promises } from "fs";
 import { basename } from "path";
 import { homedir } from "os";
 const { readdir, lstat } = promises;
+import { ITreeAdapter, Tree, TreeData } from "@notarium/types";
 
 async function readTreeData(path: string): Promise<TreeData> {
   const stat = await lstat(path);
@@ -29,16 +30,23 @@ async function readTreeData(path: string): Promise<TreeData> {
 
 const syncData: Record<string, unknown> = {};
 
-export function FSAdapter(tree: Tree): ReturnType<ITreeAdapter> {
-  return {
-    read: async (path: string = homedir() + "/Notes") => {
-      console.log("fsAdapter::read", path);
-      return readTreeData(path);
-    },
-    deleteNode() {},
-    createNode() {},
+export function FSAdapter(): ITreeAdapter {
+  let _treeData: TreeData;
 
-    getPeerIds() {
+  return {
+    readTree: async (path: string = homedir() + "/Notes") => {
+      console.log("fsAdapter::read", path);
+      _treeData = await readTreeData(path);
+      return _treeData;
+    },
+
+    deleteNode(path: string) {},
+    createNode(path: string, defaultContent?: string) {},
+
+    writeDocument() {},
+    readDocument() {},
+
+    async getPeerIds() {
       return Object.keys(syncData);
     },
     async readSyncData(peerId: string) {

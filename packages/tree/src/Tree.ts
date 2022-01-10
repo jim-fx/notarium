@@ -1,4 +1,11 @@
-import { BinarySyncMessage, save } from "automerge";
+import {
+  ISyncAdapter,
+  ITreeAdapter,
+  ITreeAdapterFactory,
+  Tree,
+  TreeData,
+} from "@notarium/types";
+import { BinarySyncMessage } from "automerge";
 import createDataStore from "./TreeCRDT";
 
 function splitPath(p: string) {
@@ -10,7 +17,7 @@ function findChild(tree: TreeData, n: string) {
 }
 
 export function createTree(
-  createAdapter: ITreeAdapterCreator,
+  createAdapter: ITreeAdapterFactory,
   syncAdapter: ISyncAdapter
 ): Tree {
   const exp: Tree = {
@@ -19,12 +26,8 @@ export function createTree(
     findNode,
 
     load,
-    getTree() {
-      return crdt?.currentDoc;
-    },
     _addAdapter,
-    _pushChangesToAdapter,
-    _emit: () => {},
+    _pushChangesToAdapters,
   };
 
   const initialAdapter = createAdapter(exp);
@@ -32,28 +35,34 @@ export function createTree(
   let crdt: ReturnType<typeof createDataStore>;
   const adapters: Partial<ITreeAdapter>[] = [initialAdapter];
 
-  function _addAdapter(adapter: ITreeAdapterCreatorPartial) {
+  function _addAdapter(adapter: ITreeAdapterFactory<Partial<ITreeAdapter>>) {
     adapters.push(adapter(exp));
   }
 
   let _pushTimeout: NodeJS.Timeout;
-  function _pushChangesToAdapter(adapter?: ITreeAdapter) {
+  function _pushChangesToAdapters(adapter?: ITreeAdapter) {
     if (_pushTimeout) clearTimeout(_pushTimeout);
     _pushTimeout = setTimeout(() => {
       adapters.forEach((a) => {
         if (a !== adapter) {
-          a?.write?.(crdt.currentDoc);
+          a?.writeTree?.(crdt?.currentDoc);
         }
       });
     }, 200);
   }
 
-  function findNode(path: string) {
-    return crdt.currentDoc;
+  function findNode(path: string = "/") {
+    if (path === "/") {
+      return crdt?.currentDoc;
+    }
+    // TODO: implement findNode
+    return crdt?.currentDoc;
   }
   function createNode(path: string) {}
   function deleteNode(path: string) {
     const p = splitPath(path);
+    // Disallow deleting of root dir
+    if (!p.length) return;
     p.shift();
 
     crdt.update((doc) => {
@@ -73,7 +82,7 @@ export function createTree(
       }
     });
 
-    _pushChangesToAdapter();
+    _pushChangesToAdapters();
     _pushChangesToPeers();
   }
 
@@ -90,24 +99,14 @@ export function createTree(
   }
 
   async function initListeners() {
-    // Start a sync cycle with the server first
-    // if ("sendToServer" in syncAdapter) {
-    //   console.log("tree: request server sync");
-    //   const syncMessage = await crdt.getSyncForPeer("server");
-    //   if (syncMessage) {
-    //     syncAdapter.sendToServer("sync-data", syncMessage);
-    //   } else {
-    //     _pushChangesToAdapter();
-    //   }
-    // }
-
     // Sync with peers when they connect
     syncAdapter.on("connect", async (peerId) => {
+      console.log("crdt::connected to " + peerId);
       const syncMessage = await crdt.getSyncForPeer(peerId as string);
       if (syncMessage) {
         syncAdapter.sendTo(peerId as string, "sync-data", syncMessage);
       } else {
-        _pushChangesToAdapter();
+        _pushChangesToAdapters();
       }
     });
 
@@ -131,16 +130,16 @@ export function createTree(
         } else {
           console.log("sync complete");
         }
-        _pushChangesToAdapter();
+        _pushChangesToAdapters();
       }
     );
   }
 
   async function load(path?: string) {
-    const _data = await initialAdapter.read(path);
+    const _data = await initialAdapter.readTree(path);
     crdt = createDataStore(_data, initialAdapter);
     initListeners();
-    _pushChangesToAdapter();
+    _pushChangesToAdapters();
     return;
   }
 

@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@notarium/document": "link:../../packages/document",
+		"@notarium/adapters": "link:../../packages/adapters",
 		"@notarium/p2p-client": "link:../../packages/p2p-client",
 		"@notarium/tree": "link:../../packages/tree",
 		"@sveltejs/adapter-static": "^1.0.0-next.24",

@@ -1,10 +1,12 @@
 import { readable } from "svelte/store";
+import { Tree, TreeData } from "@notarium/types";
+import { BinaryDocument } from "automerge";
 
 export function createSvelteStore(tree: Tree) {
-  const store = readable(tree.getTree() || {}, function start(set) {
+  const store = readable(tree.findNode() || {}, function start(set) {
     tree._addAdapter(() => {
       return {
-        write: (data) => {
+        writeTree: (data: TreeData) => {
           set(data);
         },
       };
