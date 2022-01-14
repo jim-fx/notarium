@@ -14,7 +14,9 @@ export function sendTo(peerId: string, eventType: string, data: unknown) {
   }
 }
 
-export function broadcast(eventType: string, data: unknown) {}
+export function broadcast(eventType: string, data: unknown) {
+  getPeerIds().forEach((peerId) => sendTo(peerId, eventType, data));
+}
 
 export function on(
   event: string,
@@ -24,6 +26,10 @@ export function on(
   return () => {
     callbacks[event] = callbacks[event].filter((c) => c !== cb);
   };
+}
+
+export function getPeerIds() {
+  return connections.map((p) => p.id);
 }
 
 export default function handleWebSocket(ws: WebSocket) {

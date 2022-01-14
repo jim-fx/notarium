@@ -5,7 +5,7 @@ import {
   Tree,
   TreeData,
 } from "@notarium/types";
-import { BinarySyncMessage } from "automerge";
+import { BinaryDocument, BinarySyncMessage, BinarySyncState } from "automerge";
 import createDataStore from "./TreeCRDT";
 
 function splitPath(p: string) {
@@ -45,7 +45,7 @@ export function createTree(
     _pushTimeout = setTimeout(() => {
       adapters.forEach((a) => {
         if (a !== adapter) {
-          a?.writeTree?.(crdt?.currentDoc);
+          a?.writeDocument?.("tree", crdt?.currentDoc);
         }
       });
     }, 200);
@@ -90,7 +90,7 @@ export function createTree(
     const peerIds = await initialAdapter.getPeerIds();
     console.log(peerIds);
     for (const peerId of peerIds) {
-      console.log("crdt::syncing", peerId);
+      console.log("[tree] syncing", peerId);
       const syncMessage = await crdt.getSyncForPeer(peerId);
       if (syncMessage) {
         syncAdapter.sendTo(peerId, "sync-data", syncMessage);
@@ -98,37 +98,48 @@ export function createTree(
     }
   }
 
+  async function _syncWithPeer(peerId: string) {
+    const syncMessage = await crdt.getSyncForPeer(peerId);
+    if (syncMessage) {
+      syncAdapter.sendTo(peerId, "sync-data", syncMessage);
+    } else {
+      _pushChangesToAdapters();
+    }
+  }
+
   async function initListeners() {
-    // Sync with peers when they connect
+    // Sync with new peers when they connect
     syncAdapter.on("connect", async (peerId) => {
-      console.log("crdt::connected to " + peerId);
-      const syncMessage = await crdt.getSyncForPeer(peerId as string);
-      if (syncMessage) {
-        syncAdapter.sendTo(peerId as string, "sync-data", syncMessage);
-      } else {
-        _pushChangesToAdapters();
-      }
+      console.log("[tree] connected to " + peerId);
+      _syncWithPeer(peerId as string);
+    });
+
+    // Start syncing with other peers
+    syncAdapter.getPeerIds().forEach((peerId) => {
+      _syncWithPeer(peerId);
     });
 
     // Sync with peers
     syncAdapter.on(
       "sync-data",
       async (rawSyncData, peerId: string = "server") => {
-        console.log("received sync data");
+        await new Promise((res) => setTimeout(res, 500));
 
-        // Decoding incomming stringified Uint8Array
+        // Decode incoming stringified Uint8Array
         const syncData = Uint8Array.from(
           (rawSyncData as string).split(",").map((v) => parseInt(v))
         ) as BinarySyncMessage;
-        console.log("received sync data from", peerId);
+        console.groupCollapsed("[tree] received sync data from", peerId);
+        console.log(syncData);
+        console.groupEnd();
 
         const syncMessage = await crdt.handleSyncMessage(syncData, peerId);
 
         if (syncMessage) {
-          console.log("sending sync request");
+          console.log("[tree] sending sync request to", peerId);
           syncAdapter.sendTo(peerId, "sync-data", syncMessage);
         } else {
-          console.log("sync complete");
+          console.log("[tree] sync complete with", peerId);
         }
         _pushChangesToAdapters();
       }
@@ -136,7 +147,10 @@ export function createTree(
   }
 
   async function load(path?: string) {
-    const _data = await initialAdapter.readTree(path);
+    const _data = (await initialAdapter.readDocument(
+      "tree",
+      path
+    )) as BinaryDocument;
     crdt = createDataStore(_data, initialAdapter);
     initListeners();
     _pushChangesToAdapters();

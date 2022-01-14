@@ -1,2 +1,2 @@
-export * from "./FSAdapter";
 export * from "./IDBAdapter";
+export * from "./MEMAdapter";

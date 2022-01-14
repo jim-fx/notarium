@@ -5,6 +5,7 @@ interface ISyncAdapter {
     cb: (data?: unknown, peerId?: string) => unknown
   ): () => void;
   sendToServer?: (eventType: string, data?: unknown) => void;
+  getPeerIds(): string[];
   broadcast(eventType: string, data?: unknown): void;
 }
 

@@ -25,53 +25,40 @@ function getId() {
   }
 }
 
-const hexEncode = function (input: string) {
-  let hex, i;
-  let result = "";
-  for (i = 0; i < input.length; i++) {
-    hex = input.charCodeAt(i).toString(16);
-    result += ("000" + hex).slice(-4);
-  }
-  return result;
-};
-
 export default function createDataStore(
   initialData: BinaryDocument | TreeData | null,
   adapter: ITreeAdapter
 ) {
-  let id = getId() as string | undefined;
-  if (id) id = hexEncode(id);
-
   type TreeDoc = FreezeObject<TreeData>;
 
   let currentDoc: TreeDoc;
   if (initialData instanceof Uint8Array) {
-    console.log("crdt::init from serialized");
-    currentDoc = load(initialData as BinaryDocument, id);
+    console.log("[crdt] init from save file");
+    currentDoc = load(initialData as BinaryDocument);
   } else if (initialData) {
-    console.log("crdt::init load from object");
-    currentDoc = merge(init(id), from(initialData, id));
+    console.log("[crdt] init load from object");
+    currentDoc = merge(init(), from(initialData));
   } else {
-    console.log("crdt::init empty document");
-    currentDoc = init(id);
+    console.log("[crdt] init empty document");
+    currentDoc = init();
   }
 
   async function readSyncState(peerId: string): Promise<SyncState> {
-    let peerSyncState = await adapter.readSyncData(peerId);
-    if (!peerSyncState) {
-      console.log("crdt::init sync data for " + peerId);
-      return initSyncState();
-    } else {
-      console.log("crdt::found sync data for " + peerId);
-      return Automerge.Backend.decodeSyncState(peerSyncState);
+    let peerSyncState = await adapter.readSyncState(peerId);
+    if (peerSyncState) {
+      console.groupCollapsed("[crdt] found sync state for " + peerId);
+      console.log(peerSyncState);
+      console.groupEnd();
+      return peerSyncState;
     }
+    return initSyncState();
   }
 
-  async function writeSyncData(peerId: string, syncState: SyncState) {
-    return adapter.writeSyncData(
-      peerId,
-      Automerge.Backend.encodeSyncState(syncState)
-    );
+  async function writeSyncState(peerId: string, syncState: SyncState) {
+    console.groupCollapsed("[crdt] write sync state", peerId);
+    console.log(syncState);
+    console.groupEnd();
+    return adapter.writeSyncState(peerId, syncState);
   }
 
   function update(cb: (d: TreeDoc) => void) {
@@ -81,7 +68,7 @@ export default function createDataStore(
 
   async function handleSyncMessage(
     syncMessage: BinarySyncMessage,
-    peerId: string = "server"
+    peerId: string
   ) {
     const [newDoc, newSyncState, patch] = receiveSyncMessage(
       currentDoc,
@@ -89,18 +76,13 @@ export default function createDataStore(
       syncMessage
     );
 
-    console.log(receiveSyncMessage);
-
-    console.log("crdt::received change, patch:", patch);
+    console.log("[crdt] received change, patch:", patch);
 
     currentDoc = newDoc;
-
     const newSyncMessage = await getSyncForPeer(peerId);
 
-    console.log("crdt:writesync data for " + peerId);
-    await writeSyncData(peerId, newSyncState);
-
     if (newSyncMessage) {
+      await writeSyncState(peerId, newSyncState);
       return newSyncMessage.toString();
     }
 
@@ -108,14 +90,14 @@ export default function createDataStore(
   }
 
   async function getSyncForPeer(peerId: string = "server") {
-    console.log("crdt::get sync for peer", peerId);
+    console.log("[crdt] get syncState for peer", peerId);
 
     const [newSyncState, syncMessage] = generateSyncMessage(
       currentDoc,
       await readSyncState(peerId)
     );
 
-    await writeSyncData(peerId, newSyncState);
+    await writeSyncState(peerId, newSyncState);
 
     if (syncMessage) {
       return syncMessage.toString();

@@ -15,26 +15,18 @@ interface ITreeAdapterFactory<T = ITreeAdapter> {
 }
 
 interface ITreeAdapter {
-  // Directly manipulate the tree
-  readTree(path?: string): Promise<BinaryDocument | TreeData | null>;
-
-  /**
-   * Only use for in memory saving
-   */
-  writeTree?: (tree: TreeData) => void;
-
   // manipulate nodes
   deleteNode(path: string): unknown;
   createNode(path: string): unknown;
 
   // manipulate documents (eg. file contents)
-  readDocument(path: string): unknown;
-  writeDocument(path: string): unknown;
+  readDocument(docId: string, fsPath?: string): Promise<unknown>;
+  writeDocument(docId: string, doc: any): Promise<void>;
 
   //Read/write Sync data
   getPeerIds(): Promise<string[]>;
-  readSyncData(peerId: string): Promise<BinarySyncState | undefined>;
-  writeSyncData(peerId: string, d: SyncState): Promise<void>;
+  readSyncState(peerId: string): Promise<SyncState>;
+  writeSyncState(peerId: string, d: SyncState): Promise<void>;
 }
 
 interface Tree {

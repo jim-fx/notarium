@@ -2,7 +2,7 @@
 	import File from '$lib/elements/File.svelte';
 import p2p from '@notarium/p2p-client';
 import { createSvelteStore,createTree } from '@notarium/tree';
-import {IDBAdapter} from "@notarium/adapters/IDBAdapter"
+import {IDBAdapter} from "@notarium/adapters"
 	import { onMount } from 'svelte';
 
   const t = createTree(IDBAdapter, p2p);
@@ -12,8 +12,6 @@ import {IDBAdapter} from "@notarium/adapters/IDBAdapter"
   function handleDelete(path){
     t.deleteNode(path)
 }
-
-$: console.log($store);
 
   onMount(() => {
     t.load()

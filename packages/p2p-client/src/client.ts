@@ -117,6 +117,10 @@ async function handleMessage(msg: string, peerId?: string) {
   }
 }
 
+export function getPeerIds() {
+  return [...peers.map((p) => p.id), "server"];
+}
+
 export async function connectWebSocket(url: string) {
   const id = getId();
 
@@ -124,10 +128,8 @@ export async function connectWebSocket(url: string) {
 
   ws = new Promise((res) => {
     _ws.onopen = () => {
+      console.log("p2p::ws", "opened");
       if (id) _ws.send(JSON.stringify({ type: "p2p-id", data: id }));
-      if ("connect" in callbacks) {
-        callbacks["connect"].forEach((cb) => cb("server"));
-      }
       res(_ws);
     };
   });
@@ -152,9 +154,11 @@ export async function sendToServer(eventType: string, data?: unknown) {
 }
 
 export async function broadcast(type: string, data: unknown) {
+  const msg = JSON.stringify({ type, data });
   peers.forEach((p) => {
-    p.peer.send(JSON.stringify({ type, data }));
+    p.peer.send(msg);
   });
+  (await ws).send(msg);
 }
 
 export async function sendTo(id: string, type: string, data: unknown) {

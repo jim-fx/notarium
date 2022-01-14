@@ -3,6 +3,7 @@ import { basename } from "path";
 import { homedir } from "os";
 const { readdir, lstat } = promises;
 import { ITreeAdapter, Tree, TreeData } from "@notarium/types";
+import { BinarySyncState } from "automerge";
 
 async function readTreeData(path: string): Promise<TreeData> {
   const stat = await lstat(path);
@@ -28,31 +29,35 @@ async function readTreeData(path: string): Promise<TreeData> {
   }
 }
 
-const syncData: Record<string, unknown> = {};
+const syncData: Record<string, BinarySyncState> = {};
 
 export function FSAdapter(): ITreeAdapter {
   let _treeData: TreeData;
 
   return {
-    readTree: async (path: string = homedir() + "/Notes") => {
-      console.log("fsAdapter::read", path);
-      _treeData = await readTreeData(path);
-      return _treeData;
+    deleteNode(path: string) {
+      console.log("delete node", path);
+    },
+    createNode(path: string, defaultContent?: string) {
+      console.log("create node", path);
     },
 
-    deleteNode(path: string) {},
-    createNode(path: string, defaultContent?: string) {},
-
     writeDocument() {},
-    readDocument() {},
+    async readDocument(docId: string, fsPath?: string) {
+      if (docId === "tree") {
+        console.log("fsAdapter::read", fsPath);
+        _treeData = await readTreeData(fsPath);
+        return _treeData;
+      }
+    },
 
     async getPeerIds() {
       return Object.keys(syncData);
     },
-    async readSyncData(peerId: string) {
+    async readSyncState(peerId: string) {
       return syncData[peerId];
     },
-    async writeSyncData(peerId: string, d: unknown): Promise<void> {
+    async writeSyncState(peerId: string, d: BinarySyncState): Promise<void> {
       syncData[peerId] = d;
     },
   };

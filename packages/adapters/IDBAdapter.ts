@@ -31,12 +31,12 @@ export function IDBAdapter(): ITreeAdapter {
       const db = await getDb();
       return db.getAllKeys("syncStates") as Promise<string[]>;
     },
-    async readSyncData(peerId: string) {
+    async readSyncState(peerId: string) {
       const db = await getDb();
       const syncState = await db.get("syncStates", peerId);
       return syncState;
     },
-    async writeSyncData(peerId: string, d: any): Promise<void> {
+    async writeSyncState(peerId: string, d: any): Promise<void> {
       const db = await getDb();
       await db.put("syncStates", d, peerId);
       return;
