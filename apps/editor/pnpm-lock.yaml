@@ -6,6 +6,7 @@ specifiers:
   '@notarium/document': link:../../packages/document
   '@notarium/p2p-client': link:../../packages/p2p-client
   '@notarium/tree': link:../../packages/tree
+  '@notarium/types': link:../../packages/types
   '@sveltejs/adapter-auto': next
   '@sveltejs/adapter-static': ^1.0.0-next.24
   '@sveltejs/kit': next
@@ -32,6 +33,7 @@ dependencies:
   '@notarium/document': link:../../packages/document
   '@notarium/p2p-client': link:../../packages/p2p-client
   '@notarium/tree': link:../../packages/tree
+  '@notarium/types': link:../../packages/types
   '@sveltejs/adapter-static': 1.0.0-next.24
   diff-match-patch: 1.0.5
   idb: 7.0.0

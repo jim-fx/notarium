@@ -1,32 +1,36 @@
-import { ITreeAdapter, TreeData } from "@notarium/types";
-import { BinarySyncState, SyncState } from "automerge";
+import type { IPersistanceAdapter } from "@notarium/types";
+import type { BinaryDocument, BinarySyncState } from "automerge";
 
-export function MEMAdapter(): ITreeAdapter {
-  let docData: Record<string, unknown> = {};
-  let syncState: Record<string, SyncState> = {};
+export function MEMAdapter<T>(): IPersistanceAdapter<T> {
+  let docData: Record<string, T | BinaryDocument> = {};
+  let syncState: Record<string, Record<string, BinarySyncState>> = {};
 
   return {
-    deleteNode(path: string) {
-      console.log("delete node", path);
-    },
-    createNode(path: string, defaultContent?: string) {
-      console.log("create node", path);
-    },
-    async writeDocument(docId: string, doc: unknown) {
+    async saveDocument(docId: string, doc: BinaryDocument) {
       docData[docId] = doc;
     },
-    async readDocument(docId: string) {
-      return docData[docId] || {};
+    async loadDocument(docId: string, fsPath?: string) {
+      if (docId === "tree" && fsPath) {
+        return {
+          path: "test",
+          children: [{ path: "home", children: [] }],
+        } as unknown as T;
+      }
+      return docData[docId];
     },
 
-    async getPeerIds() {
-      return Object.keys(syncState);
+    async loadSyncState(peerId: string, docId: string) {
+      return syncState[peerId]?.[docId];
     },
-    async readSyncState(peerId: string) {
-      return syncState[peerId];
-    },
-    async writeSyncState(peerId: string, d: SyncState): Promise<void> {
-      syncState[peerId] = d;
+    async saveSyncState(
+      peerId: string,
+      docId: string,
+      d: BinarySyncState
+    ): Promise<void> {
+      syncState[peerId] = {
+        ...syncState[peerId],
+        [docId]: d,
+      };
     },
   };
 }

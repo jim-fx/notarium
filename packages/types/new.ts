@@ -1,11 +1,26 @@
-import { BinaryDocument, BinarySyncState, SyncState } from "automerge";
+import {
+  BinaryDocument,
+  BinarySyncState,
+  FreezeObject,
+  SyncState,
+} from "automerge";
 
 interface IPersistanceAdapter<T> {
-  loadDocument(docId: string): Promise<T | BinaryDocument | undefined>;
+  loadDocument(
+    docId: string,
+    fsPath?: string
+  ): Promise<T | BinaryDocument | undefined>;
   saveDocument(docId: string, doc: BinaryDocument): Promise<void>;
 
-  saveSyncState(peerId: string, docId: string, doc: SyncState): Promise<void>;
-  loadSyncState(peerId: string, docId: string): Promise<SyncState | undefined>;
+  loadSyncState(
+    peerId: string,
+    docId: string
+  ): Promise<BinarySyncState | undefined>;
+  saveSyncState(
+    peerId: string,
+    docId: string,
+    doc: BinarySyncState
+  ): Promise<void>;
 }
 
 interface IMessageAdapter {
@@ -19,21 +34,31 @@ interface IMessageAdapter {
   broadcast(eventType: string, data?: unknown): void;
 }
 
+type HandleDefault = (eventType: string, data: unknown) => void;
+type HandleData<T> = (eventType: "data", data: T) => void;
+
+interface ISubscriber<T> {
+  handle: HandleDefault | HandleData<T>;
+}
 interface IDataBackend<T> {
-  load(): Promise<T>;
-  update(cb: (doc: T) => void): void;
+  load(path?: string): Promise<T>;
+  update(cb: (doc: FreezeObject<T>) => FreezeObject<T> | void): void;
   close(): void;
+
+  _doc: FreezeObject<T>;
+  _addSubscriber(sub: ISubscriber<T>): () => void;
 }
 
 interface IDataBackendFactory<T> {
   (
     docId: string,
-    persistanceAdapter: IPersistanceAdapter<T>,
+    persistanceAdapter: () => IPersistanceAdapter<T>,
     syncAdapter: IMessageAdapter
   ): IDataBackend<T>;
 }
 
 export {
+  ISubscriber,
   IDataBackend,
   IDataBackendFactory,
   IMessageAdapter,

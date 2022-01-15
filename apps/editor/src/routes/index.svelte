@@ -1,28 +1,34 @@
 <script lang="ts">
 	import File from '$lib/elements/File.svelte';
 	import p2p from '@notarium/p2p-client';
-	import { createSvelteStore, createTree } from '@notarium/tree';
-	import { IDBAdapter } from '@notarium/adapters';
+	import { createTreeStore, createTree } from '@notarium/tree';
+	import { IDBAdapter, MEMAdapter } from '@notarium/adapters';
 	import { onMount } from 'svelte';
+	import { createDataBackend } from '@notarium/data';
+	import type { TreeData } from '@notarium/types';
 
-	const t = createTree(IDBAdapter, p2p);
+	const treeBackend = createDataBackend<TreeData>('tree', IDBAdapter, p2p);
 
-	const store = createSvelteStore(t);
+	const treeStore = createTreeStore(treeBackend);
+
+	const tree = createTree(treeBackend);
 
 	function handleDelete(path) {
-		t.deleteNode(path);
+   console.log("delete path",path)
+		tree.deleteNode(path);
 	}
 
 	function handleCreate(path) {
-		t.createNode(path, 'TestContent');
+   console.log("create path",path)
+		tree.createNode(path, 'TestContent');
 	}
 
 	onMount(() => {
-		t.load();
-		window['t'] = t;
+		treeBackend.load();
+		window['t'] = tree;
 	});
 </script>
 
-{#if $store?.children?.length}
-	<File file={$store} {handleDelete} {handleCreate} />
+{#if $treeStore?.children?.length}
+	<File file={$treeStore} {handleDelete} {handleCreate} />
 {/if}

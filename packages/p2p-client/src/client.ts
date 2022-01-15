@@ -21,6 +21,7 @@ function removePeer(peerId: string) {
   if (index !== -1) {
     peers.splice(index, 1);
   }
+  emit("disconnect", peerId);
 }
 
 function setId(id: string) {
@@ -87,6 +88,7 @@ async function handleMessage(msg: string, peerId?: string) {
   const { type, data } = parse(msg);
 
   console.groupCollapsed("[p2p] handleMessage ", type);
+  console.log(peerId);
   console.log(data);
   console.groupEnd();
 
@@ -130,18 +132,25 @@ export function getPeerIds() {
 export async function connectWebSocket(url: string) {
   const id = getId();
 
-  const _ws = new WebSocket(url + "?id=" + id);
+  if (id) {
+    document.cookie = "X-Authorization=" + id + "; path=/; SameSite=Strict;";
+  }
+
+  const _ws = new WebSocket(url);
+
+  setTimeout(() => {
+    document.cookie = "";
+  });
 
   ws = new Promise((res) => {
     _ws.onopen = () => {
       console.log("[p2p/ws] opened");
-      emit("connectToServer");
       res(_ws);
     };
   });
 
   _ws.onmessage = (msg) => {
-    handleMessage(msg.data);
+    handleMessage(msg.data, "server");
   };
 }
 
@@ -162,7 +171,9 @@ export async function sendToServer(eventType: string, data?: unknown) {
 export async function broadcast(type: string, data: unknown) {
   const msg = JSON.stringify({ type, data });
   peers.forEach((p) => {
-    p.peer.send(msg);
+    if (p.peer.connected) {
+      p.peer.send(msg);
+    }
   });
   (await ws).send(msg);
 }
@@ -173,7 +184,7 @@ export async function sendTo(id: string, type: string, data: unknown) {
   }
 
   const p = peers.find((p) => p.id === id);
-  if (p) {
+  if (p && p.peer.connected) {
     p.peer.send(JSON.stringify({ type, data }));
   }
 }

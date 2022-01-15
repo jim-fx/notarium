@@ -1,20 +1,17 @@
-import { readable } from "svelte/store";
-import { Tree, TreeData } from "@notarium/types";
-import { BinaryDocument } from "automerge";
+import { Readable, readable } from "svelte/store";
+import { IDataBackend, TreeData } from "@notarium/types";
 
-export function createSvelteStore(tree: Tree) {
-  const store = readable(tree.findNode() || {}, function start(set) {
-    tree._addAdapter(() => {
-      return {
-        writeTree: (data: TreeData) => {
+export function createTreeStore(
+  backend: IDataBackend<TreeData>
+): Readable<TreeData> {
+  return readable(backend._doc || {}, function start(set) {
+    return backend._addSubscriber({
+      handle: (evenType: string, data: unknown | TreeData) => {
+        if (evenType === "data") {
           console.log("[adapt/store] update content");
-          set(data);
-        },
-      };
+          set(data as TreeData);
+        }
+      },
     });
-
-    return () => {};
   });
-
-  return store;
 }

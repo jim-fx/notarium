@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start:dev": "node --inspect -r tsm server.ts",
+    "start:dev": "node -r tsm server.ts",
     "dev": "nodemon"
   },
   "keywords": [],
@@ -11,8 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "@notarium/adapters": "link:../../packages/adapters",
+    "@notarium/data": "link:../../packages/data",
     "@notarium/tree": "link:../../packages/tree",
-    "@types/uuid": "^8.3.4",
+    "@notarium/types": "link:../../packages/types",
     "nanoid": "^3.1.30",
     "nodemon": "^2.0.15",
     "peer": "^0.6.1",
@@ -21,20 +22,15 @@
     "sqlite": "^4.0.23",
     "sqlite-async": "^1.1.2",
     "sqlite3": "^5.0.2",
-    "sqlite3-async": "^1.0.3",
     "tinyws": "^0.1.0",
     "uuid": "^8.3.2",
     "ws": "^8.4.0"
   },
   "devDependencies": {
+    "@types/uuid": "^8.3.4",
     "@types/polka": "^0.5.4",
-    "@types/sqlite3": "^3.1.8",
     "kill-port": "^1.6.1",
-    "ts-eager": "^2.0.2",
-    "ts-node": "^10.4.0",
     "tsm": "^2.2.1",
-    "typescript": "^4.5.4",
-    "vite": "^2.7.10",
-    "vite-node": "^0.1.11"
+    "typescript": "^4.5.4"
   }
 }

@@ -10,6 +10,7 @@
 	<h3>
 		{#if file?.children}
 			{file.path}
+			<button on:click={() => handleDelete(ownPath)}>delete</button>
 			{#if !file.children.find((c) => c.path === 'index.md')}
 				<button on:click={() => handleCreate(ownPath + '/index.md')}>new</button>
 			{/if}

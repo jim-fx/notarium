@@ -1,16 +1,26 @@
 import { promises } from "fs";
 import { basename } from "path";
 const { readdir, lstat } = promises;
-import { ITreeAdapter, TreeData } from "@notarium/types";
-import type { BinarySyncState } from "automerge";
+import { IPersistanceAdapter, TreeData } from "@notarium/types";
+import type { BinaryDocument, BinarySyncState, SyncState } from "automerge";
 import Database from "sqlite-async";
 
 const dbPromise = Database.open("./db.sql")
   .then(async (db) => {
-    await Promise.all([
-      db.run("CREATE TABLE IF NOT EXISTS syncStates(peerId text, state text)"),
-      db.run("CREATE TABLE IF NOT EXISTS documents(docId text, state text)"),
+    const res = await Promise.all([
+      db.run(
+        `CREATE TABLE IF NOT EXISTS syncStates(
+            id integer PRIMARY KEY,
+            peerId text NOT NULL, 
+            docId text NOT NULL, 
+            state text)
+          `
+      ),
+      db.run(
+        "CREATE TABLE IF NOT EXISTS documents(docId text PRIMARY KEY, content text)"
+      ),
     ]);
+    console.log("[fs] sqlite initialized", res);
     return db;
   })
   .catch((err: Error) => {
@@ -41,78 +51,113 @@ async function readTreeData(path: string): Promise<TreeData> {
   }
 }
 
-const syncData: Record<string, BinarySyncState> = {};
-let tree;
-
-async function writeTreeToDB(content: string) {
-  const db = await dbPromise;
-
-  const t = await readTreeFromDB();
-
-  if (t) {
-    await db.run("UPDATE documents SET state = ? WHERE docId = ?", [
-      content,
-      "tree",
-    ]);
-  } else {
-    await db.run(
-      `INSERT INTO documents(docId, state) VALUES(?,?)`,
-      ["tree", content],
-      function (err) {
-        if (err) {
-          return console.log(err.message);
-        } else {
-          // get the last insert id
-          console.log(`A row has been inserted with rowid ${this.lastID}`);
-        }
-      }
-    );
-  }
-}
-
-async function readTreeFromDB() {
+async function readDocFromDB(docId: string) {
   return (await dbPromise).get("SELECT * from documents WHERE docId = ?", [
-    "tree",
+    docId,
   ]);
 }
 
-export function FSAdapter(): ITreeAdapter {
-  let _treeData: TreeData;
+function parseBinary(s: string) {
+  return Uint8Array.from(s.split(",").map((v) => parseInt(v)));
+}
+
+export function FSAdapter(): IPersistanceAdapter<TreeData> {
+  const syncStates = {};
 
   return {
-    deleteNode(path: string) {
-      console.log("delete node", path);
+    async saveDocument(docId: string, doc: BinaryDocument) {
+      const db = await dbPromise;
+      console.log("[pers/sql] save document state", docId);
+
+      const content = doc.toString();
+
+      const updateResult = await db.run(
+        `UPDATE OR IGNORE documents 
+         SET content = ? 
+         WHERE docId = ?;`,
+        [content, docId]
+      );
+
+      if (updateResult.changes === 0) {
+        return (await dbPromise)
+          .run("INSERT OR IGNORE INTO documents(docId, content) VALUES(?,?)", [
+            docId,
+            content,
+          ])
+          .then((res) => {
+            console.log("[pers/sql] sync state saved");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     },
-    createNode(path: string, defaultContent?: string) {
-      console.log("create node", path);
+    async loadDocument(docId: string, fsPath: string) {
+      let doc = await readDocFromDB(docId);
+      if (!doc && docId === "tree") {
+        return await readTreeData(fsPath);
+      }
+
+      if (doc?.content) return parseBinary(doc.content) as BinaryDocument;
+      return undefined;
     },
 
-    writeDocument() {},
+    async loadSyncState(peerId: string, docId: string) {
+      return syncStates?.[peerId]?.[docId];
 
-    async readTree(fsPath: string) {
-      const t = await readTreeFromDB();
-      if (t?.state)
-        return Uint8Array.from(t?.state.split(",").map((v) => parseInt(v)));
-      console.log("fsAdapter::read", fsPath);
-      _treeData = await readTreeData(fsPath);
-      return _treeData;
-    },
+      const v = await (
+        await dbPromise
+      ).get("SELECT * from syncStates WHERE peerId = ? AND docId = ?", [
+        peerId,
+        docId,
+      ]);
 
-    async writeTree(t, bin) {
-      tree = t;
-      writeTreeToDB(bin.toString());
-    },
+      console.groupCollapsed("[pers/sql] load sync state for", peerId, docId);
+      console.log(v);
+      console.groupEnd();
 
-    async readDocument(docId: string) {},
+      if (v?.state) return parseBinary(v.state) as BinarySyncState;
+      return;
+    },
+    async saveSyncState(
+      peerId: string,
+      docId: string,
+      d: BinarySyncState
+    ): Promise<void> {
+      syncStates[peerId] = {
+        ...syncStates[peerId],
+        [docId]: d,
+      };
+      return;
 
-    async getPeerIds() {
-      return Object.keys(syncData);
-    },
-    async readSyncState(peerId: string) {
-      return syncData[peerId];
-    },
-    async writeSyncState(peerId: string, d: BinarySyncState): Promise<void> {
-      syncData[peerId] = d;
+      const db = await dbPromise;
+
+      const state = d.toString();
+
+      console.groupCollapsed("[pers/sql] save sync state for", peerId, docId);
+      console.log(d);
+      console.groupEnd();
+
+      const updateResult = await db.run(
+        `UPDATE OR IGNORE syncStates 
+         SET state = ? 
+         WHERE docId = ? AND peerId = ?;`,
+        [state, docId, peerId]
+      );
+
+      if (updateResult.changes === 0) {
+        return (await dbPromise)
+          .run(
+            "INSERT OR IGNORE INTO syncStates(peerId, docId, state) VALUES(?,?,?)",
+            [peerId, docId, state]
+          )
+          .then((res) => {
+            console.log("sync state saved");
+          })
+          .catch((err) => {
+            console.error(err);
+          });
+      }
     },
   };
 }

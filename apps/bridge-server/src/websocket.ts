@@ -40,9 +40,12 @@ export function getPeerIds() {
   return connections.map((p) => p.id);
 }
 
-export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
-  let hasChangedID = false;
+export function getConnectionIds() {
+  return connections.map((c) => c.id);
+}
 
+export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
+  console.log("[ws] new connection", id);
   const localConnection = {
     id,
     ws,
@@ -55,17 +58,7 @@ export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
 
     const { type, data } = JSON.parse(msg);
 
-    if (type === "p2p-id") {
-      // Find old stale connections
-      const oldIndex = connections.findIndex((c) => c.id === data);
-      if (oldIndex !== -1) {
-        connections.splice(oldIndex, 1);
-      }
-
-      id = data;
-      hasChangedID = true;
-      localConnection.id = id;
-    }
+    console.log("[ws] handleMessage ", type);
 
     // Request to connect to other peer over p2p
     if (type === "p2p-signal") {
