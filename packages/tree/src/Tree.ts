@@ -5,7 +5,12 @@ import {
   Tree,
   TreeData,
 } from "@notarium/types";
-import { BinaryDocument, BinarySyncMessage, BinarySyncState } from "automerge";
+import {
+  BinaryDocument,
+  BinarySyncMessage,
+  BinarySyncState,
+  save,
+} from "automerge";
 import createDataStore from "./TreeCRDT";
 
 function splitPath(p: string) {
@@ -26,8 +31,8 @@ export function createTree(
     findNode,
 
     load,
+
     _addAdapter,
-    _pushChangesToAdapters,
   };
 
   const initialAdapter = createAdapter(exp);
@@ -43,9 +48,11 @@ export function createTree(
   function _pushChangesToAdapters(adapter?: ITreeAdapter) {
     if (_pushTimeout) clearTimeout(_pushTimeout);
     _pushTimeout = setTimeout(() => {
+      const doc = crdt.currentDoc;
+      const bin = save(doc);
       adapters.forEach((a) => {
         if (a !== adapter) {
-          a?.writeDocument?.("tree", crdt?.currentDoc);
+          a?.writeTree?.(doc, bin);
         }
       });
     }, 200);
@@ -55,10 +62,45 @@ export function createTree(
     if (path === "/") {
       return crdt?.currentDoc;
     }
-    // TODO: implement findNode
-    return crdt?.currentDoc;
+
+    const p = splitPath(path);
+    p.shift();
+
+    let currentNode = crdt.currentDoc;
+
+    while (p.length) {
+      const name = p.shift();
+      currentNode = findChild(currentNode, name);
+    }
+
+    return currentNode;
   }
-  function createNode(path: string) {}
+  function createNode(path: string, content: string) {
+    const p = splitPath(path);
+    p.shift();
+    console.log("create new ", path);
+    crdt.update((doc) => {
+      let currentNode = doc;
+      while (p.length) {
+        const n = p.shift();
+        if (p.length === 0 && n && currentNode) {
+          if ("children" in currentNode) {
+            currentNode?.children?.push({
+              path: n,
+            });
+          } else {
+            currentNode.children = [{ path: n }];
+          }
+          console.log(currentNode);
+        } else {
+          currentNode = findChild(currentNode, n as string) as any;
+          if (!currentNode) break;
+        }
+      }
+    });
+    _pushChangesToAdapters();
+    _pushChangesToPeers();
+  }
   function deleteNode(path: string) {
     const p = splitPath(path);
     // Disallow deleting of root dir
@@ -102,9 +144,8 @@ export function createTree(
     const syncMessage = await crdt.getSyncForPeer(peerId);
     if (syncMessage) {
       syncAdapter.sendTo(peerId, "sync-data", syncMessage);
-    } else {
-      _pushChangesToAdapters();
     }
+    // _pushChangesToAdapters();
   }
 
   async function initListeners() {
@@ -115,25 +156,33 @@ export function createTree(
     });
 
     // Start syncing with other peers
-    syncAdapter.getPeerIds().forEach((peerId) => {
-      _syncWithPeer(peerId);
-    });
+    // syncAdapter.on("connectToServer", () => {
+    //   syncAdapter.getPeerIds().forEach((peerId) => {
+    //     _syncWithPeer(peerId);
+    //   });
+    // });
 
     // Sync with peers
     syncAdapter.on(
       "sync-data",
       async (rawSyncData, peerId: string = "server") => {
-        await new Promise((res) => setTimeout(res, 500));
+        console.log(rawSyncData);
 
         // Decode incoming stringified Uint8Array
         const syncData = Uint8Array.from(
           (rawSyncData as string).split(",").map((v) => parseInt(v))
         ) as BinarySyncMessage;
+
         console.groupCollapsed("[tree] received sync data from", peerId);
         console.log(syncData);
         console.groupEnd();
 
-        const syncMessage = await crdt.handleSyncMessage(syncData, peerId);
+        const [syncMessage, changes] = await crdt.handleSyncMessage(
+          syncData,
+          peerId
+        );
+
+        // TODO: handle changes on incoming sync message;
 
         if (syncMessage) {
           console.log("[tree] sending sync request to", peerId);
@@ -147,10 +196,7 @@ export function createTree(
   }
 
   async function load(path?: string) {
-    const _data = (await initialAdapter.readDocument(
-      "tree",
-      path
-    )) as BinaryDocument;
+    const _data = await initialAdapter.readTree(path);
     crdt = createDataStore(_data, initialAdapter);
     initListeners();
     _pushChangesToAdapters();

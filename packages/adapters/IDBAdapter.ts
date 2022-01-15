@@ -1,5 +1,6 @@
-import { IDBPDatabase, openDB } from "idb";
-import { ITreeAdapter } from "@notarium/types";
+import { IDBPDatabase, openDB, deleteDB } from "idb";
+import { ITreeAdapter, TreeData } from "@notarium/types";
+import { BinaryDocument, FreezeObject, save } from "automerge";
 
 const getDb = (() => {
   let db: Promise<IDBPDatabase<unknown>>;
@@ -16,12 +17,27 @@ const getDb = (() => {
   };
 })();
 
+if ("window" in globalThis) {
+  window["clearDb"] = async () => {
+    await deleteDB("notarium");
+    console.log("cleared");
+  };
+}
+
 export function IDBAdapter(): ITreeAdapter {
   return {
     async readTree() {
       const db = await getDb();
       const res = await db.get("main", "tree");
       return res;
+    },
+    async writeTree(tree: TreeData) {
+      const db = await getDb();
+      console.groupCollapsed("[adapt/idb] save document");
+      console.log(tree);
+      console.groupEnd();
+      await db.put("main", save(tree), "tree");
+      return;
     },
     deleteNode() {},
     createNode() {},

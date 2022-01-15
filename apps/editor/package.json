@@ -13,6 +13,7 @@
 	},
 	"dependencies": {
 		"@notarium/adapters": "link:../../packages/adapters",
+		"@notarium/data": "link:../../packages/data",
 		"@notarium/document": "link:../../packages/document",
 		"@notarium/p2p-client": "link:../../packages/p2p-client",
 		"@notarium/tree": "link:../../packages/tree",

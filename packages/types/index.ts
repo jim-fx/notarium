@@ -10,4 +10,5 @@ interface ISyncAdapter {
 }
 
 export * from "./tree";
+export * from "./new";
 export { ISyncAdapter };

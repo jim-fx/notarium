@@ -6,11 +6,19 @@ let connections: {
 }[] = [];
 const callbacks: Record<string, ((data: unknown, peerId?: string) => void)[]> =
   {};
+
+function emit(eventType: string, data?: unknown, peerId?: string) {
+  if (eventType in callbacks) {
+    callbacks[eventType].forEach((cb) => cb(data, peerId));
+  }
+}
 export function sendTo(peerId: string, eventType: string, data: unknown) {
   const peer = connections.find((c) => c.id === peerId);
   // console.log("wss::sendto", eventType, peerId);
   if (peer) {
     peer.ws.send(JSON.stringify({ type: eventType, data }));
+  } else {
+    console.log("[ws] cant send to ", peerId);
   }
 }
 
@@ -32,9 +40,7 @@ export function getPeerIds() {
   return connections.map((p) => p.id);
 }
 
-export default function handleWebSocket(ws: WebSocket) {
-  let id = nanoid();
-
+export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
   let hasChangedID = false;
 
   const localConnection = {
@@ -50,6 +56,12 @@ export default function handleWebSocket(ws: WebSocket) {
     const { type, data } = JSON.parse(msg);
 
     if (type === "p2p-id") {
+      // Find old stale connections
+      const oldIndex = connections.findIndex((c) => c.id === data);
+      if (oldIndex !== -1) {
+        connections.splice(oldIndex, 1);
+      }
+
       id = data;
       hasChangedID = true;
       localConnection.id = id;
@@ -80,20 +92,18 @@ export default function handleWebSocket(ws: WebSocket) {
 
   // New Client connects, so we need to tell him whom to say hello to
   // And we delay it a bit to give the client the chance to change its id
-  setTimeout(() => {
-    if (!hasChangedID) {
-      ws.send(
-        JSON.stringify({
-          type: "p2p-id",
-          data: id,
-        })
-      );
-    }
-    ws.send(
-      JSON.stringify({
-        type: "p2p-peer-ids",
-        data: connections.map((v) => v.id).filter((_id) => _id !== id),
-      })
-    );
-  }, 100);
+  emit("connect", id);
+
+  ws.send(
+    JSON.stringify({
+      type: "p2p-id",
+      data: id,
+    })
+  );
+  ws.send(
+    JSON.stringify({
+      type: "p2p-peer-ids",
+      data: connections.map((v) => v.id).filter((_id) => _id !== id),
+    })
+  );
 }

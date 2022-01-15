@@ -1,9 +1,4 @@
-import {
-  BinaryDocument,
-  BinarySyncState,
-  FreezeObject,
-  SyncState,
-} from "automerge";
+import { FreezeObject, SyncState } from "automerge";
 
 interface TreeData {
   path: string;
@@ -15,16 +10,13 @@ interface ITreeAdapterFactory<T = ITreeAdapter> {
 }
 
 interface ITreeAdapter {
-  readTree(path?: string): Promise<TreeData>;
-  writeTree(tree: TreeData, bin: BinaryDocument): Promise<void>;
-
   // manipulate nodes
   deleteNode(path: string): unknown;
   createNode(path: string): unknown;
 
   // manipulate documents (eg. file contents)
-  // readDocument(docId: string, fsPath?: string): Promise<unknown>;
-  // writeDocument(docId: string, doc: any): Promise<void>;
+  readDocument(docId: string, fsPath?: string): Promise<unknown>;
+  writeDocument(docId: string, doc: any): Promise<void>;
 
   //Read/write Sync data
   getPeerIds(): Promise<string[]>;

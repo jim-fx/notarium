@@ -1,7 +1,7 @@
 let ws: Promise<WebSocket>;
-import type SimplePeer from "simple-peer";
+import type Peer from "simple-peer";
 
-const peers: { peer: SimplePeer.Instance; id: string }[] = [];
+const peers: { peer: Peer.Instance; id: string }[] = [];
 const callbacks: Record<string, ((data: unknown, peerId?: string) => void)[]> =
   {};
 
@@ -27,13 +27,18 @@ function setId(id: string) {
   id && localStorage.setItem("p2p-id", id);
 }
 
-function connectToPeer(
-  id: string,
-  signal?: SimplePeer.SignalData
-): SimplePeer.Instance {
+function emit(eventType: string, data?: unknown, peerId?: string) {
+  if (eventType in callbacks) {
+    callbacks[eventType].forEach((cb) => cb(data, peerId));
+  }
+}
+
+function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
+  console.log("connect to peer", id);
+
   const peer = new SimplePeer({
     initiator: !signal,
-  }) as unknown as SimplePeer.Instance;
+  }) as unknown as Peer.Instance;
 
   peers.push({ peer, id });
 
@@ -52,10 +57,9 @@ function connectToPeer(
 
   peer.on("error", (err) => console.error(err));
   peer.on("connect", () => {
+    console.log("[p2p/wrtc] connected to ", id);
     // peer.send(JSON.stringify({ type: "connect", data: "hello" }));
-    if ("connect" in callbacks) {
-      callbacks["connect"].forEach((cb) => cb(id));
-    }
+    emit("connect", id);
   });
 
   peer.on("close", () => {
@@ -81,6 +85,10 @@ function parse(msg: string | object) {
 
 async function handleMessage(msg: string, peerId?: string) {
   const { type, data } = parse(msg);
+
+  console.groupCollapsed("[p2p] handleMessage ", type);
+  console.log(data);
+  console.groupEnd();
 
   if (type === "p2p-id") {
     setId(data);
@@ -112,9 +120,7 @@ async function handleMessage(msg: string, peerId?: string) {
     });
   }
 
-  if (type in callbacks) {
-    callbacks[type].forEach((cb) => cb(data, peerId));
-  }
+  emit(type, data, peerId);
 }
 
 export function getPeerIds() {
@@ -124,12 +130,12 @@ export function getPeerIds() {
 export async function connectWebSocket(url: string) {
   const id = getId();
 
-  const _ws = new WebSocket(url);
+  const _ws = new WebSocket(url + "?id=" + id);
 
   ws = new Promise((res) => {
     _ws.onopen = () => {
-      console.log("p2p::ws", "opened");
-      if (id) _ws.send(JSON.stringify({ type: "p2p-id", data: id }));
+      console.log("[p2p/ws] opened");
+      emit("connectToServer");
       res(_ws);
     };
   });

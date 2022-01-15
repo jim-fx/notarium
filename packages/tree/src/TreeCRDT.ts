@@ -1,5 +1,5 @@
 import { ITreeAdapter, TreeData } from "@notarium/types";
-import Automerge, {
+import {
   BinarySyncMessage,
   from,
   load,
@@ -12,18 +12,10 @@ import Automerge, {
   FreezeObject,
   init,
   merge,
+  Frontend,
+  Backend,
+  save,
 } from "automerge";
-
-function getId() {
-  if ("localStorage" in globalThis && "p2p-id" in localStorage) {
-    let id = localStorage.getItem("p2p-id");
-    if (id === "undefined" || id === "null") {
-      localStorage.removeItem("p2p-id");
-      return undefined;
-    }
-    return id;
-  }
-}
 
 export default function createDataStore(
   initialData: BinaryDocument | TreeData | null,
@@ -32,6 +24,8 @@ export default function createDataStore(
   type TreeDoc = FreezeObject<TreeData>;
 
   let currentDoc: TreeDoc;
+  console.groupCollapsed("[crdt] initialData:");
+  console.log(initialData);
   if (initialData instanceof Uint8Array) {
     console.log("[crdt] init from save file");
     currentDoc = load(initialData as BinaryDocument);
@@ -42,6 +36,7 @@ export default function createDataStore(
     console.log("[crdt] init empty document");
     currentDoc = init();
   }
+  console.groupEnd();
 
   async function readSyncState(peerId: string): Promise<SyncState> {
     let peerSyncState = await adapter.readSyncState(peerId);
@@ -62,7 +57,8 @@ export default function createDataStore(
   }
 
   function update(cb: (d: TreeDoc) => void) {
-    const [newDoc] = Frontend.change(currentDoc, cb);
+    const [newDoc, changes] = Frontend.change(currentDoc, cb);
+    console.log(changes);
     currentDoc = newDoc;
   }
 
@@ -81,12 +77,11 @@ export default function createDataStore(
     currentDoc = newDoc;
     const newSyncMessage = await getSyncForPeer(peerId);
 
-    if (newSyncMessage) {
+    if (newSyncState) {
       await writeSyncState(peerId, newSyncState);
-      return newSyncMessage.toString();
     }
 
-    return;
+    return [newSyncMessage?.toString(), patch];
   }
 
   async function getSyncForPeer(peerId: string = "server") {

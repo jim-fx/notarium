@@ -7,6 +7,7 @@ export function createSvelteStore(tree: Tree) {
     tree._addAdapter(() => {
       return {
         writeTree: (data: TreeData) => {
+          console.log("[adapt/store] update content");
           set(data);
         },
       };
