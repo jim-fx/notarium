@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "@notarium/types": "link:../types"
+    "@notarium/common": "link:../common",
+    "@notarium/types": "link:../types",
+    "svelte": "^3.46.2"
   },
   "keywords": [],
   "author": "",

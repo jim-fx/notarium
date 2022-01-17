@@ -1,7 +1,18 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@notarium/common': link:../common
   '@notarium/types': link:../types
+  svelte: ^3.46.2
 
 dependencies:
+  '@notarium/common': link:../common
   '@notarium/types': link:../types
+  svelte: 3.46.2
+
+packages:
+
+  /svelte/3.46.2:
+    resolution: {integrity: sha512-RXSAtYNefe01Sb1lXtZ2I+gzn3t/h/59hoaRNeRrm8IkMIu6BSiAkbpi41xb+C44x54YKnbk9+dtfs3pM4hECA==}
+    engines: {node: '>= 8'}
+    dev: false

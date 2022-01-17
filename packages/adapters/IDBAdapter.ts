@@ -1,6 +1,7 @@
 import { IDBPDatabase, openDB, deleteDB } from "idb";
-import { IPersistanceAdapter, ITreeAdapter, TreeData } from "@notarium/types";
-import { BinaryDocument, BinarySyncState, FreezeObject, save } from "automerge";
+import { IPersistanceAdapter } from "@notarium/types";
+import { BinarySyncState } from "automerge";
+import { delayExecution } from "@notarium/common";
 
 const getDb = (() => {
   let db: Promise<IDBPDatabase<unknown>>;
@@ -25,35 +26,51 @@ if ("window" in globalThis) {
 }
 
 export function IDBAdapter<T>(): IPersistanceAdapter<T> {
+  const documents: Record<string, T> = {};
+  const syncStates: Record<string, Record<string, any>> = {};
+
+  const saveDocument = delayExecution(async (ids) => {
+    const db = await getDb();
+    ids.forEach(async (id) => {
+      await db.put("documents", documents[id], id);
+    });
+  }, 2000);
+
+  const saveSyncState = delayExecution(async (peerIds) => {
+    const db = await getDb();
+    peerIds.forEach(async (peerId) => {
+      await db.put("syncStates", syncStates[peerId], peerId);
+    });
+  }, 2000);
+
   return {
     async loadDocument(docId: string) {
-      return (await getDb()).get("documents", docId);
+      if (!documents[docId])
+        documents[docId] = await (await getDb()).get("documents", docId);
+      return documents[docId];
     },
     async saveDocument(docId: string, content: any) {
-      await (await getDb()).put("documents", content, docId);
+      documents[docId] = content;
+      saveDocument(docId);
     },
 
     async loadSyncState(peerId: string, docId: string) {
-      const db = await getDb();
-      const syncState = await db.get("syncStates", peerId);
-      console.groupCollapsed("[pers/idb] load sync state for", peerId, docId);
-      console.log(syncState);
-      console.groupEnd();
-      if (!syncState || !(docId in syncState)) return;
-      return syncState[docId] as BinarySyncState;
+      if (!syncStates?.[peerId]) {
+        const db = await getDb();
+        syncStates[peerId] = await db.get("syncStates", peerId);
+      }
+      return syncStates[peerId]?.[docId];
     },
     async saveSyncState(
       peerId: string,
       docId: string,
       d: BinarySyncState
     ): Promise<void> {
-      const db = await getDb();
-      const syncState = await db.get("syncStates", peerId);
-      console.groupCollapsed("[pers/idb] save sync state for", peerId, docId);
-      console.log(d);
-      console.groupEnd();
-      await db.put("syncStates", { ...syncState, [docId]: d }, peerId);
-      return;
+      syncStates[peerId] = {
+        ...syncStates[peerId],
+        [docId]: d,
+      };
+      saveSyncState(peerId);
     },
   };
 }

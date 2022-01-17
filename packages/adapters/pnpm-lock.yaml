@@ -1,16 +1,24 @@
 lockfileVersion: 5.3
 
 specifiers:
+  '@notarium/common': link:../common/
   '@notarium/types': link:../types/
   idb: ^7.0.0
+  nanoid: ^3.2.0
   sqlite: ^4.0.23
+  sqlite-async: ^1.1.2
   sqlite3: ^5.0.2
+  ws: ^8.4.2
 
 dependencies:
+  '@notarium/common': link:../common
   '@notarium/types': link:../types
   idb: 7.0.0
+  nanoid: 3.2.0
   sqlite: 4.0.23
+  sqlite-async: 1.1.2
   sqlite3: 5.0.2
+  ws: 8.4.2
 
 packages:
 
@@ -440,6 +448,12 @@ packages:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
     dev: false
 
+  /nanoid/3.2.0:
+    resolution: {integrity: sha512-fmsZYa9lpn69Ad5eDn7FMcnnSR+8R34W9qJEijxYhTbfOWzr22n1QxCMzXLK+ODyW2973V3Fux959iQoUxzUIA==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+    dev: false
+
   /needle/2.9.1:
     resolution: {integrity: sha512-6R9fqJ5Zcmf+uYaFgdIHmLwNldn5HbK8L5ybn7Uz+ylX/rnOsSp1AHcvQSrCaFN+qNM1wpymHqD7mVasEOlHGQ==}
     engines: {node: '>= 4.4.x'}
@@ -696,6 +710,12 @@ packages:
     resolution: {integrity: sha512-sDl4qMFpijcGw22U5w63KmD3cZJfBuFlVNbVMKje2keoKML7X2UzWbc4XrmEbDwg0NXJc3yv4/ox7b+JWb57kQ==}
     dev: false
 
+  /sqlite-async/1.1.2:
+    resolution: {integrity: sha512-ocSKDAGDC5LUbUhbgSrSJnsbBx6YxlkDQbgbmo494WG3a2Vw8Yc6j+JgK0UZPyZH7H3FnCiBFv3tq03YklZONg==}
+    dependencies:
+      sqlite3: 5.0.2
+    dev: false
+
   /sqlite/4.0.23:
     resolution: {integrity: sha512-dSdmSkrdIhUL7xP/fiEMfFuAo4dxb0afag3rK8T4Y9lYxE3g3fXT0J8H9qSFvmcKxnM0zEA8yvLbpdWQ8mom3g==}
     dev: false
@@ -845,6 +865,19 @@ packages:
 
   /wrappy/1.0.2:
     resolution: {integrity: sha1-tSQ9jz7BqjXxNkYFvA0QNuMKtp8=}
+    dev: false
+
+  /ws/8.4.2:
+    resolution: {integrity: sha512-Kbk4Nxyq7/ZWqr/tarI9yIt/+iNNFOjBXEWgTb4ydaNHBNGgvf2QHbS9fdfsndfjFlFwEd4Al+mw83YkaD10ZA==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: ^5.0.2
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
     dev: false
 
   /yallist/3.1.1:

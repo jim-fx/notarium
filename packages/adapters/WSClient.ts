@@ -1,17 +1,13 @@
 import { nanoid } from "nanoid";
 import type WebSocket from "ws";
+import { createEventListener } from "@notarium/common";
 let connections: {
   id: string;
   ws: WebSocket;
 }[] = [];
-const callbacks: Record<string, ((data: unknown, peerId?: string) => void)[]> =
-  {};
 
-function emit(eventType: string, data?: unknown, peerId?: string) {
-  if (eventType in callbacks) {
-    callbacks[eventType].forEach((cb) => cb(data, peerId));
-  }
-}
+const { on, emit } = createEventListener();
+
 export function sendTo(peerId: string, eventType: string, data: unknown) {
   const peer = connections.find((c) => c.id === peerId);
   // console.log("wss::sendto", eventType, peerId);
@@ -26,25 +22,13 @@ export function broadcast(eventType: string, data: unknown) {
   getPeerIds().forEach((peerId) => sendTo(peerId, eventType, data));
 }
 
-export function on(
-  event: string,
-  cb: (data: unknown, peerId?: string) => void
-): () => void {
-  callbacks[event] = event in callbacks ? [...callbacks[event], cb] : [cb];
-  return () => {
-    callbacks[event] = callbacks[event].filter((c) => c !== cb);
-  };
-}
+export { on };
 
 export function getPeerIds() {
   return connections.map((p) => p.id);
 }
 
-export function getConnectionIds() {
-  return connections.map((c) => c.id);
-}
-
-export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
+export function connect(ws: WebSocket, id = nanoid()) {
   console.log("[ws] new connection", id);
   const localConnection = {
     id,
@@ -53,8 +37,8 @@ export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
 
   connections.push(localConnection);
 
-  ws.on("message", (_msg) => {
-    const msg = _msg.toString("utf-8");
+  ws.on("message", (rawMsg: Buffer) => {
+    const msg = rawMsg.toString("utf-8");
 
     const { type, data } = JSON.parse(msg);
 
@@ -71,9 +55,7 @@ export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
       }
     }
 
-    if (type in callbacks) {
-      callbacks[type].forEach((cb) => cb(data, id));
-    }
+    emit(type, data, id);
   });
 
   ws.on("close", () => {
@@ -100,3 +82,10 @@ export default function handleWebSocket(ws: WebSocket, id = nanoid()) {
     })
   );
 }
+
+export default {
+  on,
+  sendTo,
+  broadcast,
+  connect,
+};

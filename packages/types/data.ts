@@ -12,26 +12,20 @@ interface IPersistanceAdapter<T> {
   ): Promise<T | BinaryDocument | undefined>;
   saveDocument(docId: string, doc: BinaryDocument): Promise<void>;
 
-  loadSyncState(
-    peerId: string,
-    docId: string
-  ): Promise<BinarySyncState | undefined>;
-  saveSyncState(
-    peerId: string,
-    docId: string,
-    doc: BinarySyncState
-  ): Promise<void>;
+  loadSyncState(peerId: string, docId: string): Promise<SyncState | undefined>;
+  saveSyncState(peerId: string, docId: string, doc: SyncState): Promise<void>;
 }
 
 interface IMessageAdapter {
   sendTo(peerId: string, eventType: string, data: unknown): void;
   on(
     eventType: string,
-    cb: (data?: unknown, peerId?: string) => unknown
+    cb: (data?: unknown, peerId?: string) => unknown,
+    options?: { listeners: any[] }
   ): () => void;
-  sendToServer?: (eventType: string, data?: unknown) => void;
-  getPeerIds(): string[];
   broadcast(eventType: string, data?: unknown): void;
+
+  connect(urlOrWs: any): void;
 }
 
 type HandleDefault = (eventType: string, data: unknown) => void;
@@ -45,6 +39,8 @@ interface IDataBackend<T> {
   update(cb: (doc: FreezeObject<T>) => FreezeObject<T> | void): void;
   close(): void;
 
+  setDefault(v: any): void;
+
   _doc: FreezeObject<T>;
   _addSubscriber(sub: ISubscriber<T>): () => void;
 }
@@ -52,7 +48,7 @@ interface IDataBackend<T> {
 interface IDataBackendFactory<T> {
   (
     docId: string,
-    persistanceAdapter: () => IPersistanceAdapter<T>,
+    persistanceAdapter: (backend: IDataBackend<T>) => IPersistanceAdapter<T>,
     syncAdapter: IMessageAdapter
   ): IDataBackend<T>;
 }

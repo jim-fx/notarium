@@ -10,17 +10,44 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createDataBackend } from '@notarium/data';
+	import { createDocument, createDocumentStore, createDataBackend } from '@notarium/data';
 	import { IDBAdapter } from '@notarium/adapters';
-	import * as p2p from '@notarium/p2p-client';
+	import * as P2PClient from '@notarium/adapters/P2PClient';
+import type { DocumentData } from '@notarium/types';
 
-	export let path;
+	export let path:string[];
 
-	const backend = createDataBackend(path.join('/'), IDBAdapter, p2p);
+	const documentBackend = createDataBackend<DocumentData>(path.join('/'), IDBAdapter, P2PClient);
 
-	const tree = createTree(backend);
+	documentBackend.setDefault('doc');
 
-	onMount(() => {});
+	const doc = createDocument(documentBackend);
+
+	const docStore = createDocumentStore(documentBackend);
+
+	let text = $docStore.content;
+	docStore.subscribe((v) => {
+		const storeText = v?.content?.toString();
+		if (storeText !== text) {
+			text = storeText;
+		}
+	});
+
+	$: if (text && text.length) {
+		doc.setText(text);
+	}
+
+	let inputText;
+	function handleKeyDown(ev) {
+		if (ev.key === 'Enter') {
+			inputText = '';
+		}
+	}
+
+	onMount(() => {
+		documentBackend.load();
+		return documentBackend.close;
+	});
 </script>
 
-{JSON.stringify(path, null, 2)}
+<textarea name="dude" bind:value={text} cols="30" rows="10" />

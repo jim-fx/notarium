@@ -15,7 +15,7 @@
 				<button on:click={() => handleCreate(ownPath + '/index.md')}>new</button>
 			{/if}
 		{:else}
-			<a href="/edit/{ownPath}">
+			<a href="/edit{ownPath}">
 				{file.path}
 			</a>
 			<button on:click={() => handleDelete(ownPath)}>delete</button>

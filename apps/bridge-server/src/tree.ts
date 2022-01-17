@@ -1,11 +1,10 @@
 import { FSAdapter } from "@notarium/adapters/FSAdapter";
 import { resolve } from "path";
-import * as wsAdapter from "./websocket";
-import type { TreeData } from "@notarium/types";
-import { createDataBackend } from "@notarium/data";
-import { createTree } from "@notarium/tree";
+import WSClient from "@notarium/adapters/WSClient";
+import type { DocumentData, TreeData } from "@notarium/types";
+import { createDataBackend, createTree } from "@notarium/data";
 
-const treeBackend = createDataBackend<TreeData>("tree", FSAdapter, wsAdapter);
+const treeBackend = createDataBackend<TreeData>("tree", FSAdapter, WSClient);
 
 treeBackend.load(resolve(__dirname, "../../../test"));
 

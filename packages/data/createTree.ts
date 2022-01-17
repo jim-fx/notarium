@@ -1,12 +1,5 @@
 import { IDataBackend, TreeData } from "@notarium/types";
-
-function splitPath(p: string) {
-  return p.split("/").filter((v) => !!v.length);
-}
-
-function findChild(tree: TreeData, n: string) {
-  return tree.children?.find((c) => c.path === n);
-}
+import { splitPath, findChild } from "@notarium/common";
 
 export function createTree(backend: IDataBackend<TreeData>) {
   function findNode(path: string = "/") {

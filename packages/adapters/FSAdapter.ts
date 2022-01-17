@@ -1,7 +1,7 @@
 import { promises } from "fs";
 import { basename } from "path";
 const { readdir, lstat } = promises;
-import { IPersistanceAdapter, TreeData } from "@notarium/types";
+import { IDataBackend, IPersistanceAdapter, TreeData } from "@notarium/types";
 import type { BinaryDocument, BinarySyncState, SyncState } from "automerge";
 import Database from "sqlite-async";
 
@@ -61,7 +61,9 @@ function parseBinary(s: string) {
   return Uint8Array.from(s.split(",").map((v) => parseInt(v)));
 }
 
-export function FSAdapter(): IPersistanceAdapter<TreeData> {
+export function FSAdapter<T = TreeData>(
+  backend: IDataBackend<T>
+): IPersistanceAdapter<T> {
   const syncStates = {};
 
   return {
@@ -85,7 +87,7 @@ export function FSAdapter(): IPersistanceAdapter<TreeData> {
             content,
           ])
           .then((res) => {
-            console.log("[pers/sql] sync state saved");
+            console.log("[pers/sql] saved doc", docId, "to db");
           })
           .catch((err) => {
             console.error(err);
@@ -98,13 +100,12 @@ export function FSAdapter(): IPersistanceAdapter<TreeData> {
         return await readTreeData(fsPath);
       }
 
+      console.log("[pers/sql] read doc", docId, "from db");
       if (doc?.content) return parseBinary(doc.content) as BinaryDocument;
-      return undefined;
+      return;
     },
 
     async loadSyncState(peerId: string, docId: string) {
-      return syncStates?.[peerId]?.[docId];
-
       const v = await (
         await dbPromise
       ).get("SELECT * from syncStates WHERE peerId = ? AND docId = ?", [
@@ -112,31 +113,53 @@ export function FSAdapter(): IPersistanceAdapter<TreeData> {
         docId,
       ]);
 
-      console.groupCollapsed("[pers/sql] load sync state for", peerId, docId);
-      console.log(v);
-      console.groupEnd();
+      if (v?.state) {
+        const data = JSON.parse(v.state) as SyncState;
 
-      if (v?.state) return parseBinary(v.state) as BinarySyncState;
+        if (data.theirHave) {
+          console.log(data.theirHave);
+          debugger;
+          data.theirHave = data.theirHave.map((v) => {
+            return {
+              ...v,
+              bloom: v?.bloom?.length ? parseBinary(v.bloom) : new Uint8Array(),
+            };
+          });
+        }
+
+        debugger;
+        console.groupCollapsed("[pers/sql] load sync state for", peerId, docId);
+        console.log(data);
+        console.groupEnd();
+        return data;
+      }
+
       return;
     },
     async saveSyncState(
       peerId: string,
       docId: string,
-      d: BinarySyncState
+      d: SyncState
     ): Promise<void> {
-      syncStates[peerId] = {
-        ...syncStates[peerId],
-        [docId]: d,
-      };
-      return;
-
       const db = await dbPromise;
 
-      const state = d.toString();
+      debugger;
 
-      console.groupCollapsed("[pers/sql] save sync state for", peerId, docId);
-      console.log(d);
-      console.groupEnd();
+      if (d.theirHave) {
+        d = {
+          ...d,
+          theirHave: d?.theirHave?.map((v) => {
+            return {
+              ...v,
+              bloom: v?.bloom?.toString(),
+            };
+          }),
+        };
+      }
+
+      debugger;
+
+      const state = JSON.stringify(d);
 
       const updateResult = await db.run(
         `UPDATE OR IGNORE syncStates 
@@ -152,7 +175,14 @@ export function FSAdapter(): IPersistanceAdapter<TreeData> {
             [peerId, docId, state]
           )
           .then((res) => {
-            console.log("sync state saved");
+            console.groupCollapsed(
+              "[pers/sql] save sync state for",
+              peerId,
+              docId
+            );
+            console.log(d);
+            console.log(res);
+            console.groupEnd();
           })
           .catch((err) => {
             console.error(err);

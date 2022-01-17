@@ -1,9 +1,9 @@
 <script lang="ts">
-	import p2p from '@notarium/p2p-client';
+	import P2PClient from '@notarium/adapters/P2PClient';
 	import { onMount } from 'svelte';
 
 	onMount(() => {
-		p2p.connectWebSocket('ws://localhost:3000/ws');
+		P2PClient.connect('ws://localhost:3000/ws');
 	});
 </script>
 

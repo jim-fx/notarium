@@ -1,9 +1,12 @@
 let ws: Promise<WebSocket>;
 import type Peer from "simple-peer";
+import { createEventListener } from "@notarium/common";
 
 const peers: { peer: Peer.Instance; id: string }[] = [];
-const callbacks: Record<string, ((data: unknown, peerId?: string) => void)[]> =
-  {};
+
+globalThis["p"] = peers;
+
+const { emit, on } = createEventListener();
 
 function getId() {
   if ("p2p-id" in localStorage) {
@@ -28,15 +31,9 @@ function setId(id: string) {
   id && localStorage.setItem("p2p-id", id);
 }
 
-function emit(eventType: string, data?: unknown, peerId?: string) {
-  if (eventType in callbacks) {
-    callbacks[eventType].forEach((cb) => cb(data, peerId));
-  }
-}
+export { on };
 
 function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
-  console.log("connect to peer", id);
-
   const peer = new SimplePeer({
     initiator: !signal,
   }) as unknown as Peer.Instance;
@@ -125,11 +122,7 @@ async function handleMessage(msg: string, peerId?: string) {
   emit(type, data, peerId);
 }
 
-export function getPeerIds() {
-  return [...peers.map((p) => p.id), "server"];
-}
-
-export async function connectWebSocket(url: string) {
+export async function connect(url: string) {
   const id = getId();
 
   if (id) {
@@ -154,17 +147,7 @@ export async function connectWebSocket(url: string) {
   };
 }
 
-export function on(
-  event: string,
-  cb: (data: unknown, peerId?: string) => void
-): () => void {
-  callbacks[event] = event in callbacks ? [...callbacks[event], cb] : [cb];
-  return () => {
-    callbacks[event] = callbacks[event].filter((c) => c !== cb);
-  };
-}
-
-export async function sendToServer(eventType: string, data?: unknown) {
+async function sendToServer(eventType: string, data?: unknown) {
   (await ws).send(JSON.stringify({ type: eventType, data }));
 }
 
@@ -188,3 +171,10 @@ export async function sendTo(id: string, type: string, data: unknown) {
     p.peer.send(JSON.stringify({ type, data }));
   }
 }
+
+export default {
+  sendTo,
+  on,
+  broadcast,
+  connect,
+};
