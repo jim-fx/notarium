@@ -56,3 +56,4 @@ $ pnpm dev
    3. [ ] Block
 5. [ ] Sync FSAdapter with DataBackend
 6. [ ] Implement Document parsing
+7. [ ] Sync Tree with Document, eg (document deletion);
