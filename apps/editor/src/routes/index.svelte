@@ -34,5 +34,7 @@
 </script>
 
 {#if $treeStore?.children?.length}
-	<File file={$treeStore} {handleDelete} {handleCreate} />
+	{#each $treeStore.children as child}
+		<File file={child} {handleDelete} {handleCreate} />
+	{/each}
 {/if}

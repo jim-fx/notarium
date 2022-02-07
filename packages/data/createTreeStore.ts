@@ -5,7 +5,7 @@ export function createTreeStore(
   backend: IDataBackend<TreeData>
 ): Readable<TreeData> {
   return readable(
-    (backend?.doc?.toJSON() || {}) as TreeData,
+    (backend?.doc?.getMap("tree").toJSON() || {}) as TreeData,
     function start(set) {
       return backend.doc.on("update", () => {
         console.log("[adapt/store] update content");

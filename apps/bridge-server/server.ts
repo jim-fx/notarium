@@ -1,40 +1,35 @@
 import polka from "polka";
 import { tinyws } from "tinyws";
 import type { TinyWSRequest } from "tinyws";
-import WSClient, { connect, getPeerIds } from "@notarium/adapters/WSClient";
-import tree from "./src/tree";
+import WSClient, { connect } from "@notarium/adapters/WSClient";
+import { tree, createDoc, default as docStore } from "./src/docStore";
 import { parseCookie } from "@notarium/common";
-import { createDataBackend } from "@notarium/data";
-import { FSAdapter } from "@notarium/adapters/FSAdapter";
 import { splitPath } from "@notarium/common";
-import { DocumentData } from "@notarium/types";
 
 const app = polka();
 app.use(tinyws() as any);
 
-app.get("/id", async (_, res) => {
-  res.end(JSON.stringify(getPeerIds()));
-});
+// app.get("/id", async (_, res) => {
+//   res.end(JSON.stringify(getPeerIds()));
+// });
 
 app.get("/", async (_, res) => {
   res.end(JSON.stringify(tree.findNode()));
 });
 
-const docStore = {};
-async function createDoc(docId: string) {
-  if (docId in docStore) return docStore[docId];
-  docStore[docId] = createDataBackend<DocumentData>(docId, {
-    persistanceAdapterFactory: FSAdapter,
-    messageAdapter: WSClient,
-  });
-  docStore[docId].load();
-  return docStore[docId];
-}
-
-WSClient.on("open-document", (docId: string) => createDoc(docId));
+WSClient.on("doc.open", ({ docId }) => createDoc(docId));
 
 app.get("/doc", (req, res) => {
-  res.end(JSON.stringify(docStore));
+  res.end(
+    JSON.stringify(
+      Object.keys(docStore).map((key) => {
+        return {
+          id: docStore[key].docId,
+          store: docStore[key].doc.getText("content").toString(),
+        };
+      })
+    )
+  );
 });
 
 app.get("/doc/*", async (req, res) => {
@@ -48,8 +43,6 @@ app.get("/doc/*", async (req, res) => {
   }
 
   const doc = await createDoc(cleanPath);
-
-  debugger;
 
   res.end(JSON.stringify(doc._doc));
 });

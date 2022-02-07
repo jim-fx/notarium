@@ -15,13 +15,14 @@
 		"@notarium/adapters": "link:../../packages/adapters",
 		"@notarium/data": "link:../../packages/data",
 		"@notarium/types": "link:../../packages/types",
+		"bytemd": "^1.10.13",
 		"diff-match-patch": "^1.0.5",
 		"idb": "^7.0.0",
 		"simple-peer": "^9.11.0"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^1.0.0-next.26",
 		"@sveltejs/adapter-auto": "next",
+		"@sveltejs/adapter-static": "^1.0.0-next.26",
 		"@sveltejs/kit": "next",
 		"@types/diff-match-patch": "^1.0.32",
 		"@typescript-eslint/eslint-plugin": "^5.10.2",
@@ -33,6 +34,7 @@
 		"prettier-plugin-svelte": "^2.6.0",
 		"svelte": "^3.46.4",
 		"svelte-check": "^2.4.2",
+		"svelte-markdown": "^0.2.2",
 		"svelte-preprocess": "^4.10.2",
 		"tslib": "^2.3.1",
 		"typescript": "^4.5.5"

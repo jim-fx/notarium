@@ -10,24 +10,26 @@
 
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import SvelteMarkdown from 'svelte-markdown';
+
 	import { createDocument, createDocumentStore, createDataBackend } from '@notarium/data';
 	import { IDBAdapter } from '@notarium/adapters';
 	import * as P2PClient from '@notarium/adapters/P2PClient';
-import type { DocumentData } from '@notarium/types';
 
-	export let path:string[];
+	export let path: string[];
+	let state = 'view';
 
-	const documentBackend = createDataBackend<DocumentData>(path.join('/'), IDBAdapter, P2PClient);
-
-	documentBackend.setDefault('doc');
+	const documentBackend = createDataBackend<string>(path.join('/'), {
+		persistanceAdapterFactory: IDBAdapter,
+		messageAdapter: P2PClient
+	});
 
 	const doc = createDocument(documentBackend);
 
 	const docStore = createDocumentStore(documentBackend);
 
-	let text = $docStore.content;
-	docStore.subscribe((v) => {
-		const storeText = v?.content?.toString();
+	let text = $docStore;
+	docStore.subscribe((storeText) => {
 		if (storeText !== text) {
 			text = storeText;
 		}
@@ -50,4 +52,28 @@ import type { DocumentData } from '@notarium/types';
 	});
 </script>
 
-<textarea name="dude" bind:value={text} cols="30" rows="10" />
+<header>
+	<button
+		on:click={() => {
+			state = 'edit';
+		}}>edit</button
+	>
+	<button
+		on:click={() => {
+			state = 'view';
+		}}>view</button
+	>
+</header>
+
+{#if state === 'view'}
+	<SvelteMarkdown source={text} />
+{:else}
+	<textarea name="dude" bind:value={text} cols="30" rows="10" />
+{/if}
+
+<style>
+	textarea {
+		height: 90vh;
+		width: 100%;
+	}
+</style>

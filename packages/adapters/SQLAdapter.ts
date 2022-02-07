@@ -1,7 +1,4 @@
-import { promises } from "fs";
-import { basename } from "path";
-const { readdir, lstat } = promises;
-import { IPersistanceAdapter, TreeData } from "@notarium/types";
+import { IPersistanceAdapter } from "@notarium/types";
 import Database from "sqlite-async";
 
 const dbPromise = Database.open("./db.sql")
@@ -28,7 +25,7 @@ function parseBinary(s: string) {
   return Uint8Array.from(s.split(",").map((v) => parseInt(v)));
 }
 
-export function FSAdapter(backend): IPersistanceAdapter {
+export function SQLAdapter(): IPersistanceAdapter {
   return {
     async saveDocument(docId: string, doc: Uint8Array) {
       const db = await dbPromise;

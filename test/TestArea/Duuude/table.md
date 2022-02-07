@@ -1,5 +1,5 @@
 # Some Content
-## smoar shit
+## smoar shits
 ```ts
 function print(d:string){
   console.log(d)

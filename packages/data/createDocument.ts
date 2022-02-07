@@ -7,6 +7,10 @@ export function createDocument(backend: IDataBackend<DocumentData>) {
   let timeout;
   let lastExecution = 0;
 
+  function getText() {
+    return backend.doc.getText("content").toString();
+  }
+
   async function setText(t: string) {
     if (timeout) clearTimeout(timeout);
     const now = Date.now();
@@ -18,7 +22,7 @@ export function createDocument(backend: IDataBackend<DocumentData>) {
       lastExecution = now;
     }
 
-    const currentContent = backend._doc.content.toString();
+    const currentContent = backend.doc.getText("content").toString();
 
     // Compute the diff:
     const diff = dmp.diff_main(currentContent, t);
@@ -28,20 +32,19 @@ export function createDocument(backend: IDataBackend<DocumentData>) {
 
     const patches = dmp.patch_make(currentContent, diff);
 
-    backend.update((doc: DocumentData) => {
-      patches.forEach((patch) => {
+    backend.update(() => {
+      const doc = backend.doc.getText("content");
+      patches.forEach((patch: { start1: any; diffs: [any, any][] }) => {
         let idx = patch.start1;
         patch.diffs.forEach(([operation, changeText]) => {
           switch (operation) {
             case 1: // Insertion
-              doc.content.insertAt(idx, ...changeText.split(""));
+              doc.insert(idx, changeText);
             case 0: // No Change
               idx += changeText.length;
               break;
             case -1: // Deletion
-              for (let i = 0; i < changeText.length; i++) {
-                doc.content.deleteAt(idx);
-              }
+              doc.delete(idx, changeText.length);
               break;
           }
         });
@@ -51,5 +54,6 @@ export function createDocument(backend: IDataBackend<DocumentData>) {
 
   return {
     setText,
+    getText,
   };
 }

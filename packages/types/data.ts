@@ -1,7 +1,7 @@
 import * as Y from "yjs";
 
 interface IPersistanceAdapter {
-  loadDocument(docId: string, fsPath?: string): Promise<Uint8Array | undefined>;
+  loadDocument(docId: string, fsPath?: string): Promise<Uint8Array | void>;
   saveDocument(docId: string, doc: Uint8Array): Promise<void>;
 }
 
@@ -20,22 +20,18 @@ interface IMessageAdapter {
 interface IDataBackend<T> {
   docId: string;
   doc: Y.Doc;
+
   load(path?: string): Promise<void>;
   update(cb: (data: T) => void): void;
   close(): void;
+
+  /**
+   * For passing options to any adapters
+   */
+  flags?: {
+    [key: string]: unknown;
+    ROOT_PATH?: string;
+  };
 }
 
-interface IDataBackendFactory<T> {
-  (
-    docId: string,
-    persistanceAdapter: (backend: IDataBackend<T>) => IPersistanceAdapter,
-    syncAdapter: IMessageAdapter
-  ): IDataBackend<T>;
-}
-
-export {
-  IDataBackend,
-  IDataBackendFactory,
-  IMessageAdapter,
-  IPersistanceAdapter,
-};
+export { IDataBackend, IMessageAdapter, IPersistanceAdapter };
