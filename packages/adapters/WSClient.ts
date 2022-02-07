@@ -8,6 +8,8 @@ let connections: {
 
 const { on, emit } = createEventListener();
 
+export const getId = () => "server";
+
 export function sendTo(peerId: string, eventType: string, data: unknown) {
   const peer = connections.find((c) => c.id === peerId);
   // console.log("wss::sendto", eventType, peerId);
@@ -30,6 +32,7 @@ export function getPeerIds() {
 
 export function connect(ws: WebSocket, id = nanoid()) {
   console.log("[ws] new connection", id);
+
   const localConnection = {
     id,
     ws,
@@ -65,8 +68,6 @@ export function connect(ws: WebSocket, id = nanoid()) {
     );
   });
 
-  // New Client connects, so we need to tell him whom to say hello to
-  // And we delay it a bit to give the client the chance to change its id
   emit("connect", id);
 
   ws.send(
@@ -75,6 +76,7 @@ export function connect(ws: WebSocket, id = nanoid()) {
       data: id,
     })
   );
+
   ws.send(
     JSON.stringify({
       type: "p2p-peer-ids",
@@ -87,5 +89,6 @@ export default {
   on,
   sendTo,
   broadcast,
+  getId,
   connect,
 };

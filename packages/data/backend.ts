@@ -1,149 +1,90 @@
+import { createMutexFactory, parseBinary } from "@notarium/common";
 import {
-  IPersistanceAdapter,
-  IMessageAdapter,
   IDataBackend,
-  ISubscriber,
+  IMessageAdapter,
+  IPersistanceAdapter,
 } from "@notarium/types";
+import * as Y from "yjs";
 
-import { parseBinary, createSerializer } from "@notarium/common";
-
-import {
-  BinaryDocument,
-  BinarySyncMessage,
-  BinarySyncState,
-  change,
-  FreezeObject,
-  from,
-  generateSyncMessage,
-  init,
-  initSyncState,
-  load,
-  merge,
-  receiveSyncMessage,
-  save,
-  SyncState,
-  Text,
-} from "automerge";
+globalThis["Y"] = Y;
 
 const backends: Record<string, IDataBackend<any>> = {};
 
+interface DataBackendOptions<T> {
+  persistanceAdapterFactory(backend: IDataBackend<T>): IPersistanceAdapter;
+  messageAdapter: IMessageAdapter;
+  defaultDocumentValue?: unknown;
+}
+
+let rootDoc: Y.Doc;
+
 export function createDataBackend<T>(
   docId: string,
-  _persistanceAdapter: (backend: IDataBackend<T>) => IPersistanceAdapter<T>,
-  messageAdapter: IMessageAdapter
+  { persistanceAdapterFactory, messageAdapter }: DataBackendOptions<T>
 ): IDataBackend<T> {
-  if (docId in backends) return backends[docId] as IDataBackend<T>;
+  if (docId in backends) return backends[docId];
 
-  const otherTasks = createSerializer();
+  if (!rootDoc) {
+    rootDoc = new Y.Doc();
+  }
 
-  const backend = {
-    load: _load,
+  let doc = rootDoc.getMap().get(docId) as Y.Doc;
+  if (!doc) {
+    doc = new Y.Doc();
+    rootDoc.getMap().set(docId, doc);
+  }
+
+  const myId = messageAdapter.getId();
+
+  const createMutex = createMutexFactory();
+
+  const backend: IDataBackend<T> = {
+    docId,
+    load,
     update,
     close,
-    setDefault(v: any) {
-      defaultValue = v;
-    },
-    get _doc() {
-      return doc;
-    },
-    _addSubscriber: (sub: ISubscriber<T>) => {
-      subscribers.push(sub);
-      return () => {
-        const index = subscribers.findIndex((s) => s === sub);
-        if (index !== -1) {
-          subscribers.splice(index, 1);
-        }
-      };
-    },
+    doc,
   };
 
-  let doc: FreezeObject<T>;
-  const subscribers: ISubscriber<T>[] = [];
-  const persistanceAdapter = _persistanceAdapter(backend);
-  const peerIds: Set<string> = new Set();
-  let defaultValue: any;
-
-  function emit(eventType: string, data: unknown) {
-    subscribers.forEach((sub) => {
-      if ("handle" in sub) sub.handle(eventType as any, data as any);
-    });
+  function update(cb: (arg: T) => void) {
+    doc.transact(() => {
+      cb(doc as unknown as T);
+    }, docId);
   }
 
-  async function readSyncState(peerId: string): Promise<SyncState> {
-    let peerSyncState = await persistanceAdapter.loadSyncState(peerId, docId);
-    if (peerSyncState) {
-      return peerSyncState;
+  const persistanceAdapter = persistanceAdapterFactory(backend);
+
+  async function load() {
+    const updates = await persistanceAdapter.loadDocument(docId);
+    if (updates) {
+      Y.applyUpdateV2(doc, updates);
     }
-    return initSyncState();
+    doc.emit("load", [this]);
+    initNetwork();
   }
 
-  async function writeSyncState(peerId: string, syncState: SyncState) {
-    return persistanceAdapter.saveSyncState(peerId, docId, syncState);
-  }
-
-  async function getSyncMessageForPeer(peerId: string) {
-    if (!peerId) return;
-
-    const [newSyncState, syncMessage] = generateSyncMessage(
-      doc,
-      await readSyncState(peerId)
-    );
-
-    await writeSyncState(peerId, newSyncState);
-
-    return syncMessage?.toString();
-  }
-
-  async function applySyncMessage(
-    syncMessage: BinarySyncMessage,
-    peerId: string
-  ) {
-    const [newDoc, newSyncState, patch] = receiveSyncMessage(
-      doc,
-      await readSyncState(peerId),
-      syncMessage
-    );
-    doc = newDoc;
-
-    console.log("[backend] received change, patch:", patch);
-
-    if (newSyncState) {
-      await writeSyncState(peerId, newSyncState);
-    }
-
-    await writeDocument();
-
-    return patch;
-  }
-
-  // TODO: unsubscribe from all messageAdapter things
   const listeners = [];
+  const peerIds = new Set<string>();
+  const docOpenType = docId + ".open";
+  const docUpdateType = docId + ".update";
+  const docCloseType = docId + ".close";
   function initNetwork() {
     // Say hello to all my peers;
-    messageAdapter.broadcast("open-document", docId);
-    messageAdapter.on(
-      "connect",
-      (peerId: string) => {
-        messageAdapter.sendTo(peerId, "open-document", docId);
-      },
-      { listeners }
-    );
+    messageAdapter.broadcast(docOpenType, Y.encodeStateVector(doc).join());
 
     // Respond to open documents
     messageAdapter.on(
-      "open-document",
-      async (remoteDocId: string, peerId: string) => {
-        const finishTask = await otherTasks("handleOpenDocument");
+      docOpenType,
+      async (rawStateVector: string, peerId: string) => {
+        const finishTask = await createMutex("handleOpenDocument");
 
-        if (remoteDocId !== docId) return;
-        console.log("[backend] received sync request", remoteDocId, peerId);
-        const newSyncMessage = await getSyncMessageForPeer(peerId);
+        const remoteStateVec = parseBinary(rawStateVector);
 
-        // Respond even when we have no changes
-        // so the other peer knows we have the document open
-        messageAdapter.sendTo(peerId, "sync-data", {
-          docId,
-          data: newSyncMessage,
+        const updates = Y.encodeStateAsUpdateV2(doc, remoteStateVec);
+        console.log("sending updates", updates);
+
+        messageAdapter.sendTo(peerId, docUpdateType, {
+          updates: updates.join(),
         });
 
         finishTask();
@@ -151,37 +92,17 @@ export function createDataBackend<T>(
       { listeners }
     );
 
-    messageAdapter.on(
-      "close-document",
-      (peerId: string) => {
-        peerIds.delete(peerId);
-      },
-      { listeners }
-    );
-
-    messageAdapter.on(
-      "disconnect",
-      (peerId: string) => {
-        peerIds.delete(peerId);
-      },
-      { listeners }
-    );
-
     // Respond to sync requests
     messageAdapter.on(
-      "sync-data",
-      async (
-        { docId: remoteDocId, data: rawSyncData },
-        peerId: string = "server"
-      ) => {
-        if (remoteDocId !== docId) return;
+      docUpdateType,
+      async ({ updates: rawSyncData }, peerId: string = "server") => {
         peerIds.add(peerId);
         if (!rawSyncData) return;
 
-        const finishTask = await otherTasks("handleSync");
+        const finishTask = await createMutex("handleSync");
 
         // Decode incoming stringified Uint8Array
-        const syncData = parseBinary(rawSyncData) as BinarySyncMessage;
+        const updates = parseBinary(rawSyncData);
 
         console.groupCollapsed(
           "[backend] received sync data from",
@@ -189,102 +110,37 @@ export function createDataBackend<T>(
           "for",
           docId
         );
-        console.log(syncData);
+        console.log(updates);
         console.groupEnd();
 
-        const changes = await applySyncMessage(syncData, peerId);
-
-        // TODO: handle changes on incoming sync message;
-        console.log("[backend] applied message changes: ", changes);
-
-        const syncMessage = await getSyncMessageForPeer(peerId);
-
-        if (syncMessage) {
-          console.log("[backend] sending sync request to", peerId);
-          messageAdapter.sendTo(peerId, "sync-data", {
-            data: syncMessage,
-            docId,
-          });
-        } else {
-          console.log("[backend] sync complete with", peerId);
-        }
+        Y.applyUpdateV2(doc, updates, peerId);
 
         finishTask();
       },
       { listeners }
     );
+
+    messageAdapter.on(
+      docCloseType,
+      (peerId: string) => peerIds.delete(peerId),
+      { listeners }
+    );
+
+    messageAdapter.on(
+      "disconnect",
+      (peerId: string) => peerIds.delete(peerId),
+      { listeners }
+    );
   }
 
-  async function writeDocument() {
-    subscribers.forEach((sub) => sub.handle("data", doc as T));
-
-    peerIds.forEach(async (peerId) => {
-      const syncMessage = await getSyncMessageForPeer(peerId);
-      if (syncMessage) {
-        messageAdapter.sendTo(peerId, "sync-data", {
-          docId,
-          data: syncMessage,
-        });
-      }
-    });
-
-    return persistanceAdapter.saveDocument(docId, save(doc));
-  }
-
-  async function _load(path?: string) {
-    const finishTask = await otherTasks("loadDoc");
-
-    let initialData = await persistanceAdapter.loadDocument(docId, path);
-
-    console.groupCollapsed("[backend] initialData:");
-    console.log(initialData);
-    if (initialData instanceof Uint8Array) {
-      console.log("[crdt] init from save file");
-      doc = load(initialData as BinaryDocument);
-    } else if (initialData) {
-      console.log("[crdt] init load from object");
-      doc = merge(init(), from(initialData));
-      await writeDocument();
-    } else if (defaultValue) {
-      console.log("[crdt] init from defaultValue");
-      if (defaultValue === "doc") {
-        doc = change(init(), (doc: any) => {
-          doc.content = new Text("#Title");
-        });
-      } else {
-        doc = merge(init(), from(defaultValue));
-      }
-      await writeDocument();
-    } else {
-      console.log("[crdt] init empty document");
-      doc = init();
-      await writeDocument();
-    }
-
-    console.log(doc);
-    console.groupEnd();
-
-    emit("data", doc);
-    initNetwork();
-    finishTask();
-
-    return doc as T;
-  }
+  doc.on("update", (update: Uint8Array, origin: string) => {
+    update = Y.convertUpdateFormatV1ToV2(update);
+    messageAdapter.broadcast(docUpdateType, { updates: update.join() });
+    persistanceAdapter.saveDocument(docId, Y.encodeStateAsUpdateV2(doc));
+  });
 
   function close() {
-    messageAdapter.broadcast("close-document", docId);
-
-    // Remove all listeners
-    listeners.forEach((remove) => remove());
-
-    // Close
-    delete backends[docId];
-  }
-
-  async function update(cb: (doc: FreezeObject<T>) => FreezeObject<T>) {
-    const newDoc = change(doc, cb);
-    doc = newDoc;
-    await writeDocument();
+    doc.destroy();
   }
 
   backends[docId] = backend;

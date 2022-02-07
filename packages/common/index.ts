@@ -31,5 +31,5 @@ export const delayExecution = (
 };
 
 export * from "./eventlistener";
-export * from "./serializer";
+export * from "./mutex";
 export * from "./fs";

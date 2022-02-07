@@ -15,6 +15,7 @@ app.use(tinyws() as any);
 app.get("/id", async (_, res) => {
   res.end(JSON.stringify(getPeerIds()));
 });
+
 app.get("/", async (_, res) => {
   res.end(JSON.stringify(tree.findNode()));
 });
@@ -22,9 +23,11 @@ app.get("/", async (_, res) => {
 const docStore = {};
 async function createDoc(docId: string) {
   if (docId in docStore) return docStore[docId];
-  docStore[docId] = createDataBackend<DocumentData>(docId, FSAdapter, WSClient);
-  docStore[docId].setDefault("doc");
-  await docStore[docId].load();
+  docStore[docId] = createDataBackend<DocumentData>(docId, {
+    persistanceAdapterFactory: FSAdapter,
+    messageAdapter: WSClient,
+  });
+  docStore[docId].load();
   return docStore[docId];
 }
 
@@ -38,6 +41,7 @@ app.get("/doc/*", async (req, res) => {
   const { path } = req;
   let cleanPath = splitPath(path.replace("/doc", "")).join("/");
   const file = tree.findNode(cleanPath);
+
   if (!file) {
     res.statusCode = 404;
     return res.end();
@@ -52,7 +56,7 @@ app.get("/doc/*", async (req, res) => {
 
 app.get("/file/*", async (req, res) => {
   const { path } = req;
-  let cleanPath = splitPath(path).join("/");
+  let cleanPath = splitPath(path).join("/").replace("file/", "");
   const doc = tree.findNode(cleanPath);
   if (!doc) {
     res.statusCode = 404;

@@ -4,14 +4,13 @@ import { IDataBackend, TreeData } from "@notarium/types";
 export function createTreeStore(
   backend: IDataBackend<TreeData>
 ): Readable<TreeData> {
-  return readable(backend._doc || {}, function start(set) {
-    return backend._addSubscriber({
-      handle: (evenType: string, data: unknown | TreeData) => {
-        if (evenType === "data") {
-          console.log("[adapt/store] update content");
-          set(data as TreeData);
-        }
-      },
-    });
-  });
+  return readable(
+    (backend?.doc?.toJSON() || {}) as TreeData,
+    function start(set) {
+      return backend.doc.on("update", () => {
+        console.log("[adapt/store] update content");
+        set(backend.doc.get("tree").toJSON() as TreeData);
+      });
+    }
+  );
 }

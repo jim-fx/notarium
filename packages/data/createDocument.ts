@@ -20,8 +20,6 @@ export function createDocument(backend: IDataBackend<DocumentData>) {
 
     const currentContent = backend._doc.content.toString();
 
-    console.log(backend._doc);
-
     // Compute the diff:
     const diff = dmp.diff_main(currentContent, t);
 

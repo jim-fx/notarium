@@ -4,9 +4,8 @@ function resolvablePromise(): [Promise<unknown>, (value: unknown) => void] {
   return [p, res];
 }
 
-export function createSerializer() {
+export function createMutexFactory() {
   const que = [];
-  globalThis["que"] = que;
   return async (task: string = "task") => {
     let [promise, resolve] = resolvablePromise();
     const a = performance.now();

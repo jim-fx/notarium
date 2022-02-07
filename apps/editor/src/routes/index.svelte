@@ -6,7 +6,12 @@
 	import { createDataBackend, createTreeStore, createTree } from '@notarium/data';
 	import type { TreeData } from '@notarium/types';
 
-	const treeBackend = createDataBackend<TreeData>('tree', IDBAdapter, P2PClient);
+	const treeBackend = createDataBackend<Y.Doc>('tree', {
+		persistanceAdapterFactory: IDBAdapter,
+		messageAdapter: P2PClient
+	});
+
+	globalThis['backend'] = treeBackend;
 
 	const treeStore = createTreeStore(treeBackend);
 
@@ -24,7 +29,6 @@
 
 	onMount(() => {
 		treeBackend.load();
-		window['t'] = tree;
 		return treeBackend.close;
 	});
 </script>

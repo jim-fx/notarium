@@ -4,7 +4,7 @@ import { IDataBackend, DocumentData } from "@notarium/types";
 export function createDocumentStore(
   backend: IDataBackend<DocumentData>
 ): Readable<DocumentData> {
-  return readable(backend?._doc || {}, function start(set) {
+  return readable(backend?._doc || ({} as DocumentData), function start(set) {
     return backend._addSubscriber({
       handle: (evenType: string, data: DocumentData) => {
         if (evenType === "data") {

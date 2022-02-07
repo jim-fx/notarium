@@ -4,20 +4,36 @@ import { createEventListener } from "@notarium/common";
 
 const peers: { peer: Peer.Instance; id: string }[] = [];
 
-globalThis["p"] = peers;
-
 const { emit, on } = createEventListener();
 
-function getId() {
-  if ("p2p-id" in localStorage) {
-    let id = localStorage.getItem("p2p-id");
-    if (id === "undefined" || id === "null") {
-      localStorage.removeItem("p2p-id");
-      return undefined;
+const { getId, setId } = (() => {
+  if (!("localStorage" in globalThis))
+    return {
+      getId: () => "",
+      setId: (v) => {},
+    };
+
+  let _id: string;
+
+  function getId() {
+    if (_id) return _id;
+    if ("p2p-id" in localStorage) {
+      let id = localStorage.getItem("p2p-id");
+      if (id === "undefined" || id === "null") {
+        localStorage.removeItem("p2p-id");
+        return undefined;
+      }
+      _id = id;
+      return id;
     }
-    return id;
   }
-}
+
+  function setId(id: string) {
+    _id = id;
+    id && localStorage.setItem("p2p-id", id);
+  }
+  return { getId, setId };
+})();
 
 function removePeer(peerId: string) {
   const index = peers.findIndex((p) => p.id === peerId);
@@ -27,11 +43,7 @@ function removePeer(peerId: string) {
   emit("disconnect", peerId);
 }
 
-function setId(id: string) {
-  id && localStorage.setItem("p2p-id", id);
-}
-
-export { on };
+export { on, getId };
 
 function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
   const peer = new SimplePeer({
@@ -131,6 +143,10 @@ export async function connect(url: string) {
 
   const _ws = new WebSocket(url);
 
+  _ws.onerror = (err) => {
+    console.log("err", err);
+  };
+
   setTimeout(() => {
     document.cookie = "";
   });
@@ -175,6 +191,7 @@ export async function sendTo(id: string, type: string, data: unknown) {
 export default {
   sendTo,
   on,
+  getId,
   broadcast,
   connect,
 };

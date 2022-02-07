@@ -9,9 +9,12 @@
   "dependencies": {
     "@notarium/common": "link:../common",
     "@notarium/types": "link:../types",
-    "svelte": "^3.46.2"
+    "svelte": "^3.46.4"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "yjs": "^13.5.27"
+  }
 }
