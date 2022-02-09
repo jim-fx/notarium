@@ -1,3 +1,5 @@
-# Palabras de los tiempo 
+# Palabras de los tiempo
 
 ahora - jetzt
+
+algundo - manchmal

@@ -1,23 +1,19 @@
-import Watcher from "watcher";
+import { createCachedFactory, createEventListener } from "@notarium/common";
 import { lstat } from "fs/promises";
-import { createEventListener } from "@notarium/common";
+import Watcher from "watcher";
 
 interface Event {
   type: string;
   path: string;
   newPath: any;
+  isDirectory?: boolean;
+  isSymbolicLink?: boolean;
 }
 
-const watcherStore: { [path: string]: ReturnType<typeof FSWatcher> } = {};
-
-export function FSWatcher(path: string) {
-  if (path in watcherStore) {
-    return watcherStore[path];
-  }
-
+const _FSWatcher = (path: string) => {
   console.log("watcher:init", path);
 
-  const { on, emit } = createEventListener();
+  const { on, emit } = createEventListener<{ changes: Event[] }>();
 
   const w = new Watcher(path, {
     recursive: true,
@@ -62,11 +58,9 @@ export function FSWatcher(path: string) {
     }
   });
 
-  const returnObj = {
+  return {
     on,
   };
+};
 
-  watcherStore[path] = returnObj;
-
-  return returnObj;
-}
+export const FSWatcher = createCachedFactory(_FSWatcher, (p) => p);

@@ -1,8 +1,12 @@
 import * as Y from "yjs";
 
+type IPersistanceAdapterFactory<T> = (
+  backend: IDataBackend<T>
+) => IPersistanceAdapter;
+
 interface IPersistanceAdapter {
-  loadDocument(docId: string, fsPath?: string): Promise<Uint8Array | void>;
-  saveDocument(docId: string, doc: Uint8Array): Promise<void>;
+  loadDocument(): Promise<Uint8Array | void>;
+  saveDocument(doc: Uint8Array, fromOrigin: Symbol): Promise<void>;
 }
 
 interface IMessageAdapter {
@@ -18,11 +22,11 @@ interface IMessageAdapter {
 }
 
 interface IDataBackend<T> {
-  docId: string;
   doc: Y.Doc;
+  docId: string;
 
   load(path?: string): Promise<void>;
-  update(cb: (data: T) => void): void;
+  update(cb: (data: T) => void, origin: Symbol): void;
   close(): void;
 
   /**
@@ -34,4 +38,9 @@ interface IDataBackend<T> {
   };
 }
 
-export { IDataBackend, IMessageAdapter, IPersistanceAdapter };
+export {
+  IDataBackend,
+  IMessageAdapter,
+  IPersistanceAdapter,
+  IPersistanceAdapterFactory,
+};

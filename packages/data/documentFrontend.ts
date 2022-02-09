@@ -1,20 +1,26 @@
 import DiffMatchPatch from "diff-match-patch";
-import { IDataBackend, DocumentData } from "@notarium/types";
+import { IDataBackend } from "@notarium/types";
+import { createCachedFactory } from "@notarium/common";
 
-export function createDocument(backend: IDataBackend<DocumentData>) {
+export const createDocument = createCachedFactory(
+  _createDocument,
+  (b) => b.docId
+);
+
+function _createDocument(backend: IDataBackend<string>) {
   const dmp = new DiffMatchPatch();
 
-  let timeout;
+  let timeout: NodeJS.Timeout;
   let lastExecution = 0;
 
   function getText() {
     return backend.doc.getText("content").toString();
   }
 
-  async function setText(t: string) {
+  async function setText(t: string, origin: Symbol) {
     if (timeout) clearTimeout(timeout);
     const now = Date.now();
-    if (now - lastExecution < 2000) {
+    if (now - lastExecution < 500) {
       await new Promise((res) => {
         timeout = setTimeout(res, 500);
       });
@@ -49,11 +55,11 @@ export function createDocument(backend: IDataBackend<DocumentData>) {
           }
         });
       });
-    });
+    }, origin);
   }
 
   return {
-    setText,
     getText,
+    setText,
   };
 }

@@ -1,31 +1,32 @@
-export function createEventListener() {
-  const callbacks: Record<
-    string,
-    ((data: unknown, peerId?: string) => void)[]
-  > = {};
+type EventMap = Record<string, any>;
 
-  function on(
-    event: string,
-    cb: (data: unknown, peerId?: string) => void,
-    options?: { listeners: any[] }
-  ): () => void {
-    callbacks[event] = event in callbacks ? [...callbacks[event], cb] : [cb];
-    const unsub = () => {
-      callbacks[event] = callbacks[event].filter((c) => c !== cb);
-    };
-    if (options && Array.isArray(options?.listeners))
-      options.listeners.push(unsub);
-    return unsub;
-  }
+type EventKey<T extends EventMap> = string & keyof T;
+type EventReceiver<T> = (params: T) => void;
 
-  function emit(eventType: string, data?: unknown, peerId?: string) {
-    if (eventType in callbacks) {
-      callbacks[eventType].forEach((cb) => cb(data, peerId));
-    }
-  }
+interface Emitter<T extends EventMap> {
+  on<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>): void;
+  emit<K extends EventKey<T>>(eventName: K, params: T[K]): void;
+}
+
+export function createEventListener<T extends EventMap>(): Emitter<T> {
+  const callbacks: {
+    [K in keyof EventMap]?: Array<(p: EventMap[K]) => void>;
+  } = {};
 
   return {
-    on,
-    emit,
+    on(event, cb, options?: { listeners: any[] }) {
+      callbacks[event] = (callbacks[event] || []).concat(cb);
+      const unsub = () => {
+        callbacks[event] = callbacks[event].filter((c) => c !== cb);
+      };
+      if (options && Array.isArray(options?.listeners))
+        options.listeners.push(unsub);
+      return unsub;
+    },
+    emit(eventType, data?: unknown, peerId?: string) {
+      if (eventType in callbacks) {
+        callbacks[eventType].forEach((cb) => cb(data, peerId));
+      }
+    },
   };
 }

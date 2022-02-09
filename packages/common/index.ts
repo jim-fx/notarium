@@ -30,6 +30,22 @@ export const delayExecution = (
   };
 };
 
+export function createCachedFactory<
+  T extends (...args: unknown[]) => ReturnType<T>
+>(
+  func: T,
+  getId: (...args: Parameters<T>) => string
+): (...args: Parameters<T>) => ReturnType<T> {
+  const cache: Record<string, ReturnType<T>> = {};
+
+  return (...args: Parameters<T>) => {
+    const id = getId(...args);
+    if (cache[id]) return cache[id];
+    cache[id] = func(...args);
+    return cache[id];
+  };
+}
+
 export * from "./eventlistener";
 export * from "./mutex";
 export * from "./fs";

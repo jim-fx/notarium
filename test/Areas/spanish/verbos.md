@@ -1,5 +1,7 @@
 ---
 type: dictionary
+dictionary:
+  type: verbs
 ---
 
 # Verbos

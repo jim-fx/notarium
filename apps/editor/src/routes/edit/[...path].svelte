@@ -39,7 +39,7 @@
 		doc.setText(text);
 	}
 
-	let inputText;
+	let inputText: string;
 	function handleKeyDown(ev) {
 		if (ev.key === 'Enter') {
 			inputText = '';

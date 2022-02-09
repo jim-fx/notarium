@@ -1,6 +1,6 @@
 import {
   IDataBackend,
-  IPersistanceAdapter,
+  IPersistanceAdapterFactory,
   TreeData,
   YNode,
 } from "@notarium/types";
@@ -38,7 +38,11 @@ export async function readTreeData(path: string): Promise<TreeData> {
   }
 }
 
-function syncTreeData(backend: IDataBackend<YNode>, treeData: TreeData) {
+function syncTreeData(
+  backend: IDataBackend<YNode>,
+  treeData: TreeData,
+  origin: Symbol
+) {
   const tree = backend.doc.getMap("tree") as YNode;
 
   backend.update(() => {
@@ -91,7 +95,7 @@ function syncTreeData(backend: IDataBackend<YNode>, treeData: TreeData) {
     }
 
     syncAttributes(tree, treeData);
-  });
+  }, origin);
 }
 
 async function syncFsWithTreeData(
@@ -120,10 +124,10 @@ async function syncFsWithTreeData(
   }
 }
 
-export function FSTreeAdapter(
-  backend: IDataBackend<YNode>
-): IPersistanceAdapter {
+export const FSTreeAdapter: IPersistanceAdapterFactory<YNode> = (backend) => {
   const { ROOT_PATH = resolve(process.env.HOME, "Notes") } = backend?.flags;
+
+  const id = Symbol();
 
   const createMutex = createMutexFactory();
 
@@ -133,7 +137,7 @@ export function FSTreeAdapter(
     const finishTask = await createMutex("applyDocToFS");
 
     const fsdata = await readTreeData(ROOT_PATH);
-    const docdata = frontend.findNode("/").toJSON();
+    const docdata = frontend.findNode("/");
 
     syncFsWithTreeData(ROOT_PATH, fsdata, docdata);
 
@@ -142,7 +146,7 @@ export function FSTreeAdapter(
 
   async function loadDocument() {
     const data = await readTreeData(ROOT_PATH as string);
-    syncTreeData(backend, data);
+    syncTreeData(backend, data, id);
   }
 
   const watcher = FSWatcher(ROOT_PATH);
@@ -152,7 +156,6 @@ export function FSTreeAdapter(
     backend.update(async () => {
       await Promise.all(
         changes.map(async (change) => {
-          console.log("change", change);
           switch (change.type) {
             case "rename":
               frontend.renameNode(change.path, change.newPath);
@@ -175,7 +178,7 @@ export function FSTreeAdapter(
           }
         })
       );
-    });
+    }, id);
     finishTask();
   });
 
@@ -183,4 +186,4 @@ export function FSTreeAdapter(
     loadDocument,
     saveDocument,
   };
-}
+};

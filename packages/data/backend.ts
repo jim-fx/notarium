@@ -1,22 +1,18 @@
 import { createMutexFactory, parseBinary } from "@notarium/common";
 import {
+  assureArray,
   IDataBackend,
   IMessageAdapter,
-  IPersistanceAdapter,
+  IPersistanceAdapterFactory,
+  MaybeArray,
 } from "@notarium/types";
 
 import * as Y from "yjs";
 
 const backends: Record<string, IDataBackend<any>> = {};
 
-type PersitanceAdapterFactory<T> = (
-  backend: IDataBackend<T>
-) => IPersistanceAdapter;
-
 interface DataBackendOptions<T> {
-  persistanceAdapterFactory:
-    | PersitanceAdapterFactory<T>
-    | PersitanceAdapterFactory<T>[];
+  persistanceAdapterFactory: MaybeArray<IPersistanceAdapterFactory<T>>;
   messageAdapter: IMessageAdapter;
   flags?: { [key: string]: unknown; ROOT_PATH?: string };
 }
@@ -38,8 +34,6 @@ export function createDataBackend<T>(
     rootDoc.getMap().set(docId, doc);
   }
 
-  const myId = messageAdapter.getId();
-
   const createMutex = createMutexFactory();
 
   const backend: IDataBackend<T> = {
@@ -51,20 +45,18 @@ export function createDataBackend<T>(
     flags,
   };
 
-  function update(cb: (arg: T) => void, origin?: string) {
+  function update(cb: (arg: T) => void, origin?: Symbol) {
     doc.transact(() => cb(doc as unknown as T), origin || docId);
   }
 
-  const persist = (
-    Array.isArray(persistanceAdapterFactory)
-      ? persistanceAdapterFactory
-      : [persistanceAdapterFactory]
-  ).map((fac) => fac(backend));
+  const persist = assureArray(persistanceAdapterFactory).map((createAdapter) =>
+    createAdapter(backend)
+  );
 
   async function load() {
     update(async () => {
       for (const p of persist) {
-        const updates = await p.loadDocument(docId);
+        const updates = await p.loadDocument();
         if (updates) {
           Y.applyUpdateV2(doc, updates);
         }
@@ -155,10 +147,11 @@ export function createDataBackend<T>(
     );
   }
 
-  doc.on("update", (update: Uint8Array, origin: string) => {
+  doc.on("update", (update: Uint8Array, origin: Symbol) => {
     update = Y.convertUpdateFormatV1ToV2(update);
     messageAdapter.broadcast(docUpdateType, { updates: update.join(), docId });
-    persist.forEach((p) => p.saveDocument(docId, Y.encodeStateAsUpdateV2(doc)));
+    const saveState = Y.encodeStateAsUpdateV2(doc);
+    persist.forEach((p) => p.saveDocument(saveState, origin));
   });
 
   function close() {

@@ -53,7 +53,12 @@ $ pnpm dev
 4. [x] Implement Data Model
    1. [x] Tree (Half implemented)
    2. [x] Document
-   3. [ ] Block
-5. [ ] Sync FSAdapter with DataBackend
-6. [ ] Implement Document parsing
-7. [ ] Sync Tree with Document, eg (document deletion);
+5. [-] Sync FSAdapter with DataBackend
+   - Not completely done, need better syncing in fs adapter
+6. [x] - Replace Automerge with yjs
+7. [ ] Implement Document parsing
+8. [ ] Sync Tree with Document, eg (document deletion);
+9. [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
+10. [ ] Authentication / Authorization, okay p2p auth seems hard
+11. [ ] Offline Mode (eg, button to download all documents);
+12. [ ] Theming Support

@@ -1,13 +1,12 @@
-import type { IPersistanceAdapter } from "@notarium/types";
-import type { BinaryDocument, BinarySyncState } from "automerge";
+import type { IDataBackend, IPersistanceAdapter } from "@notarium/types";
+import * as Y from "yjs";
 
-export function MEMAdapter<T>(): IPersistanceAdapter<T> {
-  let docData: Record<string, T | BinaryDocument> = {};
-  let syncState: Record<string, Record<string, BinarySyncState>> = {};
+export function MEMAdapter<T>(backend: IDataBackend<T>): IPersistanceAdapter {
+  let docData: Record<string, T | Uint8Array> = {};
 
   return {
-    async saveDocument(docId: string, doc: BinaryDocument) {
-      docData[docId] = doc;
+    async saveDocument(doc: Y.Doc) {
+      docData[backend.docId] = Y.encodeStateAsUpdate(backend.doc);
     },
     async loadDocument(docId: string, fsPath?: string) {
       if (docId === "tree" && fsPath) {
@@ -17,20 +16,6 @@ export function MEMAdapter<T>(): IPersistanceAdapter<T> {
         } as unknown as T;
       }
       return docData[docId];
-    },
-
-    async loadSyncState(peerId: string, docId: string) {
-      return syncState[peerId]?.[docId];
-    },
-    async saveSyncState(
-      peerId: string,
-      docId: string,
-      d: BinarySyncState
-    ): Promise<void> {
-      syncState[peerId] = {
-        ...syncState[peerId],
-        [docId]: d,
-      };
     },
   };
 }

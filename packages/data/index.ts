@@ -1,6 +1,6 @@
 export * from "./backend";
-export * from "./createTree";
-export * from "./createDocument";
+export * from "./treeFrontend";
+export * from "./documentFrontend";
 
-export { createTreeStore } from "./createTreeStore";
-export { createDocumentStore } from "./createDocumentStore";
+export * from "./treeStore";
+export * from "./documentStore";

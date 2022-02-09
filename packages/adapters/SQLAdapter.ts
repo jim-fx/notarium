@@ -1,4 +1,8 @@
-import { IPersistanceAdapter } from "@notarium/types";
+import {
+  IPersistanceAdapter,
+  IPersistanceAdapterFactory,
+  YNode,
+} from "@notarium/types";
 import Database from "sqlite-async";
 
 const dbPromise = Database.open("./db.sql")
@@ -25,9 +29,13 @@ function parseBinary(s: string) {
   return Uint8Array.from(s.split(",").map((v) => parseInt(v)));
 }
 
-export function SQLAdapter(): IPersistanceAdapter {
+export const SQLAdapter: IPersistanceAdapterFactory<string | YNode> = (
+  backend
+) => {
+  const { docId } = backend;
+
   return {
-    async saveDocument(docId: string, doc: Uint8Array) {
+    async saveDocument(doc: Uint8Array) {
       const db = await dbPromise;
       console.log("[pers/sql] save document state", docId);
 
@@ -54,11 +62,11 @@ export function SQLAdapter(): IPersistanceAdapter {
           });
       }
     },
-    async loadDocument(docId: string) {
+    async loadDocument() {
       let doc = await readDocFromDB(docId);
       console.log("[pers/sql] read doc", docId, "from db");
       if (doc?.content) return parseBinary(doc.content) as Uint8Array;
       return;
     },
   };
-}
+};

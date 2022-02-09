@@ -23,7 +23,10 @@ function deleteChild(node: YNode, name: string) {
   children.delete(index, 1);
 }
 
+const cache: Record<string, ReturnType<typeof createTree>> = {};
 export function createTree(backend: IDataBackend<YNode>) {
+  if (cache[backend.docId]) return cache[backend.docId];
+
   function getRootNode() {
     return backend.doc.getMap("tree") as YNode;
   }
@@ -57,7 +60,7 @@ export function createTree(backend: IDataBackend<YNode>) {
     return currentNode;
   }
 
-  function createNode(path: string, content?: string) {
+  function createNode(path: string, content: string | null, origin: Symbol) {
     const p = split(path);
 
     console.log("tree.frontend.create", p);
@@ -78,10 +81,10 @@ export function createTree(backend: IDataBackend<YNode>) {
 
         children.push([child as YNode]);
       }
-    });
+    }, origin);
   }
 
-  function renameNode(path: string, newPath: string) {
+  function renameNode(path: string, newPath: string, origin: Symbol) {
     backend.update(() => {
       const op = split(path);
       const np = split(newPath);
@@ -102,12 +105,11 @@ export function createTree(backend: IDataBackend<YNode>) {
         deleteChild(oldParent, oldNodeName);
         newParent.get("children").push([nodeToMove]);
       }
-    });
+    }, origin);
   }
 
-  function deleteNode(path: string) {
+  function deleteNode(path: string, origin: Symbol) {
     const p = split(path);
-    console.log("tree.frontend.delete", p);
 
     // Disallow deleting of root dir
     if (!p.length) return;
@@ -121,13 +123,15 @@ export function createTree(backend: IDataBackend<YNode>) {
       } else {
         console.log("error");
       }
-    });
+    }, origin);
   }
 
-  return {
+  const frontend = {
     deleteNode,
-    findNode,
+    findNode: (path: string) => findNode(path)?.toJSON(),
     createNode,
     renameNode,
   };
+  cache[backend.docId] = frontend;
+  return frontend;
 }

@@ -4,9 +4,9 @@
 	import { IDBAdapter } from '@notarium/adapters';
 	import { onMount } from 'svelte';
 	import { createDataBackend, createTreeStore, createTree } from '@notarium/data';
-	import type { TreeData } from '@notarium/types';
+	import type { YNode } from '@notarium/types';
 
-	const treeBackend = createDataBackend<Y.Doc>('tree', {
+	const treeBackend = createDataBackend<YNode>('tree', {
 		persistanceAdapterFactory: IDBAdapter,
 		messageAdapter: P2PClient
 	});
@@ -17,7 +17,7 @@
 
 	const tree = createTree(treeBackend);
 
-	function handleDelete(path) {
+	function handleDelete(path: string) {
 		console.log('delete path', path);
 		tree.deleteNode(path);
 	}

@@ -1,14 +1,15 @@
-import { IDataBackend, IPersistanceAdapter } from "@notarium/types";
-import { resolve } from "path";
-import { readFile, writeFile, stat } from "fs/promises";
+import { createCachedFactory, splitPath } from "@notarium/common";
 import { createDocument } from "@notarium/data";
-import { FSWatcher } from "./FSWatcher";
-import { splitPath } from "@notarium/common";
+import { IPersistanceAdapterFactory } from "@notarium/types";
+import { readFile, stat, writeFile } from "fs/promises";
+import { resolve } from "path";
 
-export function FSTextAdapter(
-  backend: IDataBackend<string>
-): IPersistanceAdapter {
+import { FSWatcher } from "./FSWatcher";
+
+const _FSTextAdapter: IPersistanceAdapterFactory<string> = (backend) => {
   const { ROOT_PATH = resolve(process.env.HOME, "Notes") } = backend?.flags;
+
+  const id = Symbol();
 
   const frontend = createDocument(backend);
 
@@ -21,7 +22,7 @@ export function FSTextAdapter(
       const changePath = splitPath(change.path).join("/");
       if (changePath === backend.docId) {
         const content = await readFile(filePath, "utf8");
-        frontend.setText(content);
+        frontend.setText(content, id);
       }
     });
   });
@@ -50,4 +51,9 @@ export function FSTextAdapter(
     loadDocument,
     saveDocument,
   };
-}
+};
+
+export const FSTextAdapter = createCachedFactory(
+  _FSTextAdapter,
+  (b) => b.docId
+);

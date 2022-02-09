@@ -18,7 +18,8 @@
 		"bytemd": "^1.10.13",
 		"diff-match-patch": "^1.0.5",
 		"idb": "^7.0.0",
-		"simple-peer": "^9.11.0"
+		"simple-peer": "^9.11.0",
+		"yjs": "^13.5.27"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "next",

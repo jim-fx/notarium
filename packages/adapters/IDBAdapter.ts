@@ -1,6 +1,10 @@
 import { IDBPDatabase, openDB, deleteDB } from "idb";
-import { IPersistanceAdapter } from "@notarium/types";
-import { delayExecution } from "@notarium/common";
+import {
+  IPersistanceAdapter,
+  IPersistanceAdapterFactory,
+  YNode,
+} from "@notarium/types";
+import { createCachedFactory, delayExecution } from "@notarium/common";
 
 const getDb = (() => {
   let db: Promise<IDBPDatabase<unknown>>;
@@ -23,7 +27,7 @@ if ("window" in globalThis) {
 }
 const documents: Record<string, Uint8Array> = {};
 
-export function IDBAdapter(): IPersistanceAdapter {
+const _IDBAdapter: IPersistanceAdapterFactory<string | YNode> = (backend) => {
   const saveDocument = delayExecution(async (ids) => {
     const db = await getDb();
     ids.forEach(async (id) => {
@@ -31,15 +35,19 @@ export function IDBAdapter(): IPersistanceAdapter {
     });
   }, 2000);
 
+  const { docId } = backend;
+
   return {
-    async loadDocument(docId: string) {
+    async loadDocument() {
       if (!documents[docId])
         documents[docId] = await (await getDb()).get("documents", docId);
       return documents[docId];
     },
-    async saveDocument(docId: string, content: any) {
+    async saveDocument(content: Uint8Array) {
       documents[docId] = content;
       saveDocument(docId);
     },
   };
-}
+};
+
+export const IDBAdapter = createCachedFactory(_IDBAdapter, (b) => b.docId);
