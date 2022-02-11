@@ -2,7 +2,7 @@
 	import SvelteMarkdown from 'svelte-markdown';
 
 	import { createWritableDocumentStore } from '@notarium/data';
-	import { documentBackend, isDocumentDir, isEditing } from '$lib/stores';
+	import { documentBackend, activeNode, isEditing } from '$lib/stores';
 
 	const possibleStates = ['text', 'block'] as const;
 	let state: typeof possibleStates[number] = 'text';
@@ -10,7 +10,9 @@
 	$: text = $documentBackend && createWritableDocumentStore($documentBackend);
 </script>
 
-{#if $isDocumentDir}
+{#if !$activeNode}
+	<p />
+{:else if $activeNode.mimetype === 'dir'}
 	<h1>Eyy, this is a directory</h1>
 {:else}
 	<header>

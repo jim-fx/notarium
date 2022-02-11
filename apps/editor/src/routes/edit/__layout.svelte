@@ -1,19 +1,31 @@
-<script lang="ts">
+<script lang="ts" context="module">
 	import { browser } from '$app/env';
 
-	import { page } from '$app/stores';
-	import { directoryStore, documentBackend, hasDocumentIndexMD, isDocumentDir } from '$lib/stores';
-	import { IDBAdapter } from '@notarium/adapters';
-	import P2PClient from '@notarium/adapters/P2PClient';
-	import { createDataBackend } from '@notarium/data';
-	import { onMount } from 'svelte';
+	export async function load({ params }) {
+		if (browser) {
+			await treeBackend.load();
+		}
+		return {
+			props: {
+				editPath: params?.editPath
+			}
+		};
+	}
 </script>
 
-isDir: {$isDocumentDir}
+<script lang="ts">
+	import { activeNode, hasActiveNodeIndexMD, activeNodeId, treeBackend } from '$lib/stores';
+</script>
 
-hasIndexMD: {$hasDocumentIndexMD}
+<details style:display="none">
+	<summary>
+		id: {$activeNodeId}
+	</summary>
 
-Directory:
-<code>{JSON.stringify($directoryStore)}</code>
+	mimeType: {$activeNode?.mimetype} <br />
+	hasIndexMD: {$hasActiveNodeIndexMD} <br />
+	Directory:
+	<code>{JSON.stringify($activeNode)}</code>
+</details>
 
 <slot />
