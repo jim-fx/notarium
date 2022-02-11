@@ -1,10 +1,11 @@
 let ws: Promise<WebSocket>;
 import type Peer from "simple-peer";
+import { EventMap } from "@notarium/types";
 import { createEventListener } from "@notarium/common";
 
 const peers: { peer: Peer.Instance; id: string }[] = [];
 
-const { emit, on } = createEventListener();
+const { emit, on } = createEventListener<EventMap>();
 
 const { getId, setId } = (() => {
   if (!("localStorage" in globalThis))
@@ -167,7 +168,7 @@ async function sendToServer(eventType: string, data?: unknown) {
   (await ws).send(JSON.stringify({ type: eventType, data }));
 }
 
-export async function broadcast(type: string, data: unknown) {
+export const broadcast: typeof emit = async (type: string, data: unknown) => {
   const msg = JSON.stringify({ type, data });
   peers.forEach((p) => {
     if (p.peer.connected) {
@@ -175,7 +176,7 @@ export async function broadcast(type: string, data: unknown) {
     }
   });
   (await ws).send(msg);
-}
+};
 
 export async function sendTo(id: string, type: string, data: unknown) {
   if (id === "server") {

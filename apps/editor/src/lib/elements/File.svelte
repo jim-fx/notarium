@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { TreeData } from '@notarium/types';
+
 	export let file: TreeData;
 	export let parentPath = '';
 	$: ownPath = (parentPath.length ? parentPath : '/') + file.path;
@@ -9,19 +10,9 @@
 
 <div class="wrapper">
 	<h3 on:click={() => console.log(file)}>
-		{#if file?.children}
+		<a href="/edit{ownPath}">
 			{file.path}
-			<button on:click={() => handleDelete(ownPath)}>delete</button>
-			<button
-				on:click={() =>
-					handleCreate(ownPath + '/index-' + Math.floor(Math.random() * 1000) + '.md')}>new</button
-			>
-		{:else}
-			<a href="/edit{ownPath}">
-				{file.path}
-			</a>
-			<button on:click={() => handleDelete(ownPath)}>delete</button>
-		{/if}
+		</a>
 	</h3>
 
 	{#if file.children}

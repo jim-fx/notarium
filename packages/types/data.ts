@@ -1,4 +1,5 @@
 import * as Y from "yjs";
+import type { Emitter } from "@notarium/common";
 
 type IPersistanceAdapterFactory<T> = (
   backend: IDataBackend<T>
@@ -9,13 +10,17 @@ interface IPersistanceAdapter {
   saveDocument(doc: Uint8Array, fromOrigin: Symbol): Promise<void>;
 }
 
+export interface EventMap {
+  connect: string;
+  disconnect: string;
+  "doc.open": { docId: string; stateVector: string };
+  "doc.close": { docId: string };
+  "doc.update": { docId: string; updates: string };
+}
+
 interface IMessageAdapter {
   sendTo(peerId: string, eventType: string, data?: unknown): void;
-  on(
-    eventType: string,
-    cb: (data?: unknown, peerId?: string) => unknown,
-    options?: { listeners: any[] }
-  ): () => void;
+  on: Emitter<EventMap>["on"];
   broadcast(eventType: string, data?: unknown): void;
   getId(): string;
   connect(urlOrWs: any): void;
@@ -25,6 +30,7 @@ interface IDataBackend<T> {
   doc: Y.Doc;
   docId: string;
 
+  connect(urlOrWs: string): void;
   load(path?: string): Promise<void>;
   update(cb: (data: T) => void, origin: Symbol): void;
   close(): void;

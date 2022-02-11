@@ -14,7 +14,7 @@ app.use(tinyws() as any);
 // });
 
 app.get("/", async (_, res) => {
-  res.end(JSON.stringify(tree.findNode()));
+  res.end(JSON.stringify(tree.findNode("/")));
 });
 
 WSClient.on("doc.open", ({ docId }) => createDoc(docId));

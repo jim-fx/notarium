@@ -1,16 +1,33 @@
 type EventMap = Record<string, any>;
 
 type EventKey<T extends EventMap> = string & keyof T;
-type EventReceiver<T> = (params: T) => void;
 
-interface Emitter<T extends EventMap> {
-  on<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>): void;
-  emit<K extends EventKey<T>>(eventName: K, params: T[K]): void;
+type MaybeAsync<T extends (...args: any) => any> = (
+  ...args: Parameters<T>
+) => ReturnType<T> | Promise<ReturnType<T>>;
+
+type EventReceiver<T> = MaybeAsync<(params: T, peerId?: string) => unknown>;
+
+interface Options {
+  listeners: any[];
+}
+
+export interface Emitter<T extends EventMap> {
+  on<K extends EventKey<T>>(
+    eventName: K,
+    fn: EventReceiver<T[K]>,
+    options?: Options
+  ): void;
+  emit<K extends EventKey<T>>(
+    eventName: K,
+    params: T[K],
+    peerId?: string
+  ): void;
 }
 
 export function createEventListener<T extends EventMap>(): Emitter<T> {
   const callbacks: {
-    [K in keyof EventMap]?: Array<(p: EventMap[K]) => void>;
+    [K in keyof EventMap]?: Array<(p: EventMap[K], peerId?: string) => void>;
   } = {};
 
   return {

@@ -82,8 +82,8 @@ function close(){
 
 ## Hash Based
 
-- SENDING: Hash {docId,userName} during sending with a salt, the salt is the password
-- RECEIVING: Hash the {docId,userName} with the password, and then check if the hashes match
+- SENDING: Hash {docId, userName} during sending with a salt, the salt is the password
+- RECEIVING: Hash the {docId, userName} with the password, and then check if the hashes match
 
 This way the password doesn't go over the wire.
 
@@ -95,7 +95,7 @@ There is also a password that allows to add public keys to that config file
 
 The server does not accept updates to this .config file, only through the fs adapter
 
-## How to store
+### How to store
 
 _.config file_
 
@@ -106,3 +106,25 @@ _.config file_
   "authorized_keys": ["po8nhinhhzvtdizagsdn278nasdasdon28m0m9p user@machine"]
 }
 ```
+
+## Better Data Structure
+
+Add a mimetype to the treedata
+
+## What happens when a folder gets renamed on the serverside?
+
+Because the docId is the path the docId then changes on all child documents
+That means that if a client is offline for some while and has made some changes on a document those changes
+are lost when synced
+
+### Ideas:
+
+- Keep a log of renames, eg. [{old: "Archive/test", new: "Archive/test2"}];
+
+  - THen every client needs to check if there are unapplied renames and apply them to there local documents
+
+- Don't use the document path as the docId,
+  - Do not like the idea
+  - Because then we need to store the id of the document alongside the document somewhere, in the frontmatter? Not every filetype has frontmatter
+
+## Distributed Indexing

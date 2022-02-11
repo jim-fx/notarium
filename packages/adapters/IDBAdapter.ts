@@ -41,6 +41,7 @@ const _IDBAdapter: IPersistanceAdapterFactory<string | YNode> = (backend) => {
     async loadDocument() {
       if (!documents[docId])
         documents[docId] = await (await getDb()).get("documents", docId);
+      console.log("[pers.adapt/idb] loaded document " + docId);
       return documents[docId];
     },
     async saveDocument(content: Uint8Array) {

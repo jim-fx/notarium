@@ -47,18 +47,19 @@ $ pnpm dev
 
 # TODO
 
-1. [x] P2P Messaging
-2. [x] Automerge
-3. [x] Connect Editor to Automerge
-4. [x] Implement Data Model
-   1. [x] Tree (Half implemented)
-   2. [x] Document
-5. [-] Sync FSAdapter with DataBackend
-   - Not completely done, need better syncing in fs adapter
-6. [x] - Replace Automerge with yjs
-7. [ ] Implement Document parsing
-8. [ ] Sync Tree with Document, eg (document deletion);
-9. [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
-10. [ ] Authentication / Authorization, okay p2p auth seems hard
-11. [ ] Offline Mode (eg, button to download all documents);
-12. [ ] Theming Support
+- [x] P2P Messaging
+- [x] Automerge
+- [x] Connect Editor to Automerge
+- [x] Implement Data Model
+  1.  [x] Tree (Half implemented)
+  2.  [x] Document
+- [-] Sync FSAdapter with DataBackend
+  - Not completely done, need better syncing in fs adapter
+- [x] Replace Automerge with yjs
+- [ ] Add mimetype to treeData
+- [ ] Implement Document parsing
+- [ ] Sync Tree with Document, eg (document deletion);
+- [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
+- [ ] Authentication / Authorization, okay p2p auth seems hard
+- [ ] Offline Mode (eg, button to download all documents);
+- [ ] Theming Support

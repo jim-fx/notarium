@@ -10,6 +10,6 @@ You really want to...
 
 then you maybe could
 
-this could be a really ice idea
+this could be a really nice idea
 
 this could be a really bad idea

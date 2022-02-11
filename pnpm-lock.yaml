@@ -165,7 +165,10 @@ importers:
 
   packages/types:
     specifiers:
+      '@notarium/common': workspace:^1.0.0
       yjs: ^13.5.27
+    dependencies:
+      '@notarium/common': link:../common
     devDependencies:
       yjs: 13.5.27
 

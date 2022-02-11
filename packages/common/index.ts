@@ -46,6 +46,10 @@ export function createCachedFactory<
   };
 }
 
+export function assureArray<T>(v: T | T[]) {
+  return Array.isArray(v) ? v : [v];
+}
+
 export * from "./eventlistener";
 export * from "./mutex";
 export * from "./fs";

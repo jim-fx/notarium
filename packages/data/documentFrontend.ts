@@ -10,6 +10,8 @@ export const createDocument = createCachedFactory(
 function _createDocument(backend: IDataBackend<string>) {
   const dmp = new DiffMatchPatch();
 
+  const myId = Symbol();
+
   let timeout: NodeJS.Timeout;
   let lastExecution = 0;
 
@@ -17,7 +19,7 @@ function _createDocument(backend: IDataBackend<string>) {
     return backend.doc.getText("content").toString();
   }
 
-  async function setText(t: string, origin: Symbol) {
+  async function setText(t: string) {
     if (timeout) clearTimeout(timeout);
     const now = Date.now();
     if (now - lastExecution < 500) {
@@ -55,7 +57,7 @@ function _createDocument(backend: IDataBackend<string>) {
           }
         });
       });
-    }, origin);
+    }, myId);
   }
 
   return {

@@ -1,6 +1,5 @@
-import { createMutexFactory, parseBinary } from "@notarium/common";
+import { createMutexFactory, parseBinary, assureArray } from "@notarium/common";
 import {
-  assureArray,
   IDataBackend,
   IMessageAdapter,
   IPersistanceAdapterFactory,
@@ -23,7 +22,17 @@ export function createDataBackend<T>(
   docId: string,
   { persistanceAdapterFactory, messageAdapter, flags }: DataBackendOptions<T>
 ): IDataBackend<T> {
-  if (docId in backends) return backends[docId];
+  if (docId in backends) {
+    console.groupCollapsed("[dataBackend] return cached backend");
+    console.log({ docId });
+    console.groupEnd();
+    return backends[docId];
+  }
+
+  console.groupCollapsed("[dataBackend] create new backend");
+  console.log({ docId });
+  console.groupEnd();
+
   if (!rootDoc) {
     rootDoc = new Y.Doc();
   }
@@ -43,6 +52,7 @@ export function createDataBackend<T>(
     close,
     doc,
     flags,
+    connect: messageAdapter.connect,
   };
 
   function update(cb: (arg: T) => void, origin?: Symbol) {
@@ -136,7 +146,11 @@ export function createDataBackend<T>(
 
     messageAdapter.on(
       docCloseType,
-      (peerId: string) => peerIds.delete(peerId),
+      ({ docId: remoteDocId }, peerId: string) => {
+        if (docId === remoteDocId) {
+          peerIds.delete(peerId);
+        }
+      },
       { listeners }
     );
 
@@ -155,6 +169,7 @@ export function createDataBackend<T>(
   });
 
   function close() {
+    delete backends[docId];
     doc.destroy();
   }
 
