@@ -1,16 +1,16 @@
 import WSClient from "@notarium/adapters/WSClient";
 import { resolve } from "path";
-import * as Y from "yjs";
 import { createDataBackend, createTree } from "@notarium/data";
 import {
   FSTextAdapter,
   SQLAdapter,
   FSTreeAdapter,
 } from "@notarium/adapters/fs";
+import { YNode } from "@notarium/types";
 
 const ROOT_PATH = resolve(__dirname, "../../../test");
 
-const treeBackend = createDataBackend<Y.Doc>("tree", {
+const treeBackend = createDataBackend<YNode>("tree", {
   persistanceAdapterFactory: [SQLAdapter, FSTreeAdapter],
   messageAdapter: WSClient,
   flags: {

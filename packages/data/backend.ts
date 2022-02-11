@@ -1,4 +1,9 @@
-import { createMutexFactory, parseBinary, assureArray } from "@notarium/common";
+import {
+  createMutexFactory,
+  parseBinary,
+  assureArray,
+  createResolvablePromise,
+} from "@notarium/common";
 import {
   IDataBackend,
   IMessageAdapter,
@@ -45,6 +50,8 @@ export function createDataBackend<T>(
 
   const createMutex = createMutexFactory();
 
+  let isLoaded = false;
+  const [isLoadedPromise, finishedLoading] = createResolvablePromise<void>();
   const backend: IDataBackend<T> = {
     docId,
     load,
@@ -52,6 +59,7 @@ export function createDataBackend<T>(
     close,
     doc,
     flags,
+    isLoaded: isLoadedPromise,
     connect: messageAdapter.connect,
   };
 
@@ -64,6 +72,8 @@ export function createDataBackend<T>(
   );
 
   async function load() {
+    if (isLoaded) return isLoadedPromise;
+    isLoaded = true;
     update(async () => {
       for (const p of persist) {
         const updates = await p.loadDocument();
@@ -73,6 +83,7 @@ export function createDataBackend<T>(
       }
       initNetwork();
     });
+    finishedLoading();
   }
 
   const listeners = [];

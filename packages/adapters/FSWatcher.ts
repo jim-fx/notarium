@@ -1,11 +1,13 @@
 import { createCachedFactory, createEventListener } from "@notarium/common";
-import { lstat } from "fs/promises";
+import detectMimeType from "@notarium/common/detectMime";
+import { MimeType } from "@notarium/types";
 import Watcher from "watcher";
 
 interface Event {
   type: string;
   path: string;
   newPath: any;
+  mimetype?: MimeType;
   isDirectory?: boolean;
   isSymbolicLink?: boolean;
 }
@@ -27,18 +29,9 @@ const _FSWatcher = (path: string) => {
 
   let timeout: NodeJS.Timeout;
   let events: Event[] = [];
-  function handleEvent(
-    e: string,
-    p: string,
-    s: any,
-    stat?: Awaited<ReturnType<typeof lstat>>
-  ) {
+  function handleEvent(e: string, p: string, s: any, mimetype?: MimeType) {
     if (timeout) clearTimeout(timeout);
-    const ev = { type: e, path: p, newPath: s };
-    if (stat) {
-      ev["isDirectory"] = stat.isDirectory();
-      ev["isSymbolicLink"] = stat.isSymbolicLink();
-    }
+    const ev: Event = { type: e, path: p, newPath: s, mimetype };
     events.push(ev);
     timeout = setTimeout(() => {
       emit("changes", events);
@@ -51,7 +44,7 @@ const _FSWatcher = (path: string) => {
     targetPathNext = targetPathNext?.replace(path, "");
 
     if (event === "add") {
-      const s = await lstat(originalPath);
+      const s = await detectMimeType(originalPath);
       handleEvent(event, targetPath, targetPathNext, s);
     } else {
       handleEvent(event, targetPath, targetPathNext);

@@ -1,5 +1,5 @@
 import { createCachedFactory, splitPath } from "@notarium/common";
-import { IDataBackend, TreeData, YNode } from "@notarium/types";
+import { IDataBackend, MimeType, IFile, YNode } from "@notarium/types";
 import * as Y from "yjs";
 
 function findChild(node: YNode, name: string) {
@@ -9,7 +9,7 @@ function findChild(node: YNode, name: string) {
 }
 
 function findChildIndex(node: YNode, name: string) {
-  if (!node.has("children")) return -1;
+  if (node.get("mimetype") !== "dir") return -1;
 
   const children = node.get("children") as Y.Array<YNode>;
 
@@ -54,11 +54,12 @@ function _createTree(backend: IDataBackend<YNode>) {
       if (!currentNode) break;
       currentNode = findChild(currentNode, name);
     }
+    console.log("findNode", { path, currentNode });
 
     return currentNode;
   }
 
-  function createNode(path: string, content: string | null, origin: Symbol) {
+  function createNode(path: string, mimetype: MimeType, origin: Symbol) {
     const p = split(path);
 
     console.log("tree.frontend.create", p);
@@ -68,10 +69,11 @@ function _createTree(backend: IDataBackend<YNode>) {
     backend.update(() => {
       const parentNode = findNode(p);
 
-      if (parentNode) {
+      if (parentNode && parentNode.get("mimetype") === "dir") {
         const child = new Y.Map();
         child.set("path", lastFileName);
-        if (!content) {
+        child.set("mimetype", mimetype);
+        if (mimetype === "dir") {
           child.set("children", new Y.Array());
         }
 
@@ -130,7 +132,8 @@ function _createTree(backend: IDataBackend<YNode>) {
 
   return {
     deleteNode,
-    findNode: (path: string): TreeData | undefined => findNode(path)?.toJSON(),
+    findNode: (path: string | string[]): IFile | undefined =>
+      findNode(path)?.toJSON(),
     isDir,
     createNode,
     renameNode,

@@ -109,7 +109,11 @@ _.config file_
 
 ## Better Data Structure
 
-Add a mimetype to the treedata
+Add a mime type to the treedata
+
+- Detect mime type with file content (magic numbers) or file ending?
+- I chose file ending, because magic numbers are a bit wonky
+- When choosing file ending you can't have folders named "index.md" or "test.som" but that's acceptable for me.
 
 ## What happens when a folder gets renamed on the serverside?
 

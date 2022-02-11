@@ -12,6 +12,7 @@
     "@notarium/types": "link:../types",
     "idb": "^7.0.0",
     "lib0": "^0.2.43",
+    "mmmagic": "^0.5.3",
     "nanoid": "^3.2.0",
     "sqlite": "^4.0.23",
     "sqlite-async": "^1.1.2",
@@ -22,5 +23,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mmmagic": "^0.4.30"
+  }
 }

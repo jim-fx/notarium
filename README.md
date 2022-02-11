@@ -56,7 +56,7 @@ $ pnpm dev
 - [-] Sync FSAdapter with DataBackend
   - Not completely done, need better syncing in fs adapter
 - [x] Replace Automerge with yjs
-- [ ] Add mimetype to treeData
+- [x] Add mimetype to treeData
 - [ ] Implement Document parsing
 - [ ] Sync Tree with Document, eg (document deletion);
 - [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory

@@ -21,14 +21,15 @@ WSClient.on("doc.open", ({ docId }) => createDoc(docId));
 
 app.get("/doc", (req, res) => {
   res.end(
-    JSON.stringify(
-      Object.keys(docStore).map((key) => {
+    JSON.stringify([
+      { id: "tree", store: tree.findNode("/") },
+      ...Object.keys(docStore).map((key) => {
         return {
           id: docStore[key].docId,
           store: docStore[key].doc.getText("content").toString(),
         };
-      })
-    )
+      }),
+    ])
   );
 });
 
