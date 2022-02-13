@@ -1,5 +1,6 @@
 # Ideas
 
+
 ## Spells
 
 Gives anything its attached to a special meaning. All spells have implanted nfc so they can have a special meaning.

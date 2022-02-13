@@ -25,6 +25,8 @@ function deleteChild(node: YNode, name: string) {
 
 export const createTree = createCachedFactory(_createTree, (b) => b.docId);
 function _createTree(backend: IDataBackend<YNode>) {
+  const myId = Symbol("tree.frontend");
+
   function getRootNode() {
     return backend.doc.getMap("tree") as YNode;
   }
@@ -59,7 +61,7 @@ function _createTree(backend: IDataBackend<YNode>) {
     return currentNode;
   }
 
-  function createNode(path: string, mimetype: MimeType, origin: Symbol) {
+  function createNode(path: string, mimetype: MimeType, origin: Symbol = myId) {
     const p = split(path);
 
     console.log("tree.frontend.create", p);
@@ -84,7 +86,7 @@ function _createTree(backend: IDataBackend<YNode>) {
     }, origin);
   }
 
-  function renameNode(path: string, newPath: string, origin: Symbol) {
+  function renameNode(path: string, newPath: string, origin: Symbol = myId) {
     backend.update(() => {
       const op = split(path);
       const np = split(newPath);
@@ -108,7 +110,7 @@ function _createTree(backend: IDataBackend<YNode>) {
     }, origin);
   }
 
-  function deleteNode(path: string, origin: Symbol) {
+  function deleteNode(path: string, origin: Symbol = myId) {
     const p = split(path);
 
     // Disallow deleting of root dir

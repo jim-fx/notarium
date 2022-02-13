@@ -6,5 +6,5 @@ protected: true
 # Notes
 
 - [ ] List Item
-- [ ] List Item
+- [x] List
 - [ ] List Item

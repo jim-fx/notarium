@@ -17,11 +17,19 @@
 <script lang="ts">
 	import File from '$lib/elements/File.svelte';
 	import { onMount } from 'svelte';
+	import { localStore } from '$lib/stores';
 
-	import './app.css';
 	import { browser } from '$app/env';
 
 	export let backend;
+
+	const loadOffline = localStore.get('load-offline', false);
+
+	const hideTree = localStore.get('show-tree', false);
+
+	$: if ($loadOffline) {
+		console.log('LLLOOOAD');
+	}
 
 	function handleDelete(path: string) {
 		console.log('delete path', path);
@@ -30,7 +38,7 @@
 
 	function handleCreate(path: string) {
 		console.log('create path', path);
-		treeFrontend.createNode(path, 'TestContent');
+		treeFrontend.createNode(path, 'text/markdown');
 	}
 
 	onMount(async () => {
@@ -38,7 +46,7 @@
 	});
 </script>
 
-<main>
+<main class:hide-tree={$hideTree}>
 	<aside>
 		{#if $treeStore.mimetype === 'dir'}
 			{#each $treeStore.children as child}
@@ -48,6 +56,12 @@
 	</aside>
 
 	<section>
+		<button
+			on:click={() => {
+				$hideTree = !$hideTree;
+				console.log($hideTree);
+			}}>hide</button
+		>
 		<slot />
 	</section>
 </main>
@@ -62,6 +76,14 @@
 	}
 	main {
 		display: grid;
-		grid-template-columns: min-content 1fr;
+		grid-template-columns: auto 1fr;
+	}
+
+	main.hide-tree {
+		grid-template-columns: 0px 1fr;
+	}
+
+	main.hide-tree > aside {
+		opacity: 0;
 	}
 </style>

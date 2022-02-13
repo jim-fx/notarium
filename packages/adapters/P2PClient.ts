@@ -170,6 +170,7 @@ async function sendToServer(eventType: string, data?: unknown) {
 
 export const broadcast: typeof emit = async (type: string, data: unknown) => {
   const msg = JSON.stringify({ type, data });
+  console.log("BROOADCASST", { type, data });
   peers.forEach((p) => {
     if (p.peer.connected) {
       p.peer.send(msg);

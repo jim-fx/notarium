@@ -1,4 +1,6 @@
-export * from './parseDocument';
-export { default as renderDocument } from './render';
-export { default as renderMarkdown } from './renderDocument';
-export * from './types';
+export * from "./parseDocument";
+export { default as renderDocument } from "./renderDocument";
+export { default as renderMarkdown } from "./renderMarkdown";
+export * from "./types";
+
+export * as regex from "./regex";

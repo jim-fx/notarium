@@ -5,11 +5,14 @@ import { createDocument } from "./documentFrontend";
 export function createDocumentStore(
   backend: IDataBackend<string>
 ): Readable<string> {
-  const { doc } = backend;
-  return readable(doc.getText("content").toString(), function start(set) {
+  const frontend = createDocument(backend);
+
+  return readable(frontend.getText(), function start(set) {
+    backend.isLoaded.then(() => {
+      set(frontend.getText());
+    });
     return backend.doc.on("update", () => {
-      console.log("[adapt/store] update content");
-      set(doc.getText("content").toString());
+      set(frontend.getText());
     });
   });
 }
@@ -17,14 +20,31 @@ export function createDocumentStore(
 export function createWritableDocumentStore(backend: IDataBackend<string>) {
   const frontend = createDocument(backend);
 
-  const store = writable(frontend.getText());
+  let value = frontend.getText();
+
+  const store = writable(value);
 
   store.subscribe((v) => {
+    if (v === value) return;
+    value = v;
+    console.log("UP1: ", v);
     frontend.setText(v);
   });
 
   backend.doc.on("update", () => {
-    store.set(frontend.getText());
+    const v = frontend.getText();
+    if (v === value) return;
+    value = v;
+    console.log("UP2: ", v);
+    store.set(v);
+  });
+
+  backend.isLoaded.then(() => {
+    const v = frontend.getText();
+    if (v === value) return;
+    value = v;
+    console.log("UP3: ", v);
+    store.set(v);
   });
 
   return store;

@@ -3,6 +3,7 @@ import {
   parseBinary,
   assureArray,
   createResolvablePromise,
+  createCachedFactory,
 } from "@notarium/common";
 import {
   IDataBackend,
@@ -13,27 +14,19 @@ import {
 
 import * as Y from "yjs";
 
-const backends: Record<string, IDataBackend<any>> = {};
-
 interface DataBackendOptions<T> {
   persistanceAdapterFactory: MaybeArray<IPersistanceAdapterFactory<T>>;
-  messageAdapter: IMessageAdapter;
+  messageAdapter?: IMessageAdapter;
   flags?: { [key: string]: unknown; ROOT_PATH?: string };
 }
 
 let rootDoc: Y.Doc;
 
-export function createDataBackend<T>(
+export const createDataBackend = createCachedFactory(_createDataBackend);
+export function _createDataBackend<T>(
   docId: string,
   { persistanceAdapterFactory, messageAdapter, flags }: DataBackendOptions<T>
 ): IDataBackend<T> {
-  if (docId in backends) {
-    console.groupCollapsed("[dataBackend] return cached backend");
-    console.log({ docId });
-    console.groupEnd();
-    return backends[docId];
-  }
-
   console.groupCollapsed("[dataBackend] create new backend");
   console.log({ docId });
   console.groupEnd();
@@ -60,16 +53,26 @@ export function createDataBackend<T>(
     doc,
     flags,
     isLoaded: isLoadedPromise,
-    connect: messageAdapter.connect,
+    connect: messageAdapter?.connect,
   };
 
-  function update(cb: (arg: T) => void, origin?: Symbol) {
-    doc.transact(() => cb(doc as unknown as T), origin || docId);
+  function update(cb: (arg: T) => void | Promise<void>, origin?: Symbol) {
+    doc.transact(async () => {
+      await cb(doc as unknown as T);
+    }, origin);
   }
 
   const persist = assureArray(persistanceAdapterFactory).map((createAdapter) =>
     createAdapter(backend)
   );
+
+  doc.on("update", (update: Uint8Array, origin: Symbol) => {
+    console.log("AAAAABABBABBABBABABA");
+    update = Y.convertUpdateFormatV1ToV2(update);
+    messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
+    const saveState = Y.encodeStateAsUpdateV2(doc);
+    persist.forEach((p) => p.saveDocument(saveState, origin));
+  });
 
   async function load() {
     if (isLoaded) return isLoadedPromise;
@@ -92,6 +95,8 @@ export function createDataBackend<T>(
   const docUpdateType = "doc.update";
   const docCloseType = "doc.close";
   function initNetwork() {
+    if (!messageAdapter) return;
+
     // Say hello to all my peers;
     messageAdapter.broadcast(docOpenType, {
       stateVector: Y.encodeStateVector(doc).join(),
@@ -172,19 +177,9 @@ export function createDataBackend<T>(
     );
   }
 
-  doc.on("update", (update: Uint8Array, origin: Symbol) => {
-    update = Y.convertUpdateFormatV1ToV2(update);
-    messageAdapter.broadcast(docUpdateType, { updates: update.join(), docId });
-    const saveState = Y.encodeStateAsUpdateV2(doc);
-    persist.forEach((p) => p.saveDocument(saveState, origin));
-  });
-
   function close() {
-    delete backends[docId];
     doc.destroy();
   }
-
-  backends[docId] = backend;
 
   return backend;
 }

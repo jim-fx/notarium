@@ -33,7 +33,7 @@ interface IDataBackend<T> {
   connect(urlOrWs: string): void;
   load(path?: string): Promise<void>;
   isLoaded: Promise<void>;
-  update(cb: (data: T) => void, origin: Symbol): void;
+  update(cb: (data: T) => void, origin?: Symbol): void;
   close(): void;
 
   /**

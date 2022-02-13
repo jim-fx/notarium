@@ -57,9 +57,10 @@ $ pnpm dev
   - Not completely done, need better syncing in fs adapter
 - [x] Replace Automerge with yjs
 - [x] Add mimetype to treeData
-- [ ] Implement Document parsing
+- [x] Implement Document parsing
+- [x] Offline Mode (eg, button to download all documents);
+  - Still need save the "I am in offline mode" in localStorage
 - [ ] Sync Tree with Document, eg (document deletion);
 - [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
 - [ ] Authentication / Authorization, okay p2p auth seems hard
-- [ ] Offline Mode (eg, button to download all documents);
 - [ ] Theming Support

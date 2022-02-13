@@ -6,3 +6,4 @@ export const isCodeOpening = (s: string) => !!s.match(/^[`]{3}([a-z])*$/gm);
 export const isCodeClosing = (s: string) => !!s.match(/^[`]{3}$/gm);
 export const isLineChecked = (s: string) => !!s.match(/^(\s*)\-\s\[[x]\]\s/gm);
 export const isFrontMatter = (s: string) => !!s.match(/^[\-]{3}$/gm);
+export const splitLine = (s: string) => s.split(/\r?\n/);

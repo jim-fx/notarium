@@ -1,3 +1,1 @@
 # Auslandsemester
-
-## Valencia

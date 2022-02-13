@@ -30,11 +30,30 @@ export const delayExecution = (
   };
 };
 
+function defaultExtractId(...args: unknown[]) {
+  const [arg0] = args;
+  if (typeof arg0 === "string") {
+    return arg0;
+  }
+
+  if (typeof arg0 === "object") {
+    if ("docId" in arg0) {
+      return arg0["docId"];
+    }
+
+    if ("id" in arg0) {
+      return arg0["id"];
+    }
+  }
+
+  throw new Error("Need to add getId function for cachedFactory");
+}
+
 export function createCachedFactory<
   T extends (...args: unknown[]) => ReturnType<T>
 >(
   func: T,
-  getId: (...args: Parameters<T>) => string
+  getId: (...args: Parameters<T>) => string = defaultExtractId
 ): (...args: Parameters<T>) => ReturnType<T> {
   const cache: Record<string, ReturnType<T>> = {};
 

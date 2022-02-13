@@ -57,7 +57,7 @@ function _createDocument(backend: IDataBackend<string>) {
           }
         });
       });
-    }, myId);
+    });
   }
 
   return {

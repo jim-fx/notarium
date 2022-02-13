@@ -1,11 +1,11 @@
 import { IDBAdapter, P2PClient } from '@notarium/adapters';
-import { createDataBackend, createTree, createTreeStore } from '@notarium/data';
+import { createDataBackend, createTreeStore, createTree } from '@notarium/data';
 
-import type { IDataBackend, IDirectory, IFile, YNode } from '@notarium/types';
+import type { IDataBackend, IDirectory, YNode } from '@notarium/types';
 import { derived, writable } from 'svelte/store';
 import { page } from '$app/stores';
 import { browser } from '$app/env';
-import { splitPath } from '../../../../packages/types/node_modules/@notarium/common';
+import { splitPath } from '@notarium/common';
 
 export const treeBackend = createDataBackend<YNode>('tree', {
 	persistanceAdapterFactory: IDBAdapter,
@@ -58,4 +58,32 @@ export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nod
 	return undefined;
 });
 
-export const isEditing = writable(false);
+let _isEditing = false;
+let _editorType = 'text';
+
+if (browser && window.location.hash) {
+	const [type, editing] = window.location.hash.replace('#', '').split('.');
+	_editorType = type || 'text';
+	_isEditing = editing === 'edit';
+}
+
+export const isEditing = writable(_isEditing);
+export const editorType = writable(_editorType);
+
+function setHash(type?: string, edit?: boolean) {
+	_isEditing = edit ?? _isEditing;
+	_editorType = type ?? _editorType;
+	if (browser) {
+		window.location.hash = _editorType + (_isEditing ? '.edit' : '');
+	}
+}
+
+isEditing.subscribe((v) => {
+	setHash(undefined, v);
+});
+
+editorType.subscribe((v) => {
+	setHash(v, undefined);
+});
+
+export * as localStore from './localStore.ts';

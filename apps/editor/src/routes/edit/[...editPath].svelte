@@ -1,55 +1,90 @@
 <script lang="ts">
-	import SvelteMarkdown from 'svelte-markdown';
-
-	import { createWritableDocumentStore } from '@notarium/data';
-	import { documentBackend, activeNode, isEditing } from '$lib/stores';
-
-	const possibleStates = ['text', 'block'] as const;
-	let state: typeof possibleStates[number] = 'text';
+	import { createWritableDocumentStore, createLoader } from '@notarium/data';
+	import {
+		documentBackend,
+		activeNode,
+		activeNodeId,
+		isEditing,
+		editorType,
+		treeBackend,
+		localStore
+	} from '$lib/stores';
+	import { BlockView } from '$lib/elements';
+	import { onMount } from 'svelte';
+	import { renderMarkdown, parseDocument } from '@notarium/parser';
 
 	$: text = $documentBackend && createWritableDocumentStore($documentBackend);
+
+	$: parsedDocument = text && parseDocument($text);
+
+	$: blockAvailable = !!parsedDocument?.frontmatter?.type;
+
+	$: preferBlock = localStore.get(activeNodeId + '-prefer-block', false);
+
+	$: $editorType = blockAvailable && $preferBlock ? 'block' : 'text';
+
+	let loader: ReturnType<typeof createLoader>;
+	function makeOffline() {
+		loader = createLoader(treeBackend);
+		loader.load((d) => {
+			console.log(d);
+		});
+	}
+
+	function toggleEditing() {
+		$isEditing = !$isEditing;
+	}
 </script>
 
 {#if !$activeNode}
-	<p />
+	<p>404</p>
 {:else if $activeNode.mimetype === 'dir'}
-	<h1>Eyy, this is a directory</h1>
+	<h3>This is directory:</h3>
+	<ul>
+		{#each $activeNode.children as n}
+			<li>
+				<a href="/edit/{$activeNodeId}/{n.path}">{n.path}</a>
+			</li>
+		{/each}
+	</ul>
 {:else}
 	<header>
-		{#each possibleStates as s}
-			<button
-				on:click={() => {
-					state = s;
-				}}>{s}</button
-			>
-		{/each}
+		{#if blockAvailable}
+			{#if $preferBlock}
+				<button
+					on:click={() => {
+						$preferBlock = false;
+					}}>text</button
+				>
+			{:else}
+				<button
+					on:click={() => {
+						$preferBlock = true;
+					}}>block</button
+				>
+			{/if}
+		{/if}
 
 		{#if $isEditing}
-			<button
-				on:click={() => {
-					$isEditing = false;
-				}}>exit edit</button
-			>
+			<button on:click={toggleEditing}>exit edit</button>
 		{:else}
-			<button
-				on:click={() => {
-					$isEditing = true;
-				}}>edit</button
-			>
+			<button on:click={toggleEditing}>edit</button>
 		{/if}
+
+		<button on:click={makeOffline}>Make Offline</button>
 	</header>
 
-	{#if state === 'text'}
+	{#if $editorType === 'text'}
 		{#if $isEditing}
 			<textarea name="dude" bind:value={$text} cols="30" rows="10" />
 		{:else}
-			<SvelteMarkdown source={$text} />
+			{@html renderMarkdown($text)}
 		{/if}
-	{:else if state === 'block'}
-		{#if $isEditing}
-			<p>BLOCK-EDITOR</p>
+	{:else if $editorType === 'block'}
+		{#if blockAvailable}
+			<BlockView backend={$documentBackend} isEditing={$isEditing} {parsedDocument} />
 		{:else}
-			<p>BLOCK</p>
+			<p>No Block Data avaialbned</p>
 		{/if}
 	{/if}
 {/if}
