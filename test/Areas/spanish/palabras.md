@@ -1,23 +1,44 @@
-## El Saludo
-El						- Die
-Saludo				- Begrüßung
-Hola					- Hallo
-Dias					- Tag
-Tardes				- Abends
-Noches				- Nacht
-Bienvenido(s) - Herzlich Wilkommen (Mit Mehrzal)
+---
+type: dictionary
+---
 
 
-## La Despedida
-Adios					- Tschüss
-Chao					- Tschau
-Hasta Luego		- Bis später (formell & informell)
-Hasta Manana	- Bis Morgen
-Hasta					- Bis
+# undefined
 
-## Misc
-ejemplo - Beispiel
-deseo - Verlangen (desire)
-sonido - Klang, Geräusch
-piel - Haut
-duermevela - Schlummer
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined
+
+# undefined

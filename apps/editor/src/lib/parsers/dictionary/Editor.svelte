@@ -1,30 +1,27 @@
 <script lang="ts">
-	import { createWritableDocumentStore } from '@notarium/data';
-	import { createParsedDocumentStore, renderDocument } from './parser';
-	import type { IDictionaryDocument } from './parser';
-	import type { IDataBackend } from '@notarium/types';
-	import type { NotariumDocument } from '@notarium/parser';
+	import { parseMarkdown, renderDocument } from './parser';
+	import type { Writable } from 'svelte/store';
 
-	export let backend: IDataBackend<string>;
-
-	const docStore = createWritableDocumentStore(backend);
+	export let text: Writable<string>;
 
 	export let isEditing = false;
 
-	const blockStore = createParsedDocumentStore(docStore);
+	$: parsed = parseMarkdown($text);
 
-	function update(cb: (d: NotariumDocument) => IDictionaryDocument) {
-		const newDoc = cb($blockStore);
+	$: markdown = renderDocument(parsed);
 
-		const content = renderDocument(newDoc);
+	function update() {
+		$text = markdown;
+	}
 
-		if (content !== $docStore) {
-			$docStore = content;
+	$: if (markdown) {
+		if (markdown !== $text) {
+			update();
 		}
 	}
 </script>
 
-{#each $blockStore.blocks as block, blockIndex}
+{#each parsed.blocks as block}
 	{#if block.type === 'heading'}
 		{@html block.html}
 	{:else if block.type === 'verbs'}
@@ -43,23 +40,13 @@
 			{/if}
 
 			{#if isEditing}
-				{#if block.data.learned}
-					<button
-						on:click={() =>
-							update((doc) => {
-								doc.blocks[blockIndex].data.learned = false;
-								return doc;
-							})}>done</button
-					>
-				{:else}
-					<button
-						on:click={() =>
-							update((doc) => {
-								doc.blocks[blockIndex].data.learned = true;
-								return doc;
-							})}>todo</button
-					>
-				{/if}
+				<button
+					on:click={() => {
+						block.data.learned = !block.data.learned;
+					}}
+				>
+					{block.data.learned ? 'done' : 'todo'}
+				</button>
 			{/if}
 		</section>
 	{:else if block.type === 'word'}

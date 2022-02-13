@@ -40,19 +40,19 @@ function _createDocument(backend: IDataBackend<string>) {
 
     const patches = dmp.patch_make(currentContent, diff);
 
-    backend.update(() => {
-      const doc = backend.doc.getText("content");
+    backend.update((doc) => {
+      const text = doc.getText("content");
       patches.forEach((patch: { start1: any; diffs: [any, any][] }) => {
         let idx = patch.start1;
         patch.diffs.forEach(([operation, changeText]) => {
           switch (operation) {
             case 1: // Insertion
-              doc.insert(idx, changeText);
+              text.insert(idx, changeText);
             case 0: // No Change
               idx += changeText.length;
               break;
             case -1: // Deletion
-              doc.delete(idx, changeText.length);
+              text.delete(idx, changeText.length);
               break;
           }
         });

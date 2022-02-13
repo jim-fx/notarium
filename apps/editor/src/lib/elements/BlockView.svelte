@@ -10,14 +10,18 @@
 
 	export let isEditing = false;
 
-	$: text = backend && createWritableDocumentStore(backend);
+	const text = createWritableDocumentStore(backend);
 
 	export let parsedDocument: NotariumDocument;
-	$: parser = parsers.getParser(parsedDocument?.frontmatter?.type);
+	$: parser = parsedDocument && parsers.getParser(parsedDocument?.frontmatter?.type);
 </script>
 
 {#if parser}
-	<svelte:component this={isEditing ? parser.Editor : parser.Viewer} {text} {isEditing} />
+	{#if isEditing}
+		<svelte:component this={parser.Editor} {text} isEditing />
+	{:else}
+		<svelte:component this={parser.Viewer} {text} isEditing={false} />
+	{/if}
 {:else}
 	<p>No parser found for type:</p>
 	<p>{parsedDocument.frontmatter?.type}</p>

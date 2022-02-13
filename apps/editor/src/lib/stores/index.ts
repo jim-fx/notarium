@@ -86,4 +86,4 @@ editorType.subscribe((v) => {
 	setHash(v, undefined);
 });
 
-export * as localStore from './localStore.ts';
+export * as localStore from './localStore';

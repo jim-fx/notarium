@@ -49,6 +49,8 @@ function defaultExtractId(...args: unknown[]) {
   throw new Error("Need to add getId function for cachedFactory");
 }
 
+const caches = [];
+globalThis["test"] = caches;
 export function createCachedFactory<
   T extends (...args: unknown[]) => ReturnType<T>
 >(
@@ -56,6 +58,7 @@ export function createCachedFactory<
   getId: (...args: Parameters<T>) => string = defaultExtractId
 ): (...args: Parameters<T>) => ReturnType<T> {
   const cache: Record<string, ReturnType<T>> = {};
+  caches.push(cache);
 
   return (...args: Parameters<T>) => {
     const id = getId(...args);

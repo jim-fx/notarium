@@ -22,7 +22,9 @@ interface DataBackendOptions<T> {
 
 let rootDoc: Y.Doc;
 
-export const createDataBackend = createCachedFactory(_createDataBackend);
+export const createDataBackend = createCachedFactory(
+  _createDataBackend
+) as typeof _createDataBackend;
 export function _createDataBackend<T>(
   docId: string,
   { persistanceAdapterFactory, messageAdapter, flags }: DataBackendOptions<T>
@@ -56,36 +58,32 @@ export function _createDataBackend<T>(
     connect: messageAdapter?.connect,
   };
 
-  let stateVector = Y.encodeStateVector(doc);
-  function handleUpdate(update?: Uint8Array, origin?: Symbol) {
-    if (!update) {
-      update = Y.encodeStateAsUpdateV2(doc, stateVector);
-    } else {
-      update = Y.convertUpdateFormatV1ToV2(update);
-    }
-    stateVector = Y.encodeStateVector(doc);
-    messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
-    const saveState = Y.encodeStateAsUpdateV2(doc);
-    persist.forEach((p) => p.saveDocument(saveState, origin));
-  }
+  async function update(
+    cb: (arg: Y.Doc) => void | Promise<void>,
+    origin?: Symbol
+  ) {
+    const finishTask = await createMutex("update");
 
-  function update(cb: (arg: T) => void | Promise<void>, origin?: Symbol) {
+    const [p, resolve] = createResolvablePromise<void>();
+
     doc.transact(async () => {
-      await cb(doc as unknown as T);
+      await cb(doc);
+      resolve();
     }, origin);
 
-    // Normally the `doc.on("update")` function should
-    // call this, but for whatever reason that doesnt
-    // work at the moment
-    handleUpdate();
+    await p;
+
+    finishTask();
   }
 
   const persist = assureArray(persistanceAdapterFactory).map((createAdapter) =>
     createAdapter(backend)
   );
 
-  doc.on("update", (update: Uint8Array, origin: Symbol) => {
-    handleUpdate(update, origin);
+  doc.on("updateV2", (update: Uint8Array, origin: Symbol) => {
+    messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
+    const saveState = Y.encodeStateAsUpdateV2(doc);
+    persist.forEach((p) => p.saveDocument(saveState, origin));
   });
 
   async function load() {
@@ -192,7 +190,7 @@ export function _createDataBackend<T>(
   }
 
   function close() {
-    doc.destroy();
+    //doc.destroy();
   }
 
   return backend;

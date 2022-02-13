@@ -22,11 +22,6 @@
 	}
 </script>
 
-<pre>
-
-{JSON.stringify(parsed?.blocks, null, 2)}
-</pre>
-
 {#if parsed}
 	{#each parsed.blocks as block}
 		{#if !block}

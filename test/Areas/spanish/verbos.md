@@ -4,10 +4,10 @@ dictionary:
   type: verbs
 ---
 
+
 # Verbos
 
-## correr - laufen - learned
-
+## correr - laufens - learned
 corro
 corres
 corre
@@ -16,7 +16,6 @@ correis
 corrent
 
 ## caminar - gehen
-
 camino
 caminas
 camina
@@ -25,7 +24,6 @@ caminaís
 caminan
 
 ## comer - essen
-
 como
 comes
 come
@@ -34,7 +32,6 @@ comeis
 comen
 
 ## comprar - kaufen
-
 compro
 compras
 compra
@@ -43,34 +40,26 @@ compráis
 compran
 
 ## estar - sein (temporary)
-
 estoy
 estas
 esta
 estamos
-estáis
-están
-
-### Example:
-
+estais
+estan
+### example
 yo estoy feliz
 
 ## ser - sein (permanent)
-
 soy
 eres
 es
 somos
 sois
 son
-
 ### example
-
 Yo soy un hombre
-Soy muy vieja
 
 ## parecer - aussehen
-
 pare*z*co
 pareces
 parece
@@ -79,7 +68,6 @@ parecéis
 parecen
 
 ## visitar - besuchen
-
 visito
 visitas
 visita
@@ -88,7 +76,6 @@ visitáis
 visitan
 
 ## traducir - übersetzen
-
 tradu*z*co
 traduces
 traduce
@@ -97,7 +84,6 @@ traducís
 traducen
 
 ## saber - wissen
-
 sé
 sabes
 sabe
@@ -106,7 +92,6 @@ sabéis
 saben
 
 ## gustar - mögen
-
 gusto
 gustas
 gusta
@@ -115,7 +100,6 @@ gustáis
 gustan
 
 ## tener - haben
-
 tengo
 tienes
 tiene
@@ -124,7 +108,6 @@ tenéis
 tienen
 
 ## hacer - machen
-
 hago
 haces
 hace
@@ -133,7 +116,6 @@ hacéis
 hacen
 
 ## ir - gehen
-
 voy
 vas
 va
@@ -142,7 +124,6 @@ vais
 van
 
 ## venir - kommen
-
 vengo
 vienes
 viene
@@ -151,7 +132,6 @@ venís
 vienen
 
 ## poder - kann
-
 puedo
 puedes
 puede
@@ -160,7 +140,6 @@ podéis
 pueden
 
 ## ver - sehen
-
 veo
 ves
 ve
@@ -169,7 +148,6 @@ veis
 ven
 
 ## crear - denken, glauben
-
 creo
 creas
 crea
@@ -178,7 +156,6 @@ creáis
 crean
 
 ## dar - geben
-
 doy
 das
 da
@@ -187,7 +164,6 @@ dais
 dan
 
 ## entrar - eintreten
-
 entro
 entras
 entra
@@ -195,11 +171,18 @@ entramos
 entráis
 entran
 
-## despertar - aufwecken - learned
-
+## despertar - aufwecken
 despierto
 despiertas
 despierta
 despertamos
 despertáis
 despiertan
+
+## acunabar - wiegen
+acuno
+acunas
+acuna
+acunamos
+acunais
+acuna

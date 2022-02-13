@@ -40,8 +40,8 @@ export function renderDocument(doc: IDictionaryDocument) {
 	for (const b of doc.blocks) {
 		if (b.type === 'verbs') {
 			res.push('');
-			let h = `## ${b.data.original} - ${b.data.translated}`;
 
+			let h = `## ${b.data.original} - ${b.data.translated}`;
 			if ('learned' in b.data) {
 				h = h + (b.data.learned ? ' - learned' : '');
 			}
@@ -160,7 +160,7 @@ export function parseGenericDictionary(inputBlocks: NotariumBlock[]) {
 				currentBlock.type = 'word';
 				continue;
 			} else {
-				currentBlock = b as unknown as VerbBlock;
+				currentBlock = b as unknown as WordBlock;
 				close();
 			}
 		}
@@ -168,15 +168,16 @@ export function parseGenericDictionary(inputBlocks: NotariumBlock[]) {
 		if (b.type === 'paragraph') {
 			const lines = regex.splitLine(b.data.toString());
 
+			console.log(lines);
 			for (const line of lines) {
 				close();
 				currentBlock.type = 'word';
 				const [orig, translated, learned] = line.replace(/\t/g, ' ').split(' - ');
+				currentBlock.data.translated = translated?.trim();
+				currentBlock.data.original = orig?.trim();
 				if (learned) {
 					currentBlock.data.learned = true;
 				}
-				currentBlock.data.translated = translated.trim();
-				currentBlock.data.original = orig.trim();
 			}
 		}
 	}
@@ -186,7 +187,9 @@ export function parseGenericDictionary(inputBlocks: NotariumBlock[]) {
 	return blocks;
 }
 
-export function parseMarkdown(s: string) {
+export function parseMarkdown(s: string): IDictionaryDocument {
+	console.log({ s });
+
 	const doc = parseDocument(s);
 
 	if (doc.frontmatter?.dictionary?.type) {
@@ -196,17 +199,8 @@ export function parseMarkdown(s: string) {
 				break;
 		}
 	} else {
-		// Implement generic dictionary parser
 		doc.blocks = parseGenericDictionary(doc.blocks);
 	}
 
-	delete doc.md;
-
-	return doc;
-}
-
-export function createParsedDocumentStore(stringStore: Writable<string>) {
-	return derived([stringStore], ([s]) => {
-		return parseMarkdown(s);
-	});
+	return doc as unknown as IDictionaryDocument;
 }

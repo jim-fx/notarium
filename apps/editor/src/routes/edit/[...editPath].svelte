@@ -10,7 +10,6 @@
 		localStore
 	} from '$lib/stores';
 	import { BlockView } from '$lib/elements';
-	import { onMount } from 'svelte';
 	import { renderMarkdown, parseDocument } from '@notarium/parser';
 
 	$: text = $documentBackend && createWritableDocumentStore($documentBackend);
@@ -19,7 +18,7 @@
 
 	$: blockAvailable = !!parsedDocument?.frontmatter?.type;
 
-	$: preferBlock = localStore.get(activeNodeId + '-prefer-block', false);
+	$: preferBlock = localStore.get($activeNodeId + '-prefer-block', false);
 
 	$: $editorType = blockAvailable && $preferBlock ? 'block' : 'text';
 

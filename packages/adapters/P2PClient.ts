@@ -1,6 +1,7 @@
 let ws: Promise<WebSocket>;
 import type Peer from "simple-peer";
 import { EventMap } from "@notarium/types";
+import ReconnectingWebSocket from "reconnecting-websocket";
 import { createEventListener } from "@notarium/common";
 
 const peers: { peer: Peer.Instance; id: string }[] = [];
@@ -142,7 +143,7 @@ export async function connect(url: string) {
     document.cookie = "X-Authorization=" + id + "; path=/; SameSite=Strict;";
   }
 
-  const _ws = new WebSocket(url);
+  const _ws = new ReconnectingWebSocket(url);
 
   _ws.onerror = (err) => {
     console.log("err", err);
@@ -155,7 +156,7 @@ export async function connect(url: string) {
   ws = new Promise((res) => {
     _ws.onopen = () => {
       console.log("[p2p/ws] opened");
-      res(_ws);
+      res(_ws as unknown as WebSocket);
     };
   });
 
@@ -170,7 +171,6 @@ async function sendToServer(eventType: string, data?: unknown) {
 
 export const broadcast: typeof emit = async (type: string, data: unknown) => {
   const msg = JSON.stringify({ type, data });
-  console.log("BROOADCASST", { type, data });
   peers.forEach((p) => {
     if (p.peer.connected) {
       p.peer.send(msg);

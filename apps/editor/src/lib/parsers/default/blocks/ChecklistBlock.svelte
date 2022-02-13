@@ -12,15 +12,6 @@
 		block.data = [...block.data, { ...defaultItem }];
 	}
 
-	async function handleInput(ev, i) {
-		if (edit) {
-			ev.preventDefault();
-			ev.stopPropagation();
-			block.data[i].checked = !block.data[i].checked;
-			block.data = block.data;
-		}
-	}
-
 	function cursor_position() {
 		const sel = document.getSelection();
 		const pos = sel.toString().length;
@@ -69,8 +60,6 @@
 	$: percent = Math.floor((done / block.data.length) * 100);
 </script>
 
-{activeItem}
-
 {#if block.data.length > 5}
 	<i class="opacity-50 text-xs">{percent}% ({done}/{block.data.length})</i>
 {/if}
@@ -81,31 +70,27 @@
 			<button transition:scale class="mr-2 text-xs" on:click={() => handleRemove(i)}>✕</button>
 		{/if}
 
-		{#if item.checked}
-			<input
-				type="checkbox"
-				class="text-blue-light"
-				checked={true}
-				on:click={(ev) => handleInput(ev, i)}
-			/>
+		{#if edit}
+			<input type="checkbox" class="text-blue-light" bind:checked={item.checked} />
 		{:else}
-			<input
-				type="checkbox"
-				class="text-blue-light"
-				checked={false}
-				on:click={(ev) => handleInput(ev, i)}
-			/>
+			<input type="checkbox" class="text-blue-light" checked={item.checked} disabled />
 		{/if}
 
-		<p
-			contenteditable
-			class="ml-2 w-full p-0.5"
-			autofocus={i === activeItem}
-			bind:textContent={item.text}
-			on:keydown={(ev) => handleKeyDown(ev, i)}
-		>
-			{item.text}
-		</p>
+		{#if edit}
+			<p
+				contenteditable
+				class="ml-2 w-full p-0.5"
+				autofocus={i === activeItem}
+				bind:textContent={item.text}
+				on:keydown={(ev) => handleKeyDown(ev, i)}
+			>
+				{item.text}
+			</p>
+		{:else}
+			<p class="ml-2 w-full p-0.5">
+				{item.text}
+			</p>
+		{/if}
 	</div>
 {/each}
 
@@ -116,5 +101,8 @@
 <style>
 	input {
 		border-radius: 4px;
+	}
+	p {
+		display: inline;
 	}
 </style>

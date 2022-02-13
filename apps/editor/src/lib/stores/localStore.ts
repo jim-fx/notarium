@@ -13,6 +13,7 @@ if (browser && 'nota-settings' in localStorage) {
 	}
 }
 
+export const get = createCachedFactory(_get, (key) => key);
 function _get<T>(key: string, def: T): Writable<T> {
 	let _def = def;
 	if (key in globalStore) {
@@ -34,5 +35,3 @@ function _get<T>(key: string, def: T): Writable<T> {
 export function set(key: string, v: unknown) {
 	get(key, v).set(v);
 }
-
-export const get = createCachedFactory(_get, (id) => id);
