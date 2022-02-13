@@ -32,7 +32,7 @@ export function _createDataBackend<T>(
   console.groupEnd();
 
   if (!rootDoc) {
-    rootDoc = new Y.Doc();
+    rootDoc = new Y.Doc({ autoLoad: true });
   }
 
   let doc = rootDoc.getMap().get(docId) as Y.Doc;
@@ -56,10 +56,28 @@ export function _createDataBackend<T>(
     connect: messageAdapter?.connect,
   };
 
+  let stateVector = Y.encodeStateVector(doc);
+  function handleUpdate(update?: Uint8Array, origin?: Symbol) {
+    if (!update) {
+      update = Y.encodeStateAsUpdateV2(doc, stateVector);
+    } else {
+      update = Y.convertUpdateFormatV1ToV2(update);
+    }
+    stateVector = Y.encodeStateVector(doc);
+    messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
+    const saveState = Y.encodeStateAsUpdateV2(doc);
+    persist.forEach((p) => p.saveDocument(saveState, origin));
+  }
+
   function update(cb: (arg: T) => void | Promise<void>, origin?: Symbol) {
     doc.transact(async () => {
       await cb(doc as unknown as T);
     }, origin);
+
+    // Normally the `doc.on("update")` function should
+    // call this, but for whatever reason that doesnt
+    // work at the moment
+    handleUpdate();
   }
 
   const persist = assureArray(persistanceAdapterFactory).map((createAdapter) =>
@@ -67,11 +85,7 @@ export function _createDataBackend<T>(
   );
 
   doc.on("update", (update: Uint8Array, origin: Symbol) => {
-    console.log("AAAAABABBABBABBABABA");
-    update = Y.convertUpdateFormatV1ToV2(update);
-    messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
-    const saveState = Y.encodeStateAsUpdateV2(doc);
-    persist.forEach((p) => p.saveDocument(saveState, origin));
+    handleUpdate(update, origin);
   });
 
   async function load() {

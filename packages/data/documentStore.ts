@@ -27,7 +27,6 @@ export function createWritableDocumentStore(backend: IDataBackend<string>) {
   store.subscribe((v) => {
     if (v === value) return;
     value = v;
-    console.log("UP1: ", v);
     frontend.setText(v);
   });
 
@@ -35,7 +34,6 @@ export function createWritableDocumentStore(backend: IDataBackend<string>) {
     const v = frontend.getText();
     if (v === value) return;
     value = v;
-    console.log("UP2: ", v);
     store.set(v);
   });
 
@@ -43,7 +41,6 @@ export function createWritableDocumentStore(backend: IDataBackend<string>) {
     const v = frontend.getText();
     if (v === value) return;
     value = v;
-    console.log("UP3: ", v);
     store.set(v);
   });
 
