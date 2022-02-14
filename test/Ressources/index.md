@@ -6,4 +6,4 @@ protected: true
 
 It contains some ressources
 
-[SomeLink](./dev/javascript.md#EasingFunctions)
+[SomeLink](./dev/snippets/javascript.md#EasingFunctions)

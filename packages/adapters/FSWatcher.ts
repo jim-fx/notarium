@@ -1,4 +1,8 @@
-import { createCachedFactory, createEventListener } from "@notarium/common";
+import {
+  createCachedFactory,
+  createEventListener,
+  logger,
+} from "@notarium/common";
 import detectMimeType from "@notarium/common/detectMime";
 import { MimeType } from "@notarium/types";
 import Watcher from "watcher";
@@ -12,8 +16,10 @@ interface Event {
   isSymbolicLink?: boolean;
 }
 
+const log = logger("adapt/fs-watcher");
+
 const _FSWatcher = (path: string) => {
-  console.log("watcher:init", path);
+  log("init", { path });
 
   const { on, emit } = createEventListener<{ changes: Event[] }>();
 

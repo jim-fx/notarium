@@ -56,7 +56,6 @@ function _createTree(backend: IDataBackend<YNode>) {
       if (!currentNode) break;
       currentNode = findChild(currentNode, name);
     }
-    console.log("findNode", { path, currentNode });
 
     return currentNode;
   }

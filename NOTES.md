@@ -132,3 +132,20 @@ are lost when synced
   - Because then we need to store the id of the document alongside the document somewhere, in the frontmatter? Not every filetype has frontmatter
 
 ## Distributed Indexing
+
+# How to do the config?
+
+We need to handle when the active Document is a config file
+We need to somehow resolve the current config
+
+## Naive Idea 1
+
+- Walk up the path until we reach the rootNode
+- for each folder check if it contains a ".config" file and parse it
+- then somehow merge all the configs into one
+
+## Naive Idea 2
+
+- In the tree store keep a reference to all .config files
+- Add a function to the treeFrontend / store to resolve all .config files for a single path
+- Then parse and merge all those configs

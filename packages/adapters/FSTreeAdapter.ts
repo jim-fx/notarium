@@ -1,6 +1,5 @@
 import {
   IDataBackend,
-  IPersistanceAdapterFactory,
   IFile,
   YNode,
   IPersistanceAdapter,
@@ -14,7 +13,13 @@ import { createTree } from "@notarium/data";
 
 import { basename, resolve } from "path";
 import { lstat, readdir, rm } from "fs/promises";
-import { createCachedFactory, createMutexFactory } from "@notarium/common";
+import {
+  createCachedFactory,
+  createMutexFactory,
+  logger,
+} from "@notarium/common";
+
+const log = logger("adapt/fs-tree");
 
 export async function readFile(path: string): Promise<IFile> {
   const stat = await lstat(path);
@@ -42,11 +47,7 @@ export async function readFile(path: string): Promise<IFile> {
   }
 }
 
-function syncFile(
-  backend: IDataBackend<YNode>,
-  treeData: IFile,
-  origin: Symbol
-) {
+function syncFile(backend: IDataBackend, treeData: IFile, origin: Symbol) {
   const tree = backend.doc.getMap("tree") as YNode;
 
   backend.update(() => {
@@ -111,8 +112,7 @@ async function syncFsWithFile(rootPath: string, file: IFile, memFile: IFile) {
       const docChild = memFile.children.find((c) => c.path === child.path);
 
       if (!docChild) {
-        // "We need to delete it"
-        console.log("delete", rootPath + "/" + child.path);
+        log("delete", rootPath + "/" + child.path);
 
         const deletePath = rootPath + "/" + child.path;
 
@@ -128,10 +128,10 @@ export const FSTreeAdapter = createCachedFactory(
   _FSTreeAdapter,
   (b) => b.docId
 );
-function _FSTreeAdapter(backend: IDataBackend<YNode>): IPersistanceAdapter {
+function _FSTreeAdapter(backend: IDataBackend): IPersistanceAdapter {
   const { ROOT_PATH = resolve(process.env.HOME, "Notes") } = backend?.flags;
 
-  console.log("[pers/tree] create new");
+  log("create new");
 
   const id = Symbol();
 

@@ -168,7 +168,6 @@ export function parseGenericDictionary(inputBlocks: NotariumBlock[]) {
 		if (b.type === 'paragraph') {
 			const lines = regex.splitLine(b.data.toString());
 
-			console.log(lines);
 			for (const line of lines) {
 				close();
 				currentBlock.type = 'word';
@@ -188,8 +187,6 @@ export function parseGenericDictionary(inputBlocks: NotariumBlock[]) {
 }
 
 export function parseMarkdown(s: string): IDictionaryDocument {
-	console.log({ s });
-
 	const doc = parseDocument(s);
 
 	if (doc.frontmatter?.dictionary?.type) {

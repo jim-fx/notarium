@@ -4,7 +4,9 @@ import {
   assureArray,
   createResolvablePromise,
   createCachedFactory,
+  logger,
 } from "@notarium/common";
+
 import {
   IDataBackend,
   IMessageAdapter,
@@ -14,24 +16,27 @@ import {
 
 import * as Y from "yjs";
 
-interface DataBackendOptions<T> {
-  persistanceAdapterFactory: MaybeArray<IPersistanceAdapterFactory<T>>;
+interface DataBackendOptions {
+  persistanceAdapterFactory: MaybeArray<IPersistanceAdapterFactory>;
   messageAdapter?: IMessageAdapter;
   flags?: { [key: string]: unknown; ROOT_PATH?: string };
 }
 
 let rootDoc: Y.Doc;
 
+const log = logger("backend");
+
 export const createDataBackend = createCachedFactory(
   _createDataBackend
 ) as typeof _createDataBackend;
-export function _createDataBackend<T>(
+
+function _createDataBackend(
   docId: string,
-  { persistanceAdapterFactory, messageAdapter, flags }: DataBackendOptions<T>
-): IDataBackend<T> {
-  console.groupCollapsed("[dataBackend] create new backend");
-  console.log({ docId });
-  console.groupEnd();
+  { persistanceAdapterFactory, messageAdapter, flags }: DataBackendOptions
+): IDataBackend {
+  let scope = this;
+
+  log("create new backend", { docId });
 
   if (!rootDoc) {
     rootDoc = new Y.Doc({ autoLoad: true });
@@ -45,9 +50,15 @@ export function _createDataBackend<T>(
 
   const createMutex = createMutexFactory();
 
+  const close = () => {
+    log("destroyed", { docId });
+    doc.destroy();
+    scope?.destroy();
+  };
+
   let isLoaded = false;
   const [isLoadedPromise, finishedLoading] = createResolvablePromise<void>();
-  const backend: IDataBackend<T> = {
+  const backend: IDataBackend = {
     docId,
     load,
     update,
@@ -156,14 +167,7 @@ export function _createDataBackend<T>(
         // Decode incoming stringified Uint8Array
         const updates = parseBinary(rawSyncData);
 
-        console.groupCollapsed(
-          "[backend] received sync data from",
-          peerId,
-          "for",
-          docId
-        );
-        console.log(updates);
-        console.groupEnd();
+        log("received sync data", { peerId, docId });
 
         Y.applyUpdateV2(doc, updates, peerId);
 
@@ -187,10 +191,6 @@ export function _createDataBackend<T>(
       (peerId: string) => peerIds.delete(peerId),
       { listeners }
     );
-  }
-
-  function close() {
-    //doc.destroy();
   }
 
   return backend;

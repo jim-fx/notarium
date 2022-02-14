@@ -60,7 +60,12 @@ $ pnpm dev
 - [x] Implement Document parsing
 - [x] Offline Mode (eg, button to download all documents);
   - Still need save the "I am in offline mode" in localStorage
-- [ ] Sync Tree with Document, eg (document deletion);
 - [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
+  - Cant sync config.json with
+  - Maybe use yaml, seems more resistant to format changes
+  - Context Store (index.md+frontmatter, config.json)
+- [ ] Sync Tree with Document, eg (document deletion);
+- [ ] Sync Binary files with peers, maybe simple-peer-files
 - [ ] Authentication / Authorization, okay p2p auth seems hard
 - [ ] Theming Support
+- [ ] Awareness Information

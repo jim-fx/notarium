@@ -2,6 +2,7 @@
 	import type { Writable } from 'svelte/store';
 	import { parse, renderMark } from './parser';
 	import { ChecklistBlock, TableBlock, HeadingBlock } from './blocks';
+	import ParagraphBlock from './blocks/ParagraphBlock.svelte';
 
 	export let text: Writable<string>;
 
@@ -32,6 +33,8 @@
 			<TableBlock bind:block />
 		{:else if block.type === 'heading'}
 			<HeadingBlock bind:block />
+		{:else if block.type === 'paragraph'}
+			<ParagraphBlock bind:block edit={isEditing} />
 		{:else}
 			<p>Block Type: {block.type} not implemented</p>
 		{/if}

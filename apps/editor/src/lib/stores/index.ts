@@ -1,13 +1,13 @@
 import { IDBAdapter, P2PClient } from '@notarium/adapters';
 import { createDataBackend, createTreeStore, createTree } from '@notarium/data';
 
-import type { IDataBackend, IDirectory, YNode } from '@notarium/types';
+import type { IDataBackend, IDirectory } from '@notarium/types';
 import { derived, writable } from 'svelte/store';
 import { page } from '$app/stores';
 import { browser } from '$app/env';
-import { splitPath } from '@notarium/common';
+import { splitPath, detectMimeFromPath } from '@notarium/common';
 
-export const treeBackend = createDataBackend<YNode>('tree', {
+export const treeBackend = createDataBackend('tree', {
 	persistanceAdapterFactory: IDBAdapter,
 	messageAdapter: P2PClient
 });
@@ -20,24 +20,13 @@ export const activeNodeId = derived([page], ([p]) => {
 	return p.params?.editPath;
 });
 
+export const activeMimeType = derived([activeNodeId], ([p]) => {
+	return detectMimeFromPath(p);
+});
+
 export const activeNode = derived([activeNodeId, treeStore], ([id]) => {
 	if (!id) return undefined;
 	return treeFrontend.findNode(id);
-});
-
-let docBackend: IDataBackend<string>;
-export const documentBackend = derived([activeNode, activeNodeId], ([n, id]) => {
-	if (!n) return undefined;
-	if (!['text/plain', 'text/markdown'].includes(n.mimetype)) return undefined;
-	if (docBackend) docBackend.close();
-	if (browser) {
-		docBackend = createDataBackend<string>(id, {
-			persistanceAdapterFactory: IDBAdapter,
-			messageAdapter: P2PClient
-		});
-		docBackend.load();
-		return docBackend;
-	}
 });
 
 export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nodeId]) => {
@@ -70,9 +59,7 @@ if (browser && window.location.hash) {
 export const isEditing = writable(_isEditing);
 export const editorType = writable(_editorType);
 
-function setHash(type?: string, edit?: boolean) {
-	_isEditing = edit ?? _isEditing;
-	_editorType = type ?? _editorType;
+function setHash(type = _editorType, edit = _isEditing) {
 	if (browser) {
 		window.location.hash = _editorType + (_isEditing ? '.edit' : '');
 	}

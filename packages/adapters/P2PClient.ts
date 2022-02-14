@@ -2,7 +2,9 @@ let ws: Promise<WebSocket>;
 import type Peer from "simple-peer";
 import { EventMap } from "@notarium/types";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { createEventListener } from "@notarium/common";
+import { createEventListener, logger } from "@notarium/common";
+
+const log = logger("adapt/p2p");
 
 const peers: { peer: Peer.Instance; id: string }[] = [];
 
@@ -69,7 +71,7 @@ function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
 
   peer.on("error", (err) => console.error(err));
   peer.on("connect", () => {
-    console.log("[p2p/wrtc] connected to ", id);
+    log("connected to ", { id });
     // peer.send(JSON.stringify({ type: "connect", data: "hello" }));
     emit("connect", id);
   });
@@ -79,7 +81,7 @@ function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
   });
 
   peer.on("data", (d) => {
-    console.log("p2p::received data");
+    log("received data");
     handleMessage(d.toString(), id);
   });
 
@@ -90,18 +92,14 @@ function parse(msg: string | object) {
   try {
     return typeof msg === "string" ? JSON.parse(msg) : msg;
   } catch (error) {
-    console.error(error);
-    console.log("received non json message", msg);
+    log.error(error);
   }
 }
 
 async function handleMessage(msg: string, peerId?: string) {
   const { type, data } = parse(msg);
 
-  console.groupCollapsed("[p2p] handleMessage ", type);
-  console.log(peerId);
-  console.log(data);
-  console.groupEnd();
+  log("handleMessage", { type, peerId, data });
 
   if (type === "p2p-id") {
     setId(data);
@@ -116,7 +114,7 @@ async function handleMessage(msg: string, peerId?: string) {
       if (peer) {
         peer.signal(signal);
       } else {
-        console.log("missing peer");
+        log.warn("missing peer");
       }
     }
   }
@@ -145,8 +143,8 @@ export async function connect(url: string) {
 
   const _ws = new ReconnectingWebSocket(url);
 
-  _ws.onerror = (err) => {
-    console.log("err", err);
+  _ws.onerror = ({ error }) => {
+    log.error(error);
   };
 
   setTimeout(() => {
@@ -155,7 +153,7 @@ export async function connect(url: string) {
 
   ws = new Promise((res) => {
     _ws.onopen = () => {
-      console.log("[p2p/ws] opened");
+      log("opened");
       res(_ws as unknown as WebSocket);
     };
   });

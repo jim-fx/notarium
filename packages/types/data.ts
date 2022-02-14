@@ -1,11 +1,11 @@
 import * as Y from "yjs";
 import type { Emitter } from "@notarium/common";
 
-type IPersistanceAdapterFactory<T> = (
-  backend: IDataBackend<T>
+export type IPersistanceAdapterFactory = (
+  backend: IDataBackend
 ) => IPersistanceAdapter;
 
-interface IPersistanceAdapter {
+export interface IPersistanceAdapter {
   loadDocument(): Promise<Uint8Array | void>;
   saveDocument(doc: Uint8Array, fromOrigin: Symbol): Promise<void>;
 }
@@ -18,7 +18,7 @@ export interface EventMap {
   "doc.update": { docId: string; updates: string };
 }
 
-interface IMessageAdapter {
+export interface IMessageAdapter {
   sendTo(peerId: string, eventType: string, data?: unknown): void;
   on: Emitter<EventMap>["on"];
   broadcast(eventType: string, data?: unknown): void;
@@ -26,7 +26,7 @@ interface IMessageAdapter {
   connect(urlOrWs: any): void;
 }
 
-interface IDataBackend<T> {
+export interface IDataBackend {
   doc: Y.Doc;
   docId: string;
 
@@ -44,10 +44,3 @@ interface IDataBackend<T> {
     ROOT_PATH?: string;
   };
 }
-
-export {
-  IDataBackend,
-  IMessageAdapter,
-  IPersistanceAdapter,
-  IPersistanceAdapterFactory,
-};

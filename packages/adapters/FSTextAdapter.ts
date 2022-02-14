@@ -1,12 +1,14 @@
-import { createCachedFactory, splitPath } from "@notarium/common";
+import { createCachedFactory, splitPath, logger } from "@notarium/common";
 import { createDocument } from "@notarium/data";
 import { IPersistanceAdapterFactory } from "@notarium/types";
-import { readFile, stat, writeFile, lstat } from "fs/promises";
+import { readFile, stat, writeFile } from "fs/promises";
 import { resolve } from "path";
 
 import { FSWatcher } from "./FSWatcher";
 
-const _FSTextAdapter: IPersistanceAdapterFactory<string> = (backend) => {
+const log = logger("adapter/fs-text");
+
+const _FSTextAdapter: IPersistanceAdapterFactory = (backend) => {
   const { ROOT_PATH = resolve(process.env.HOME, "Notes") } = backend?.flags;
 
   const frontend = createDocument(backend);
@@ -35,9 +37,7 @@ const _FSTextAdapter: IPersistanceAdapterFactory<string> = (backend) => {
 
     if (s) {
       if (!s.isFile()) return;
-      console.groupCollapsed("[adapt/fs.text] readFile");
-      console.log({ filePath });
-      console.groupEnd();
+      log("reading file", { filePath });
       const content = await readFile(filePath, "utf8");
       frontend.setText(content);
     } else {

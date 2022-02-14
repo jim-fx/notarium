@@ -1,7 +1,7 @@
 export * from "./data";
 import * as Y from "yjs";
 
-export type MimeType = "dir" | "text/markdown" | "unknown";
+export type MimeType = "dir" | "text/markdown" | "nota/config" | "unknown";
 
 export type IFile = IContentFile | IDirectory;
 

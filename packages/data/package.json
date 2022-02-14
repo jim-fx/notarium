@@ -17,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@types/diff-match-patch": "^1.0.32",
     "yjs": "^13.5.27"
   }
 }

@@ -11,9 +11,9 @@ export function createMutexFactory() {
   const que = [];
   return async (task: string = "task") => {
     let [promise, resolve] = createResolvablePromise();
-    const a = performance.now();
+    // const a = performance.now();
     que.push({ promise, task });
-    console.log("started", task, que.length);
+    // console.log("started", task, que.length);
     if (que.length > 1) {
       await que[que.length - 2].promise;
     }
@@ -22,14 +22,14 @@ export function createMutexFactory() {
       clearTimeout(timeout);
       que.shift();
       resolve(null);
-      console.log(
-        "finished in " + Math.floor(performance.now() - a) + "ms",
-        task,
-        que.length
-      );
+      // console.log(
+      //   "finished in " + Math.floor(performance.now() - a) + "ms",
+      //   task,
+      //   que.length
+      // );
     }
     const timeout = setTimeout(() => {
-      console.log("timeout", task, que.length);
+      console.warn("[mutex] timeout", task, que.length);
       finish();
     }, 1000);
 

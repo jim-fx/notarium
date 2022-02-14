@@ -50,7 +50,6 @@ function defaultExtractId(...args: unknown[]) {
 }
 
 const caches = [];
-globalThis["test"] = caches;
 export function createCachedFactory<
   T extends (...args: unknown[]) => ReturnType<T>
 >(
@@ -59,11 +58,17 @@ export function createCachedFactory<
 ): (...args: Parameters<T>) => ReturnType<T> {
   const cache: Record<string, ReturnType<T>> = {};
   caches.push(cache);
-
   return (...args: Parameters<T>) => {
     const id = getId(...args);
     if (cache[id]) return cache[id];
-    cache[id] = func(...args);
+    cache[id] = func.call(
+      {
+        destroy: () => {
+          delete cache[id];
+        },
+      },
+      ...args
+    );
     return cache[id];
   };
 }
@@ -75,3 +80,6 @@ export function assureArray<T>(v: T | T[]) {
 export * from "./eventlistener";
 export * from "./mutex";
 export * from "./fs";
+
+export * from "./logger";
+export * from "./detectMimeFromPath";

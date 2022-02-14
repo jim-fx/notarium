@@ -9,10 +9,6 @@ import { splitPath } from "@notarium/common";
 const app = polka();
 app.use(tinyws() as any);
 
-// app.get("/id", async (_, res) => {
-//   res.end(JSON.stringify(getPeerIds()));
-// });
-
 app.get("/", async (_, res) => {
   res.end(JSON.stringify(tree.findNode("/")));
 });

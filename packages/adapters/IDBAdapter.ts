@@ -1,10 +1,6 @@
-import { IDBPDatabase, openDB, deleteDB } from "idb";
-import {
-  IPersistanceAdapter,
-  IPersistanceAdapterFactory,
-  YNode,
-} from "@notarium/types";
-import { createCachedFactory, delayExecution } from "@notarium/common";
+import { IDBPDatabase, openDB } from "idb";
+import { IPersistanceAdapterFactory } from "@notarium/types";
+import { createCachedFactory, delayExecution, logger } from "@notarium/common";
 
 const getDb = (() => {
   let db: Promise<IDBPDatabase<unknown>>;
@@ -19,15 +15,11 @@ const getDb = (() => {
   };
 })();
 
-if ("window" in globalThis) {
-  window["clearDb"] = async () => {
-    await deleteDB("notarium");
-    console.log("cleared");
-  };
-}
 const documents: Record<string, Uint8Array> = {};
 
-const _IDBAdapter: IPersistanceAdapterFactory<string | YNode> = (backend) => {
+const log = logger("adapt/idb");
+
+const _IDBAdapter: IPersistanceAdapterFactory = (backend) => {
   const saveDocument = delayExecution(async (ids) => {
     const db = await getDb();
     ids.forEach(async (id) => {
@@ -41,7 +33,7 @@ const _IDBAdapter: IPersistanceAdapterFactory<string | YNode> = (backend) => {
     async loadDocument() {
       if (!documents[docId])
         documents[docId] = await (await getDb()).get("documents", docId);
-      console.log("[pers.adapt/idb] loaded document " + docId);
+      log("loaded document ", { docId });
       return documents[docId];
     },
     async saveDocument(content: Uint8Array) {

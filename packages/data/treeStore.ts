@@ -1,9 +1,7 @@
 import { Readable, readable } from "svelte/store";
-import { IDataBackend, IDirectory, YNode } from "@notarium/types";
+import { IDataBackend, IDirectory } from "@notarium/types";
 
-export function createTreeStore(
-  backend: IDataBackend<YNode>
-): Readable<IDirectory> {
+export function createTreeStore(backend: IDataBackend): Readable<IDirectory> {
   return readable(
     backend?.doc?.getMap("tree").toJSON() || {},
     function start(set) {

@@ -1,4 +1,4 @@
-import DiffMatchPatch from "diff-match-patch";
+import { diff_match_patch } from "diff-match-patch";
 import { IDataBackend } from "@notarium/types";
 import { createCachedFactory } from "@notarium/common";
 
@@ -7,10 +7,8 @@ export const createDocument = createCachedFactory(
   (b) => b.docId
 );
 
-function _createDocument(backend: IDataBackend<string>) {
-  const dmp = new DiffMatchPatch();
-
-  const myId = Symbol();
+function _createDocument(backend: IDataBackend) {
+  const dmp = new diff_match_patch();
 
   let timeout: NodeJS.Timeout;
   let lastExecution = 0;
@@ -30,7 +28,7 @@ function _createDocument(backend: IDataBackend<string>) {
       lastExecution = now;
     }
 
-    const currentContent = backend.doc.getText("content").toString();
+    const currentContent = getText();
 
     // Compute the diff:
     const diff = dmp.diff_main(currentContent, t);

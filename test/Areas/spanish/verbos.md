@@ -40,22 +40,10 @@ compráis
 compran
 
 ## estar - sein (temporary)
-estoy
-estas
-esta
-estamos
-estais
-estan
 ### example
 yo estoy feliz
 
 ## ser - sein (permanent)
-soy
-eres
-es
-somos
-sois
-son
 ### example
 Yo soy un hombre
 

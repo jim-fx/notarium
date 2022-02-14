@@ -173,6 +173,7 @@ importers:
       '@notarium/common': link:../common
       '@notarium/parser': link:../parser
       '@notarium/types': link:../types
+      '@types/diff-match-patch': ^1.0.32
       svelte: ^3.46.4
       yjs: ^13.5.27
     dependencies:
@@ -182,6 +183,7 @@ importers:
       '@notarium/types': link:../types
       svelte: 3.46.4
     devDependencies:
+      '@types/diff-match-patch': 1.0.32
       yjs: 13.5.27
 
   packages/parser:
