@@ -52,8 +52,8 @@ function _createDataBackend(
 
   const close = () => {
     log("destroyed", { docId });
-    doc.destroy();
-    scope?.destroy();
+    //doc.destroy();
+    //scope?.destroy();
   };
 
   let isLoaded = false;

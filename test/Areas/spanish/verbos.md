@@ -7,13 +7,13 @@ dictionary:
 
 # Verbos
 
-## correr - laufens - learned
+## correr - laufen
 corro
 corres
 corre
 corremos
 correis
-corrent
+corren
 
 ## caminar - gehen
 camino
@@ -40,10 +40,22 @@ compráis
 compran
 
 ## estar - sein (temporary)
+estoy
+estas
+esta
+estamos
+estáis
+están
 ### example
 yo estoy feliz
 
 ## ser - sein (permanent)
+soy
+eres
+es
+somos
+sois
+son
 ### example
 Yo soy un hombre
 
@@ -173,4 +185,4 @@ acunas
 acuna
 acunamos
 acunais
-acuna
+acunan

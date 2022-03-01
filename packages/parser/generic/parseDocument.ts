@@ -1,4 +1,4 @@
-import { parseBlock } from "./parse";
+import { parseBlock } from "./parseBlocks";
 import {
   isCheckList,
   isCodeClosing,
@@ -7,7 +7,8 @@ import {
   isLineHeading,
   isLineTable,
   splitLine,
-} from "./regex";
+} from "../regex";
+
 import {
   NotariumBlock,
   NotariumDocument,
@@ -47,6 +48,7 @@ export function parseLines(lines: string[]): NotariumBlock[] {
         currentBlock.type = "table";
         add(line);
       } else if (isLineHeading(line)) {
+        close();
         currentBlock.data = [line];
         currentBlock.type = "heading";
         close();
@@ -72,7 +74,7 @@ export function parseLines(lines: string[]): NotariumBlock[] {
   return output.map((block) => parseBlock(block));
 }
 
-export function parseDocument(input: string): NotariumDocument {
+export default function parseDocument(input: string): NotariumDocument {
   const lines = splitLine(input);
   if (!lines.length || (lines.length === 1 && lines[0].length === 0))
     return undefined;

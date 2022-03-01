@@ -2,9 +2,7 @@ import { Readable, readable, writable } from "svelte/store";
 import { IDataBackend } from "@notarium/types";
 import { createDocument } from "./documentFrontend";
 
-export function createDocumentStore(
-  backend: IDataBackend<string>
-): Readable<string> {
+export function createDocumentStore(backend: IDataBackend): Readable<string> {
   const frontend = createDocument(backend);
 
   return readable(frontend.getText(), function start(set) {
@@ -17,7 +15,7 @@ export function createDocumentStore(
   });
 }
 
-export function createWritableDocumentStore(backend: IDataBackend<string>) {
+export function createWritableDocumentStore(backend: IDataBackend) {
   const frontend = createDocument(backend);
 
   let value = frontend.getText();
@@ -30,19 +28,16 @@ export function createWritableDocumentStore(backend: IDataBackend<string>) {
     frontend.setText(v);
   });
 
-  backend.doc.on("update", () => {
+  function handleBackendUpdate() {
     const v = frontend.getText();
     if (v === value) return;
     value = v;
     store.set(v);
-  });
+  }
 
-  backend.isLoaded.then(() => {
-    const v = frontend.getText();
-    if (v === value) return;
-    value = v;
-    store.set(v);
-  });
+  backend.doc.on("update", () => handleBackendUpdate());
+
+  backend.isLoaded.then(() => handleBackendUpdate());
 
   return store;
 }

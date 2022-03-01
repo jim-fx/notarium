@@ -43,4 +43,4 @@ const _IDBAdapter: IPersistanceAdapterFactory = (backend) => {
   };
 };
 
-export const IDBAdapter = createCachedFactory(_IDBAdapter, (b) => b.docId);
+export const IDBAdapter = createCachedFactory(_IDBAdapter);

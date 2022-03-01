@@ -1,3 +1,7 @@
+---
+type: true
+---
+
 # Not so empty
 
 A

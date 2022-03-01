@@ -32,7 +32,7 @@ const _FSTextAdapter: IPersistanceAdapterFactory = (backend) => {
     try {
       s = await stat(filePath);
     } catch (err) {
-      // Into the void with you, YEEEET!
+      return;
     }
 
     if (s) {

@@ -1,9 +1,10 @@
 ---
-type: default
+type: notes
+protected: true
 ---
-# This is my List
 
-- [x] One
-- [x] Three
-- [x] Four
-- [x] Five
+# Notes
+
+- [ ] List Item
+- [ ] List Item
+- [ ] List Item

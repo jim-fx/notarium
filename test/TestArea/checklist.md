@@ -1,12 +1,9 @@
----
-type: default
----
 # Testing Checklist Component
 
-- [x] List Item 2
+- [ ] List I
+- [ ] List Item
+- [ ] List Item
+- [ ] List Item
+- [ ] List Item
 - [x] List Item
-- [x] List Item
-- [x] List Item
-- [x] List Item
-- [x] List Item
-- [x] List Item
+- [ ] List Item

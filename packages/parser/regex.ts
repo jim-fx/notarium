@@ -7,3 +7,11 @@ export const isCodeClosing = (s: string) => !!s.match(/^[`]{3}$/gm);
 export const isLineChecked = (s: string) => !!s.match(/^(\s*)\-\s\[[x]\]\s/gm);
 export const isFrontMatter = (s: string) => !!s.match(/^[\-]{3}$/gm);
 export const splitLine = (s: string) => s.split(/\r?\n/);
+export const replaceTabsWithSpaces = (s: string) => s.replace(/\t/g, " ");
+
+export const matchFrontmatter = (s: string) => {
+  const frontmatterRegexp = new RegExp(
+    /(?:^---(?:\s|\t)*$)([\s\S]*)(?:^---(?:\s|\t)*$)/gm
+  );
+  return frontmatterRegexp.exec(s)?.[1];
+};

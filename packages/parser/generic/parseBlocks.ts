@@ -1,7 +1,7 @@
 import YAML from "yaml";
-import { isLineChecked, isTableSeperator } from "./regex";
-import renderMarkdown from "./renderMarkdown";
-import { NotariumBlock, NotariumRawBlock } from "./types";
+import { isLineChecked, isTableSeperator } from "../regex";
+import renderMarkdown from "../renderMarkdownToHTML";
+import { NotariumBlock, NotariumRawBlock } from "../types";
 
 export function parseHeading([line]: string[]) {
   let weight = 1;
@@ -67,6 +67,7 @@ export function parseFrontMatter(lines: string[]) {
     const res = YAML.parse(content);
     return res;
   } catch (err) {
+    console.log("[parser] error parsing frontmatter");
     return {};
   }
 }

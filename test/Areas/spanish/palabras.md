@@ -3,42 +3,44 @@ type: dictionary
 ---
 
 
-# undefined
+## El Saludo
 
-# undefined
+El - Die
 
-# undefined
+Saludo - Begrüßung
 
-# undefined
+Hola - Hallo
 
-# undefined
+Dias - Tag
 
-# undefined
+Tardes - Abends
 
-# undefined
+Noches - Nacht
 
-# undefined
+Bienvenido(s) - Herzlich Wilkommen (Mit Mehrzal)
 
-# undefined
+## La Despedida
 
-# undefined
+Adios - Tschüss
 
-# undefined
+Chao - Tschau
 
-# undefined
+Hasta Luego - Bis später (formell & informell)
 
-# undefined
+Hasta Manana - Bis Morgen
 
-# undefined
+Hasta - Bis
 
-# undefined
+## Misc
 
-# undefined
+ejemplo - Beispiel
 
-# undefined
+deseo - Verlangen (desire)
 
-# undefined
+sonido - Klang, Geräusch
 
-# undefined
+piel - Haut
 
-# undefined
+duermevela - Schlummer
+
+cuna - Wiege

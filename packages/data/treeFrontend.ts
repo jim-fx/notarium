@@ -23,8 +23,8 @@ function deleteChild(node: YNode, name: string) {
   children.delete(index, 1);
 }
 
-export const createTree = createCachedFactory(_createTree, (b) => b.docId);
-function _createTree(backend: IDataBackend<YNode>) {
+export const createTree = createCachedFactory(_createTree);
+function _createTree(backend: IDataBackend) {
   const myId = Symbol("tree.frontend");
 
   function getRootNode() {

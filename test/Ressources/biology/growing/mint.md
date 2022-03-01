@@ -1,6 +1,3 @@
----
-type: block
----
 # Growing Mint
 
 ## This is a new node

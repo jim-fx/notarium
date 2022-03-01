@@ -83,3 +83,4 @@ export * from "./fs";
 
 export * from "./logger";
 export * from "./detectMimeFromPath";
+export { default as mergeObjects } from "./mergeObjects";

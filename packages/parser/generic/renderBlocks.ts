@@ -5,10 +5,11 @@ import {
   NotariumHeadingBlock,
   NotariumTableBlock,
   NotariumTextBlock,
-} from "./types";
+} from "../types";
 
 import YAML from "yaml";
-import { splitLine } from "./regex";
+import { splitLine } from "../regex";
+import { NotariumBlock } from "./types";
 
 export function renderChecklist(b: NotariumChecklistBlock) {
   return b.data.map((v) => `- [${v.checked ? "x" : " "}] ${v.text}`);
@@ -61,6 +62,24 @@ export function renderTable(b: NotariumTableBlock): string[] {
 
 export function renderCode(d: NotariumCodeBlock) {
   return ["```" + d.data.language, ...d.data.text, "```"];
+}
+
+export function renderBlock(b: NotariumBlock) {
+  switch (b.type) {
+    case "table":
+      return renderTable(b);
+    case "heading":
+      return renderHeading(b);
+    case "checklist":
+      return renderChecklist(b);
+    case "code":
+      return renderCode(b);
+    case "paragraph":
+      return renderParagraph(b);
+    default:
+      console.error("Need to implement render for type", b.type);
+      return [];
+  }
 }
 
 export function renderFrontMatter(d: NotariumDocument) {
