@@ -18,24 +18,9 @@ import { readable } from "svelte/store";
 const log = logger("data/config");
 
 function getAllPossibleConfigs(rawPath: string) {
-  const possiblePaths: string[] = [];
-
-  const mimeType = detectMimeFromPath(rawPath);
-
-  const paths = splitPath(rawPath);
-
-  const p = paths.map((_, i, a) => {
+  return [...splitPath(rawPath), "index.md"].map((_, i, a) => {
     return [...a.slice(0, i), "index.md"].join("/");
   });
-
-  possiblePaths.push(...p);
-
-  if (mimeType === "text/markdown" && !rawPath.endsWith("index.md")) {
-    possiblePaths.push(rawPath);
-    paths.pop();
-  }
-
-  return possiblePaths;
 }
 
 export const createConfigStore = createCachedFactory(_createConfigStore);
@@ -104,7 +89,6 @@ function _createConfig(
 
       function listener() {
         r.frontmatter = parseFrontmatter(frontend.getText());
-        console.log(docId, r.frontmatter);
         updateConfig();
       }
       backend.doc.on("update", listener);
@@ -115,9 +99,10 @@ function _createConfig(
     Promise.all(
       backends.map((b) => {
         b.backend.load();
-        return b.backend.isLoaded;
+        b.listener();
       })
     ).then(() => {
+      backends.forEach((b) => b.listener());
       log("loaded", { docId });
       updateConfig();
     });

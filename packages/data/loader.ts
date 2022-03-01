@@ -19,7 +19,7 @@ function flattenTree(t: IDirectory): string[] {
 
   while (currentChildren.length) {
     const cu = currentChildren.shift();
-    if (cu.file.mimetype === "dir") {
+    if ("children" in cu.file) {
       currentChildren.push(
         ...cu.file.children.map((c) => {
           return {
@@ -36,7 +36,7 @@ function flattenTree(t: IDirectory): string[] {
   return output;
 }
 
-export function createLoader(b: IDataBackend<YNode>) {
+export function createLoader(b: IDataBackend) {
   let paths: string[] = [];
 
   const frontend = createTree(b);

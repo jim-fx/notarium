@@ -60,7 +60,7 @@ $ pnpm dev
 - [x] Implement Document parsing
 - [x] Offline Mode (eg, button to download all documents);
   - Still need save the "I am in offline mode" in localStorage
-- [ ] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
+- [x] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
   - Cant sync config.json with
   - Maybe use yaml, seems more resistant to format changes
   - Context Store (index.md+frontmatter, config.json)

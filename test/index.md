@@ -1,5 +1,5 @@
 ---
-private: true
+private: false
 ---
 # JimFX's Personal Wiki
 
