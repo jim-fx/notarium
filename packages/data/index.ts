@@ -8,3 +8,5 @@ export * from "./documentStore";
 export * from "./loader";
 
 export * from "./config";
+
+export { default as auth } from "./auth";

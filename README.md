@@ -69,3 +69,4 @@ $ pnpm dev
 - [ ] Authentication / Authorization, okay p2p auth seems hard
 - [ ] Theming Support
 - [ ] Awareness Information
+- [ ] Probably need a Backend Manager to garbage collect old Backends

@@ -1,5 +1,5 @@
 import { IDBAdapter, P2PClient } from '@notarium/adapters';
-import { createDataBackend, createTreeStore, createTree } from '@notarium/data';
+import { createDataBackend, createTreeStore, createTree, auth } from '@notarium/data';
 
 import type { IDataBackend, IDirectory } from '@notarium/types';
 import { derived, writable } from 'svelte/store';
@@ -11,6 +11,8 @@ export const treeBackend = createDataBackend('tree', {
 	persistanceAdapterFactory: IDBAdapter,
 	messageAdapter: P2PClient
 });
+
+globalThis['auth'] = auth;
 
 export const treeStore = createTreeStore(treeBackend);
 

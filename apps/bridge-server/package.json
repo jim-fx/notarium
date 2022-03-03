@@ -15,17 +15,12 @@
     "@notarium/common": "link:../../packages/common/",
     "@notarium/data": "link:../../packages/data",
     "@notarium/types": "link:../../packages/types",
-    "nanoid": "^3.2.0",
+    "nanoid": "^3.3.1",
     "nodemon": "^2.0.15",
-    "peer": "^0.6.1",
-    "peerjs": "^1.3.2",
     "polka": "^0.5.2",
-    "sqlite": "^4.0.23",
-    "sqlite-async": "^1.1.2",
-    "sqlite3": "^5.0.2",
+    "sqlite-async": "^1.1.3",
     "svelte": "^3.46.4",
     "tinyws": "^0.1.0",
-    "uuid": "^8.3.2",
     "ws": "^8.5.0",
     "yjs": "^13.5.27"
   },
@@ -34,6 +29,6 @@
     "@types/uuid": "^8.3.4",
     "kill-port": "^1.6.1",
     "tsm": "^2.2.1",
-    "typescript": "^4.5.5"
+    "typescript": "^4.6.2"
   }
 }
