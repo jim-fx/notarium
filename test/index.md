@@ -1,6 +1,7 @@
 ---
 private: false
 ---
+
 # JimFX's Personal Wiki
 
 [Ressources](Ressources)

@@ -117,9 +117,9 @@ this way it is possible to create "join with url"
 ## API
 
 ```ts
-const authProvider = new AuthProvider({ messageAdapter, persistanceAdapter });
+const authProvider = new AuthProvider({ persistanceAdapter });
 
-authProvider.addPeer(p);
+authProvider.getPublicKey(p);
 
 const canEdit = await authProvider.isInGroup(userId, groupId);
 ```
@@ -224,10 +224,54 @@ Maybe this is prematurely optimized, need to do some testing how much memory tha
 
 [https://www.npmjs.com/package/keyword-extractor](Extract keywords) so that we don't have to do fulltext search
 
+# AuthN
+
+1. Create a private key on the client side
+2. encrypt that client key with a password
+3. Create a public key from the client
+
+4. Let the user download or copy the private key
+
+When the session is lost, the user can paste the private key and unlock it with the password.
+
+# AuthZ
+
+Have a premade array of „trusted“ public keys baked into the app.
+
+**Example**
+
+```json
+{
+  "/": {
+    "keys": ["asdiojmoUNHSILGBzagndazszdgnnAI", "ÖOUHAHiu2hniGoIZg oING"]
+  }
+}
+```
+
+Only to the array from those trusted sources are accepted
+
+## Idea 1
+
+Each file has an owners array, only users which ids are in that array can edit it
+
 # How to do the config?
 
 We need to have a config for `authN`, `authZ`, `theming`
 We need to somehow resolve the current config
+
+## What Flags are useful?
+
+**protected**
+Can not be deleted
+
+**read: (everyone|owners|readers|nobody)**
+**write: (everyone|owners|readers|nobody)**
+
+**owners: string[]**
+
+**readers: string[]**
+
+List of IDs for accepted readers
 
 ## In index.md
 
@@ -258,3 +302,17 @@ Don’t have to create an extra `.config` file
 - In the tree store keep a reference to all .config files
 - Add a function to the treeFrontend / store to resolve all .config files for a single path
 - Then parse and merge all those configs
+
+# Join Tree and Document
+
+Pros:
+
+- Have content and file in the same doc
+- easier to do granular authZ
+- no mismatches between tree and doc
+
+Cons:
+
+- Clients have to build the tree from the data
+- always have to sync entire tree
+- much harder to get the contexts

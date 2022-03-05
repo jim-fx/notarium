@@ -15,6 +15,7 @@ import {
 } from "@notarium/types";
 
 import * as Y from "yjs";
+import { createConfig } from "./config";
 
 interface DataBackendOptions {
   persistanceAdapterFactory: MaybeArray<IPersistanceAdapterFactory>;
@@ -35,6 +36,8 @@ function _createDataBackend(
   { persistanceAdapterFactory, messageAdapter, flags }: DataBackendOptions
 ): IDataBackend {
   let scope = this;
+
+  let config: ReturnType<typeof createConfig>;
 
   log("create new backend", { docId });
 
@@ -68,6 +71,7 @@ function _createDataBackend(
     isLoaded: isLoadedPromise,
     connect: messageAdapter?.connect,
   };
+  isLoadedPromise.then(() => {});
 
   async function update(
     cb: (arg: Y.Doc) => void | Promise<void>,
@@ -87,29 +91,43 @@ function _createDataBackend(
     finishTask();
   }
 
-  const persist = assureArray(persistanceAdapterFactory).map((createAdapter) =>
-    createAdapter(backend)
+  const persistanceAdapters = assureArray(persistanceAdapterFactory).map(
+    (createAdapter) => createAdapter(backend)
   );
 
   doc.on("updateV2", (update: Uint8Array, origin: Symbol) => {
     messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
     const saveState = Y.encodeStateAsUpdateV2(doc);
-    persist.forEach((p) => p.saveDocument(saveState, origin));
+    persistanceAdapters.forEach((p) => p.saveDocument(saveState, origin));
   });
 
   async function load() {
     if (isLoaded) return isLoadedPromise;
     isLoaded = true;
     update(async () => {
-      for (const p of persist) {
+      for (const p of persistanceAdapters) {
         const updates = await p.loadDocument();
         if (updates) {
           Y.applyUpdateV2(doc, updates);
         }
       }
       initNetwork();
+
+      if (docId !== "tree") {
+        config = createConfig(docId, {
+          persistanceAdapterFactory,
+          messageAdapter,
+        });
+
+        config.isLoaded.then(() => {
+          console.log("config loaded", config.get());
+        });
+
+        await config.isLoaded;
+      }
+
+      finishedLoading();
     });
-    finishedLoading();
   }
 
   const listeners = [];

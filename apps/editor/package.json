@@ -17,9 +17,12 @@
 		"@notarium/data": "link:../../packages/data",
 		"@notarium/parser": "link:../../packages/parser",
 		"@notarium/types": "link:../../packages/types",
+		"ace-builds": "^1.4.14",
+		"brace": "^0.11.1",
 		"bytemd": "^1.11.0",
 		"diff-match-patch": "^1.0.5",
 		"idb": "^7.0.0",
+		"lib0": "^0.2.46",
 		"simple-peer": "^9.11.1",
 		"yjs": "^13.5.27"
 	},
@@ -39,7 +42,8 @@
 		"svelte-markdown": "^0.2.2",
 		"svelte-preprocess": "^4.10.4",
 		"tslib": "^2.3.1",
-		"typescript": "^4.6.2"
+		"typescript": "^4.6.2",
+		"y-protocols": "^1.0.5"
 	},
 	"type": "module"
 }

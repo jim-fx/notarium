@@ -13,18 +13,9 @@
 			console.log(d);
 		});
 	}
-
-	$: configBackend = createConfig($activeNodeId, {
-		messageAdapter: P2PClient,
-		persistanceAdapterFactory: IDBAdapter
-	});
-
-	$: configStore = createConfigStore(configBackend);
 </script>
 
 <button on:click={makeOffline}>Make Offline</button>
-
-<pre>{JSON.stringify($configStore, null, 2)}</pre>
 
 {#if !$activeNode}
 	<p>404</p>

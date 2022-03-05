@@ -14,18 +14,46 @@
 </script>
 
 <script lang="ts">
-	import { activeNode, hasActiveNodeIndexMD, activeNodeId, treeBackend } from '$lib/stores';
+	import {
+		activeNode,
+		hasActiveNodeIndexMD,
+		activeNodeId,
+		treeBackend,
+		configStore
+	} from '$lib/stores';
+
+	const config = $configStore;
 </script>
 
-<details style:display="none">
+<details>
 	<summary>
 		id: {$activeNodeId}
 	</summary>
 
-	mimeType: {$activeNode?.mimetype} <br />
-	hasIndexMD: {$hasActiveNodeIndexMD} <br />
-	Directory:
-	<code>{JSON.stringify($activeNode)}</code>
+	<table>
+		<tr>
+			<td>mimetype</td>
+			<td>{$activeNode?.mimetype}</td>
+		</tr>
+		<tr>
+			<td>hasIndexMD</td>
+			<td>{$hasActiveNodeIndexMD}</td>
+		</tr>
+
+		<tr>
+			<td>dir</td>
+			<td>
+				<code>{JSON.stringify($activeNode)}</code>
+			</td>
+		</tr>
+
+		<tr>
+			<td>Config</td>
+			<td>
+				<pre>{JSON.stringify($config, null, 2)}</pre>
+			</td>
+		</tr>
+	</table>
 </details>
 
 <slot />

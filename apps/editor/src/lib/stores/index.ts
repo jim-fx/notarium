@@ -1,5 +1,12 @@
 import { IDBAdapter, P2PClient } from '@notarium/adapters';
-import { createDataBackend, createTreeStore, createTree, auth } from '@notarium/data';
+import {
+	createDataBackend,
+	createTreeStore,
+	createTree,
+	auth,
+	createConfig,
+	createConfigStore
+} from '@notarium/data';
 
 import type { IDataBackend, IDirectory } from '@notarium/types';
 import { derived, writable } from 'svelte/store';
@@ -21,6 +28,14 @@ export const treeFrontend = createTree(treeBackend);
 export const activeNodeId = derived([page], ([p]) => {
 	return p.params?.editPath;
 });
+
+const configBackend = derived([activeNodeId], ([id]) => {
+	return createConfig(id, {
+		messageAdapter: P2PClient,
+		persistanceAdapterFactory: IDBAdapter
+	});
+});
+export const configStore = derived([configBackend], ([b]) => createConfigStore(b));
 
 export const activeMimeType = derived([activeNodeId], ([p]) => {
 	return detectMimeFromPath(p);

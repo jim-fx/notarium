@@ -41,13 +41,21 @@ const _FSTextAdapter: IPersistanceAdapterFactory = (backend) => {
       const content = await readFile(filePath, "utf8");
       frontend.setText(content);
     } else {
-      await writeFile(filePath, "", "utf8");
+      try {
+        await writeFile(filePath, "", "utf8");
+      } catch (error) {
+        log.error(error);
+      }
     }
   }
 
   async function saveDocument() {
     const content = frontend.getText();
-    await writeFile(filePath, content, "utf8");
+    try {
+      await writeFile(filePath, content, "utf8");
+    } catch (error) {
+      log.error(error);
+    }
   }
 
   return {
@@ -56,7 +64,4 @@ const _FSTextAdapter: IPersistanceAdapterFactory = (backend) => {
   };
 };
 
-export const FSTextAdapter = createCachedFactory(
-  _FSTextAdapter,
-  (b) => b.docId
-);
+export const FSTextAdapter = createCachedFactory(_FSTextAdapter);

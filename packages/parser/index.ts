@@ -4,4 +4,3 @@ export * from "./generic";
 export * from "./dictionary";
 
 export * from "./parseFrontmatter";
-export * from "./getParser";

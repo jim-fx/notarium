@@ -143,8 +143,8 @@ export async function connect(url: string) {
 
   const _ws = new ReconnectingWebSocket(url);
 
-  _ws.onerror = ({ error }) => {
-    log.error(error);
+  _ws.onerror = (event) => {
+    // log.error(new Error(event.message));
   };
 
   setTimeout(() => {

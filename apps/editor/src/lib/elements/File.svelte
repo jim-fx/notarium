@@ -13,6 +13,7 @@
 		<a href="/edit{ownPath}">
 			{file.path}
 		</a>
+		<button on:click={() => confirm('Delete?') && handleDelete(ownPath)}>x</button>
 	</h3>
 
 	{#if 'children' in file}

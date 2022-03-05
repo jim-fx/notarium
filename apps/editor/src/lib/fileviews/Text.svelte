@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { IDataBackend, IFile } from '@notarium/types';
-	import { GenericParser, renderMarkdownToHTML, getParser } from '@notarium/parser';
+	import { GenericParser, renderMarkdownToHTML, parseFrontmatter } from '@notarium/parser';
+	import { getParser } from './blocks';
 	import { createDataBackend, createWritableDocumentStore } from '@notarium/data';
 	import { isEditing, localStore } from '$lib/stores';
 	import { IDBAdapter, P2PClient } from '@notarium/adapters';
@@ -28,15 +29,15 @@
 
 	$: text = documentBackend && createWritableDocumentStore(documentBackend);
 
-	$: parsedDocument = text && GenericParser.parse($text);
+	$: frontMatter = text && parseFrontmatter($text);
 
-	$: blockAvailable = !!parsedDocument?.frontmatter?.type;
+	$: blockAvailable = !!frontMatter?.type;
 
 	$: preferBlock = localStore.get(activeNodeId + '-prefer-block', false);
 
 	$: editorType = blockAvailable && $preferBlock ? 'block' : 'text';
 
-	$: parser = blockAvailable && getParser(parsedDocument?.frontmatter?.type);
+	$: parser = blockAvailable && getParser(frontMatter?.type);
 
 	function toggleEditing() {
 		$isEditing = !$isEditing;
@@ -69,7 +70,15 @@
 
 {#if editorType === 'text'}
 	{#if $isEditing}
-		<textarea name="dude" bind:value={$text} cols="30" rows="10" />
+		{#if browser}
+			{#await import('$lib/elements/TextEditor.svelte')}
+				<p>Loading Text</p>
+			{:then editorComponent}
+				<svelte:component this={editorComponent.default} bind:value={$text} />
+			{/await}
+		{:else}
+			<textarea name="" id="" cols="30" rows="10" />
+		{/if}
 	{:else}
 		{@html renderMarkdownToHTML($text)}
 	{/if}
@@ -78,7 +87,7 @@
 		{#if parser}
 			<svelte:component this={parser} {text} isEditing={$isEditing} />
 		{:else}
-			<p>No parser available for {parsedDocument?.frontmatter?.type}</p>
+			<p>No parser available for {frontMatter?.type}</p>
 		{/if}
 	{:else}
 		<p>No Block Data avaialbned</p>

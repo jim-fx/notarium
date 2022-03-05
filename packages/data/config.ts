@@ -1,6 +1,7 @@
 import {
   createCachedFactory,
   createEventListener,
+  createResolvablePromise,
   detectMimeFromPath,
   logger,
   mergeObjects,
@@ -54,17 +55,21 @@ function _createConfig(
     frontmatter: any;
     frontend: ReturnType<typeof createDocument>;
   }[] = [];
+  const [isLoaded, setLoaded] = createResolvablePromise<boolean>();
 
+  let config = {};
   async function updateConfig() {
-    let config = {};
+    let _config = {};
 
     backends.forEach((b) => {
       if (b?.frontmatter) {
-        config = mergeObjects(config, b.frontmatter);
+        _config = mergeObjects(_config, b.frontmatter);
       }
     });
 
-    emit("config", config);
+    emit("config", _config);
+    config = _config;
+    setLoaded(true);
   }
 
   function updateBackendStores() {
@@ -127,6 +132,10 @@ function _createConfig(
     get docId() {
       return docId;
     },
+    get() {
+      return JSON.parse(JSON.stringify(config));
+    },
+    isLoaded,
     on,
   };
 }
