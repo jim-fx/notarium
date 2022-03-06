@@ -19,6 +19,6 @@
   "devDependencies": {
     "@types/diff-match-patch": "^1.0.32",
     "ucans": "^0.8.0",
-    "yjs": "^13.5.27"
+    "yjs": "^13.5.28"
   }
 }

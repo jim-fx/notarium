@@ -316,3 +316,25 @@ Cons:
 - Clients have to build the tree from the data
 - always have to sync entire tree
 - much harder to get the contexts
+
+# Refactor 2
+
+```ts
+
+const file = createBinaryFile(docId, [persistance, network]);
+
+const file = createCRDTFile(docId,[persistance,network]);
+
+const loaded = await file.load();
+
+// Inside file
+
+load(){
+  adapters.forEach(a => a.requestFile(docId));
+  adapters.on(docId+".content" => /*update other stuff*/);
+}
+
+Adapter Interface
+
+
+```

@@ -1,6 +1,6 @@
 import {
   createCachedFactory,
-  createEventListener,
+  createEventEmitter,
   logger,
 } from "@notarium/common";
 import detectMimeType from "@notarium/common/detectMime";
@@ -21,7 +21,7 @@ const log = logger("adapt/fs-watcher");
 const _FSWatcher = (path: string) => {
   log("init", { path });
 
-  const { on, emit } = createEventListener<{ changes: Event[] }>();
+  const { on, emit } = createEventEmitter<{ changes: Event[] }>();
 
   const w = new Watcher(path, {
     recursive: true,

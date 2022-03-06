@@ -2,7 +2,6 @@ import {
   createCachedFactory,
   createEventListener,
   createResolvablePromise,
-  detectMimeFromPath,
   logger,
   mergeObjects,
   splitPath,
@@ -27,16 +26,13 @@ function getAllPossibleConfigs(rawPath: string) {
 export const createConfigStore = createCachedFactory(_createConfigStore);
 export const createConfig = createCachedFactory(_createConfig);
 
-function _createConfigStore(b: ReturnType<typeof _createConfig>) {
+function createConfigStore(b: ReturnType<typeof _createConfig>) {
   return readable({}, (set) => {
     b.on("config", (c) => set(c));
   });
 }
 
-function _createConfig(
-  docId: string,
-  { messageAdapter, persistanceAdapterFactory }
-) {
+function createConfig(docId: string, fs: FileSystem) {
   log("new", { docId });
 
   const { on, emit } = createEventListener<{ config: any }>();

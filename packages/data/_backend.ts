@@ -15,7 +15,7 @@ import {
 } from "@notarium/types";
 
 import * as Y from "yjs";
-import { createConfig } from "./config";
+// import { createConfig } from "./config";
 
 interface DataBackendOptions {
   persistanceAdapterFactory: MaybeArray<IPersistanceAdapterFactory>;
@@ -37,7 +37,7 @@ function _createDataBackend(
 ): IDataBackend {
   let scope = this;
 
-  let config: ReturnType<typeof createConfig>;
+  // let config: ReturnType<typeof createConfig>;
 
   log("create new backend", { docId });
 
@@ -71,12 +71,8 @@ function _createDataBackend(
     isLoaded: isLoadedPromise,
     connect: messageAdapter?.connect,
   };
-  isLoadedPromise.then(() => {});
 
-  async function update(
-    cb: (arg: Y.Doc) => void | Promise<void>,
-    origin?: Symbol
-  ) {
+  async function update(cb: (arg: Y.Doc) => void | Promise<void>) {
     const finishTask = await createMutex("update");
 
     const [p, resolve] = createResolvablePromise<void>();
@@ -98,7 +94,7 @@ function _createDataBackend(
   doc.on("updateV2", (update: Uint8Array, origin: Symbol) => {
     messageAdapter?.broadcast(docUpdateType, { updates: update.join(), docId });
     const saveState = Y.encodeStateAsUpdateV2(doc);
-    persistanceAdapters.forEach((p) => p.saveDocument(saveState, origin));
+    persistanceAdapters.forEach((p) => p.saveDocument(saveState));
   });
 
   async function load() {
@@ -114,16 +110,14 @@ function _createDataBackend(
       initNetwork();
 
       if (docId !== "tree") {
-        config = createConfig(docId, {
-          persistanceAdapterFactory,
-          messageAdapter,
-        });
-
-        config.isLoaded.then(() => {
-          console.log("config loaded", config.get());
-        });
-
-        await config.isLoaded;
+        // config = createConfig(docId, {
+        //   persistanceAdapterFactory,
+        //   messageAdapter,
+        // });
+        // config.isLoaded.then(() => {
+        //   console.log("config loaded", config.get());
+        // });
+        // await config.isLoaded;
       }
 
       finishedLoading();

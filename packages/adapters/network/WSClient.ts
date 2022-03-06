@@ -1,12 +1,12 @@
 import { nanoid } from "nanoid";
 import type WebSocket from "ws";
-import { createEventListener } from "@notarium/common";
+import { createEventEmitter } from "@notarium/common";
 let connections: {
   id: string;
   ws: WebSocket;
 }[] = [];
 
-const { on, emit } = createEventListener();
+const { on, emit } = createEventEmitter();
 
 export const getId = () => "server";
 
@@ -26,6 +26,10 @@ export function broadcast(eventType: string, data: unknown) {
 
 export { on };
 
+export function requestFile(path: string) {
+  console.log("request file", { path });
+}
+
 export function getPeerIds() {
   return connections.map((p) => p.id);
 }
@@ -40,12 +44,17 @@ export function connect(ws: WebSocket, id = nanoid()) {
 
   connections.push(localConnection);
 
-  ws.on("message", (rawMsg: Buffer) => {
+  ws.on("message", (rawMsg: Buffer, isBinary: boolean) => {
+    if (isBinary) {
+      console.log("received binary msg", rawMsg);
+      return;
+    }
+
     const msg = rawMsg.toString("utf-8");
 
     const { type, data } = JSON.parse(msg);
 
-    console.log("[ws] handleMessage ", type);
+    console.log("[ws] handleMessage ", type, data);
 
     // Request to connect to other peer over p2p
     if (type === "p2p-signal") {

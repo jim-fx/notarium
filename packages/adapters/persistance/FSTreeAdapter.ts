@@ -1,23 +1,18 @@
-import {
-  IDataBackend,
-  IFile,
-  YNode,
-  IPersistanceAdapter,
-} from "@notarium/types";
+import { IFile, YNode } from "@notarium/types";
 import detectMimeType from "@notarium/common/detectMime";
 
 import * as Y from "yjs";
 
 import { FSWatcher } from "./FSWatcher";
-import { createTree } from "@notarium/data";
 
 import { basename, resolve } from "path";
 import { lstat, readdir, rm } from "fs/promises";
 import {
-  createCachedFactory,
+  createEventEmitter,
   createMutexFactory,
   logger,
 } from "@notarium/common";
+import { Adapter, File, FileSystem } from "@notarium/fs";
 
 const log = logger("adapt/fs-tree");
 
@@ -47,10 +42,10 @@ export async function readFile(path: string): Promise<IFile> {
   }
 }
 
-function syncFile(backend: IDataBackend, treeData: IFile, origin: Symbol) {
-  const tree = backend.doc.getMap("tree") as YNode;
+function syncFile(file: File, treeData: IFile) {
+  file.update((doc: Y.Doc) => {
+    const tree = doc.getMap("tree") as YNode;
 
-  backend.update(() => {
     function syncAttributes(node: YNode, oNode?: IFile) {
       const path = node.get("path");
       const currentMime = node.get("mimetype");
@@ -103,7 +98,7 @@ function syncFile(backend: IDataBackend, treeData: IFile, origin: Symbol) {
     }
 
     syncAttributes(tree, treeData);
-  }, origin);
+  });
 }
 
 async function syncFsWithFile(rootPath: string, file: IFile, memFile: IFile) {
@@ -116,7 +111,7 @@ async function syncFsWithFile(rootPath: string, file: IFile, memFile: IFile) {
 
         const deletePath = rootPath + "/" + child.path;
 
-        await rm(deletePath);
+        // await rm(deletePath);
       }
 
       return syncFsWithFile(rootPath + "/" + child.path, child, docChild);
@@ -124,42 +119,40 @@ async function syncFsWithFile(rootPath: string, file: IFile, memFile: IFile) {
   }
 }
 
-export const FSTreeAdapter = createCachedFactory(
-  _FSTreeAdapter,
-  (b) => b.docId
-);
-function _FSTreeAdapter(backend: IDataBackend): IPersistanceAdapter {
-  const { ROOT_PATH = resolve(process.env.HOME, "Notes") } = backend?.flags;
+export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
+  const { rootPath = resolve(process.env.HOME, "Notes") } = fs;
+
+  const { emit, on } = createEventEmitter();
 
   log("create new");
 
-  const id = Symbol();
-
   const createMutex = createMutexFactory();
-
-  const frontend = createTree(backend);
 
   async function saveDocument() {
     const finishTask = await createMutex("applyDocToFS");
 
-    const fsdata = await readFile(ROOT_PATH);
-    const docdata = frontend.findNode("/");
+    const fsdata = await readFile(rootPath);
+    // const docdata = frontend.findNode("/");
 
-    syncFsWithFile(ROOT_PATH, fsdata, docdata);
+    // syncFsWithFile(rootPath, fsdata, docdata);
 
     finishTask();
   }
 
   async function loadDocument() {
-    const data = await readFile(ROOT_PATH as string);
-    syncFile(backend, data, id);
+    syncFile(fs, data, id);
   }
 
-  const watcher = FSWatcher(ROOT_PATH);
+  // const file = await fs.openFile("tree");
+  // await file.load();
+
+  const watcher = FSWatcher(rootPath);
 
   watcher.on("changes", async (changes) => {
     const finishTask = await createMutex("applyFsToDoc");
+
     backend.update(async () => {
+      return;
       await Promise.all(
         changes.map(async (change) => {
           switch (change.type) {
@@ -189,7 +182,19 @@ function _FSTreeAdapter(backend: IDataBackend): IPersistanceAdapter {
   });
 
   return {
-    loadDocument,
-    saveDocument,
+    on,
+    async requestFile(f: File) {
+      const data = await readFile(rootPath as string);
+
+      f.getData().then((doc) => {});
+
+      console.log("read tree", data);
+    },
+    async closeFile(f: File) {
+      console.log("close tree", f);
+    },
+    async saveFile(f: File) {
+      console.log("save tree", f);
+    },
   };
 }

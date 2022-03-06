@@ -1,4 +1,4 @@
-export function createResolvablePromise<T = unknown>(): [
+export function createResolvablePromise<T = void>(): [
   Promise<T>,
   (value: T) => void
 ] {

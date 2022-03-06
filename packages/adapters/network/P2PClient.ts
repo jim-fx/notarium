@@ -1,14 +1,36 @@
 let ws: Promise<WebSocket>;
-import type Peer from "simple-peer";
+import SimplePeer from "simple-peer";
+import SimplePeerFiles from "simple-peer-files";
 import { EventMap } from "@notarium/types";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { createEventListener, logger } from "@notarium/common";
+import {
+  createEventEmitter,
+  createResolvablePromise,
+  logger,
+} from "@notarium/common";
+
+const spf = new SimplePeerFiles();
 
 const log = logger("adapt/p2p");
 
-const peers: { peer: Peer.Instance; id: string }[] = [];
+interface WSPeer {
+  id: string;
+  type: "ws";
+  send: (type: string, data: unknown) => void;
+  requestFile: (docId: string) => Promise<Uint8Array | void>;
+}
 
-const { emit, on } = createEventListener<EventMap>();
+interface RTCPeer {
+  id: string;
+  type: "rtc";
+  requestFile: (docId: string) => Promise<Uint8Array | void>;
+  send: (type: string, data: unknown) => void;
+  signal: SimplePeer.Instance["signal"];
+}
+
+const peers: (WSPeer | RTCPeer)[] = [];
+
+const { emit, on } = createEventEmitter<EventMap>();
 
 const { getId, setId } = (() => {
   if (!("localStorage" in globalThis))
@@ -49,28 +71,32 @@ function removePeer(peerId: string) {
 
 export { on, getId };
 
-function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
+export function requestFile(path: string) {
+  console.log("request path", path);
+}
+
+function connectToPeer(id: string, signal?: SimplePeer.SignalData) {
   const peer = new SimplePeer({
     initiator: !signal,
-  }) as unknown as Peer.Instance;
+  }) as unknown as SimplePeer.Instance;
 
-  peers.push({ peer, id });
+  const [connected, setConnected] = createResolvablePromise();
 
   if (signal) {
     peer.signal(signal);
   }
 
   peer.on("signal", async (signal) => {
-    (await ws).send(
-      JSON.stringify({
-        type: "p2p-signal",
-        data: { id, signal },
-      })
-    );
+    peers.forEach((p) => {
+      if (p.id === "server") {
+        p.send("p2p-signal", { id, signal });
+      }
+    });
   });
 
   peer.on("error", (err) => console.error(err));
   peer.on("connect", () => {
+    setConnected();
     log("connected to ", { id });
     // peer.send(JSON.stringify({ type: "connect", data: "hello" }));
     emit("connect", id);
@@ -85,7 +111,14 @@ function connectToPeer(id: string, signal?: Peer.SignalData): Peer.Instance {
     handleMessage(d.toString(), id);
   });
 
-  return peer;
+  async function send(type: string, data: unknown) {
+    await connected;
+    peer.send(JSON.stringify({ type, data }));
+  }
+
+  async function requestFile(docId: string) {}
+
+  peers.push({ type: "rtc", send, id, requestFile, signal: peer.signal });
 }
 
 function parse(msg: string | object) {
@@ -134,7 +167,7 @@ async function handleMessage(msg: string, peerId?: string) {
   emit(type, data, peerId);
 }
 
-export async function connect(url: string) {
+async function connectToServer(url: string) {
   const id = getId();
 
   if (id) {
@@ -161,30 +194,49 @@ export async function connect(url: string) {
   _ws.onmessage = (msg) => {
     handleMessage(msg.data, "server");
   };
+
+  async function send(type: string, data: unknown) {
+    const w = await ws;
+    w.send(JSON.stringify({ type, data }));
+  }
+
+  async function requestFile(docId: string) {}
+
+  peers.push({
+    id: "server",
+    type: "ws",
+    requestFile,
+    send,
+  });
 }
 
-async function sendToServer(eventType: string, data?: unknown) {
-  (await ws).send(JSON.stringify({ type: eventType, data }));
+export async function connect(url: string) {
+  if (url.startsWith("ws")) {
+    connectToServer(url);
+  }
 }
 
 export const broadcast: typeof emit = async (type: string, data: unknown) => {
-  const msg = JSON.stringify({ type, data });
   peers.forEach((p) => {
-    if (p.peer.connected) {
-      p.peer.send(msg);
-    }
+    p.send(type, data);
   });
-  (await ws).send(msg);
 };
 
-export async function sendTo(id: string, type: string, data: unknown) {
-  if (id === "server") {
-    return sendToServer(type, data);
-  }
+function sendFileTo(peerId: string, docId: string, file: Uint8Array) {
+  const p = peers.find((p) => p.id === peerId);
+  // peer is the SimplePeer object connection to receiver
+  spf.send(p, docId, file).then((transfer) => {
+    transfer.on("progress", (sentBytes) => {
+      console.log(sentBytes);
+    });
+    transfer.start();
+  });
+}
 
+export async function sendTo(id: string, type: string, data: unknown) {
   const p = peers.find((p) => p.id === id);
-  if (p && p.peer.connected) {
-    p.peer.send(JSON.stringify({ type, data }));
+  if (p) {
+    p.send(type, data);
   }
 }
 

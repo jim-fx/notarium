@@ -39,6 +39,11 @@
 
 	$: parser = blockAvailable && getParser(frontMatter?.type);
 
+	let mdContainer;
+	$: if (mdContainer) {
+		console.log(mdContainer);
+	}
+
 	function toggleEditing() {
 		$isEditing = !$isEditing;
 	}
@@ -80,7 +85,9 @@
 			<textarea name="" id="" cols="30" rows="10" />
 		{/if}
 	{:else}
-		{@html renderMarkdownToHTML($text)}
+		<div id="md-container" bind:this={mdContainer}>
+			{@html renderMarkdownToHTML($text)}
+		</div>
 	{/if}
 {:else if editorType === 'block'}
 	{#if blockAvailable}

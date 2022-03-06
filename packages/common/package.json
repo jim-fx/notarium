@@ -13,6 +13,10 @@
     "@notarium/types": "link:../types"
   },
   "dependencies": {
-    "mime-types": "^2.1.34"
+    "ee-ts": "^1.0.2",
+    "filereader-stream": "^2.0.0",
+    "mime-types": "^2.1.34",
+    "readable-stream": "^3.6.0",
+    "readable-stream-fixed-global": "^3.6.0"
   }
 }

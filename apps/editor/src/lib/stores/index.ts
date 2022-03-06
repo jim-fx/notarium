@@ -1,41 +1,19 @@
-import { IDBAdapter, P2PClient } from '@notarium/adapters';
-import {
-	createDataBackend,
-	createTreeStore,
-	createTree,
-	auth,
-	createConfig,
-	createConfigStore
-} from '@notarium/data';
+import { IDBAdapter, P2PClient, createNetworkAdapter } from '@notarium/adapters';
+import { createTreeStore, createTree } from '@notarium/data';
 
-import type { IDataBackend, IDirectory } from '@notarium/types';
+import type { IDirectory } from '@notarium/types';
 import { derived, writable } from 'svelte/store';
 import { page } from '$app/stores';
 import { browser } from '$app/env';
 import { splitPath, detectMimeFromPath } from '@notarium/common';
 
-export const treeBackend = createDataBackend('tree', {
-	persistanceAdapterFactory: IDBAdapter,
-	messageAdapter: P2PClient
-});
+import fs from '../fs';
 
-globalThis['auth'] = auth;
-
-export const treeStore = createTreeStore(treeBackend);
-
-export const treeFrontend = createTree(treeBackend);
+export const treeStore = createTreeStore(fs);
 
 export const activeNodeId = derived([page], ([p]) => {
 	return p.params?.editPath;
 });
-
-const configBackend = derived([activeNodeId], ([id]) => {
-	return createConfig(id, {
-		messageAdapter: P2PClient,
-		persistanceAdapterFactory: IDBAdapter
-	});
-});
-export const configStore = derived([configBackend], ([b]) => createConfigStore(b));
 
 export const activeMimeType = derived([activeNodeId], ([p]) => {
 	return detectMimeFromPath(p);
@@ -43,7 +21,7 @@ export const activeMimeType = derived([activeNodeId], ([p]) => {
 
 export const activeNode = derived([activeNodeId, treeStore], ([id]) => {
 	if (!id) return undefined;
-	return treeFrontend.findNode(id);
+	return fs.findNode(id);
 });
 
 export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nodeId]) => {

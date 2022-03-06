@@ -5,10 +5,16 @@
 		<meta name="description" content="" />
 		<link rel="icon" href="%svelte.assets%/favicon.svg" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<script src="https://unpkg.com/web-streams-polyfill/dist/polyfill.min.js"></script>
+		<script>
+			window.global = window;
+			window.require = function (l) {
+				alert(l);
+			};
+		</script>
 		%svelte.head%
 	</head>
 	<body>
-		<script src="/simplepeer.min.js"></script>
 		<div>%svelte.body%</div>
 	</body>
 </html>

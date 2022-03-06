@@ -1,8 +1,5 @@
-import {
-  IPersistanceAdapter,
-  IPersistanceAdapterFactory,
-  YNode,
-} from "@notarium/types";
+import type { AdapterFactory, FileSystem, File } from "@notarium/fs";
+
 import Database from "sqlite-async";
 
 const dbPromise = Database.open("./db.sql")
@@ -29,42 +26,39 @@ function parseBinary(s: string) {
   return Uint8Array.from(s.split(",").map((v) => parseInt(v)));
 }
 
-export const SQLAdapter: IPersistanceAdapterFactory<string | YNode> = (
-  backend
-) => {
-  const { docId } = backend;
-
+export const SQLAdapter: AdapterFactory = (fs: FileSystem) => {
   return {
-    async saveDocument(doc: Uint8Array) {
+    on() {},
+    async writeFile(f: File) {
       const db = await dbPromise;
-      console.log("[pers/sql] save document state", docId);
+      console.log("[pers/sql] save document state", f.path);
 
-      const content = doc.toString();
+      const content = (await f.getData()).toString();
 
       const updateResult = await db.run(
         `UPDATE OR IGNORE documents 
          SET content = ? 
          WHERE docId = ?;`,
-        [content, docId]
+        [content, f.path]
       );
 
       if (updateResult.changes === 0) {
         return (await dbPromise)
           .run("INSERT OR IGNORE INTO documents(docId, content) VALUES(?,?)", [
-            docId,
+            f.path,
             content,
           ])
           .then((res) => {
-            console.log("[pers/sql] saved doc", docId, "to db");
+            console.log("[pers/sql] saved doc", f.path, "to db");
           })
           .catch((err) => {
             console.error(err);
           });
       }
     },
-    async loadDocument() {
-      let doc = await readDocFromDB(docId);
-      console.log("[pers/sql] read doc", docId, "from db");
+    async requestFile(f: File) {
+      let doc = await readDocFromDB(f.path);
+      console.log("[pers/sql] read doc", f.path, "from db");
       if (doc?.content) return parseBinary(doc.content) as Uint8Array;
       return;
     },

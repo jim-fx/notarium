@@ -14,6 +14,7 @@
     "@notarium/adapters": "link:../../packages/adapters",
     "@notarium/common": "link:../../packages/common/",
     "@notarium/data": "link:../../packages/data",
+    "@notarium/fs": "link:../../packages/fs",
     "@notarium/types": "link:../../packages/types",
     "nanoid": "^3.3.1",
     "nodemon": "^2.0.15",
@@ -22,7 +23,7 @@
     "svelte": "^3.46.4",
     "tinyws": "^0.1.0",
     "ws": "^8.5.0",
-    "yjs": "^13.5.27"
+    "yjs": "^13.5.28"
   },
   "devDependencies": {
     "@types/polka": "^0.5.4",

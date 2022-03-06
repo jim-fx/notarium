@@ -1,31 +1,11 @@
-<script lang="ts" context="module">
-	import { treeBackend, treeFrontend, treeStore } from '$lib/stores';
-
-	export async function load() {
-		if (browser) {
-			treeBackend.connect('ws://localhost:3000/ws');
-			await treeBackend.load();
-		}
-		return {
-			props: {
-				backend: treeBackend
-			}
-		};
-	}
-</script>
-
 <script lang="ts">
 	import './app.css';
-	import File from '$lib/elements/File.svelte';
 	import { onMount } from 'svelte';
 	import { localStore } from '$lib/stores';
 
-	import { browser } from '$app/env';
-
-	export let backend;
+	import fs from '$lib/fs';
 
 	const loadOffline = localStore.get('load-offline', false);
-
 	const hideTree = localStore.get('show-tree', false);
 
 	$: if ($loadOffline) {
@@ -33,15 +13,19 @@
 	}
 
 	function handleDelete(path: string) {
-		treeFrontend.deleteNode(path);
+		fs.deleteFile(path);
 	}
 
 	function handleCreate(path: string) {
-		treeFrontend.createNode(path, 'text/markdown');
+		fs.createFile(path, 'text/markdown');
 	}
 
 	onMount(async () => {
-		await backend.load();
+		/* const channel = new BroadcastChannel('sw-messages'); */
+
+		/* createBinaryHandler(channel); */
+
+		await fs.load();
 	});
 </script>
 
@@ -54,11 +38,6 @@
 				}}>hide</button
 			>
 		</header>
-		{#if $treeStore.mimetype === 'dir'}
-			{#each $treeStore.children as child}
-				<File file={child} {handleDelete} {handleCreate} />
-			{/each}
-		{/if}
 	</aside>
 
 	<section>

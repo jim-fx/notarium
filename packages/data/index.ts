@@ -1,4 +1,3 @@
-export * from "./backend";
 export * from "./treeFrontend";
 export * from "./documentFrontend";
 
@@ -6,7 +5,3 @@ export * from "./treeStore";
 export * from "./documentStore";
 
 export * from "./loader";
-
-export * from "./config";
-
-export { default as auth } from "./auth";

@@ -1,5 +1,5 @@
 {
-  "name": "types",
+  "name": "@notarium/fs",
   "version": "1.0.0",
   "description": "",
   "main": "index.ts",
@@ -9,8 +9,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devDependencies": {
-    "@notarium/common": "workspace:^1.0.0",
+  "dependencies": {
+    "@notarium/common": "link:../common",
+    "types": "link:../types",
     "yjs": "^13.5.28"
   }
 }

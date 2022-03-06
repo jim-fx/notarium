@@ -1,9 +1,24 @@
 export * from "./data";
 import * as Y from "yjs";
 
-export type MimeType = "dir" | "text/markdown" | "nota/theme" | "unknown";
+export type MimeType =
+  | "tree"
+  | "dir"
+  | "unknown"
+  | "text/markdown"
+  | "nota/theme"
+  | "image/jpg"
+  | "image/png"
+  | "image/svg";
 
-export type IFile = IContentFile | IDirectory;
+export type IFile = IContentFile | IDirectory | IBinary;
+
+interface IBinary {
+  mimetype: Exclude<
+    MimeType,
+    "dir" | "text/markdown" | "nota/theme" | "image/svg"
+  >;
+}
 
 interface IContentFile {
   path: string;

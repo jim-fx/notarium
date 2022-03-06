@@ -1,5 +1,6 @@
 import { matchFrontmatter } from "./regex";
-import { parse } from "yaml";
+import pkg from "yaml";
+const { parse } = pkg;
 
 export function parseFrontmatter(markdown: string) {
   const frontmatter = matchFrontmatter(markdown);

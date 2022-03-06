@@ -77,7 +77,7 @@ export function assureArray<T>(v: T | T[]) {
   return Array.isArray(v) ? v : [v];
 }
 
-export * from "./eventlistener";
+export * from "./eventemitter";
 export * from "./mutex";
 export * from "./fs";
 
