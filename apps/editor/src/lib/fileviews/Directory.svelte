@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { treeFrontend } from '$lib/stores';
+	import fs from '$lib/fs';
 	import type { IDirectory } from '@notarium/types';
 
 	export let activeNode: IDirectory;
@@ -8,7 +8,7 @@
 	$: hasIndexMD = activeNode && !!activeNode.children.find((c) => c.path === 'index.md');
 
 	function addIndexMD() {
-		treeFrontend.createNode(activeNodeId + '/index.md', 'text/markdown');
+		fs.createFile(activeNodeId + '/index.md');
 	}
 </script>
 

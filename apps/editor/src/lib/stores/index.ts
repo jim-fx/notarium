@@ -1,5 +1,4 @@
-import { IDBAdapter, P2PClient, createNetworkAdapter } from '@notarium/adapters';
-import { createTreeStore, createTree } from '@notarium/data';
+import { createTreeStore } from '@notarium/data';
 
 import type { IDirectory } from '@notarium/types';
 import { derived, writable } from 'svelte/store';
@@ -19,9 +18,9 @@ export const activeMimeType = derived([activeNodeId], ([p]) => {
 	return detectMimeFromPath(p);
 });
 
-export const activeNode = derived([activeNodeId, treeStore], ([id]) => {
-	if (!id) return undefined;
-	return fs.findNode(id);
+export const activeNode = derived([activeNodeId, treeStore], ([path, tree]) => {
+	if (!path || !tree) return undefined;
+	return fs.findFile(path);
 });
 
 export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nodeId]) => {
@@ -31,8 +30,10 @@ export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nod
 	const path = splitPath(nodeId);
 	if (n.mimetype !== 'dir') {
 		path.pop();
-		n = treeFrontend.findNode(path) as IDirectory;
+		n = fs.findFile(path) as IDirectory;
 	}
+
+	console.log({ n, nodeId });
 
 	const indexMd = n.children.find((c) => c.path === 'index.md');
 	if (indexMd) {

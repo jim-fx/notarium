@@ -1,18 +1,9 @@
 <script lang="ts">
-	import { createLoader, createConfigStore, createConfig } from '@notarium/data';
-	import { activeNode, activeNodeId, treeBackend } from '$lib/stores';
+	import { activeNode, activeNodeId } from '$lib/stores';
 
 	import { Text, Directory, Image } from '$lib/fileviews';
-	import P2PClient from '@notarium/adapters/P2PClient';
-	import { IDBAdapter } from '@notarium/adapters';
 
-	let loader: ReturnType<typeof createLoader>;
-	function makeOffline() {
-		loader = createLoader(treeBackend);
-		loader.load((d) => {
-			console.log(d);
-		});
-	}
+	function makeOffline() {}
 </script>
 
 <button on:click={makeOffline}>Make Offline</button>

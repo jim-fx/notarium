@@ -1,7 +1,8 @@
 <script lang="ts">
 	import './app.css';
 	import { onMount } from 'svelte';
-	import { localStore } from '$lib/stores';
+	import File from '$lib/elements/File.svelte';
+	import { localStore, treeStore } from '$lib/stores';
 
 	import fs from '$lib/fs';
 
@@ -26,6 +27,8 @@
 		/* createBinaryHandler(channel); */
 
 		await fs.load();
+
+		window['fs'] = fs;
 	});
 </script>
 
@@ -38,6 +41,12 @@
 				}}>hide</button
 			>
 		</header>
+
+		{#if $treeStore?.mimetype === 'dir'}
+			{#each $treeStore.children as child}
+				<File file={child} {handleDelete} {handleCreate} />
+			{/each}
+		{/if}
 	</aside>
 
 	<section>

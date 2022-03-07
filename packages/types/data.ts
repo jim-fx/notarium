@@ -4,11 +4,9 @@ import type { EventEmitter } from "@notarium/common";
 export interface EventMap {
   connect: string;
   disconnect: string;
-  "file.request": { docId: string };
-  "file.response": { docId: string; data: Uint8Array };
-  "doc.open": { docId: string; stateVector: string };
-  "doc.close": { docId: string };
-  "doc.update": { docId: string; updates: string };
+  "doc.open": { path: string; stateVector: string };
+  "doc.close": { path: string };
+  "doc.update": { path: string; update: string };
 }
 
 export interface IMessageAdapter {

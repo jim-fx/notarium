@@ -7,7 +7,7 @@ interface Logger {
 }
 
 let filters: string[] = [];
-let level = 2;
+let level = 0;
 
 let longestName = 0;
 
@@ -101,27 +101,28 @@ function log(scope: string): Logger {
       }
 
       // Make some logs better to read
-      if (
-        Array.isArray(args) &&
-        typeof args[0] === "string" &&
-        typeof args[1] === "object"
-      ) {
-        console.groupCollapsed(
-          `%c[${scope.padEnd(longestName, " ")}]`,
-          `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
-          args[0]
-        );
-        console.log(...args.slice(1));
-        console.groupEnd();
-        return;
-      }
 
-      if (_level === 0) {
-        console.log(
-          `%c[${scope.padEnd(longestName, " ")}]`,
-          `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
-          ...args
-        );
+      if (_level === 2) {
+        if (
+          Array.isArray(args) &&
+          typeof args[0] === "string" &&
+          typeof args[1] === "object"
+        ) {
+          console.groupCollapsed(
+            `%c[${scope.padEnd(longestName, " ")}]`,
+            `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
+            args[0]
+          );
+          console.log(...args.slice(1));
+          console.groupEnd();
+          return;
+        } else {
+          console.log(
+            `%c[${scope.padEnd(longestName, " ")}]`,
+            `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
+            ...args
+          );
+        }
       }
 
       if (_level === 1) {

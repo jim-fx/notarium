@@ -1,20 +1,16 @@
 import { diff_match_patch } from "diff-match-patch";
-import { IDataBackend } from "@notarium/types";
-import { createCachedFactory } from "@notarium/common";
+import { File } from "@notarium/fs";
+import { Doc } from "yjs";
 
-export const createDocument = createCachedFactory(
-  _createDocument,
-  (b) => b.docId
-);
-
-function _createDocument(backend: IDataBackend) {
+export function createDocumentFrontend(file: File) {
   const dmp = new diff_match_patch();
 
   let timeout: NodeJS.Timeout;
   let lastExecution = 0;
 
   function getText() {
-    return backend.doc.getText("content").toString();
+    const doc = file.getData() as Doc;
+    return doc.getText("content").toString();
   }
 
   async function setText(t: string) {
@@ -38,7 +34,7 @@ function _createDocument(backend: IDataBackend) {
 
     const patches = dmp.patch_make(currentContent, diff);
 
-    backend.update((doc) => {
+    file.update((doc: Doc) => {
       const text = doc.getText("content");
       patches.forEach((patch: { start1: any; diffs: [any, any][] }) => {
         let idx = patch.start1;

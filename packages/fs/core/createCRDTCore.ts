@@ -1,6 +1,6 @@
 import { createResolvablePromise } from "@notarium/common";
-import { Doc } from "yjs";
-import type { Adapter, File } from "../types";
+import { applyUpdateV2, Doc } from "yjs";
+import type { Adapter, DataCore, File } from "../types";
 
 let rootDoc: Doc;
 
@@ -8,7 +8,7 @@ export default function wrapCRDT(
   file: File,
   data: Uint8Array | undefined,
   adapters: Adapter[]
-) {
+): DataCore {
   if (!rootDoc) {
     rootDoc = new Doc({ autoLoad: true });
   }
@@ -19,24 +19,48 @@ export default function wrapCRDT(
     rootDoc.getMap().set(file.path, doc);
   }
 
-  doc.on("updateV2", (update: Uint8Array) => {
-    adapters.forEach((a) => a.saveFile(file, update));
+  if (data) {
+    applyUpdateV2(doc, data);
+  }
+
+  doc.on("updateV2", (update: Uint8Array, origin) => {
+    if (origin) {
+      adapters
+        .filter((a) => a.id !== origin)
+        .map((a) => {
+          a.saveFile(file, update);
+        });
+    } else {
+      adapters.forEach((a) => a.saveFile(file, update));
+    }
   });
+
+  console.log("initialized crdt", file.path);
 
   return {
     getData() {
       return doc;
     },
-    async update(cb, originAdapter) {
+    async update(cb, adapterId) {
       const [p, resolve] = createResolvablePromise();
 
       doc.transact(async () => {
         await cb(doc);
         resolve();
-      });
+      }, adapterId);
       await p;
 
-      await Promise.all(adapters.map((a) => a.saveFile(file)));
+      if (adapterId) {
+        await Promise.all(
+          adapters
+            .filter((a) => a.id !== adapterId)
+            .map((a) => {
+              a.saveFile(file);
+            })
+        );
+      } else {
+        await Promise.all(adapters.map((a) => a.saveFile(file)));
+      }
     },
     destroy() {
       doc.destroy();

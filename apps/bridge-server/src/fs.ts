@@ -10,9 +10,17 @@ import { createNetworkAdapter } from "@notarium/adapters";
 
 const ROOT_PATH = resolve(__dirname, "../../../test");
 
-export default createFileSystem(ROOT_PATH, [
-  SQLAdapter,
-  FSTextAdapter,
-  FSTreeAdapter,
-  createNetworkAdapter([], WSClient),
-]);
+const fs = createFileSystem(
+  [
+    SQLAdapter,
+    FSTextAdapter,
+    FSTreeAdapter,
+    createNetworkAdapter([], WSClient),
+  ],
+  {
+    rootPath: ROOT_PATH,
+    autoOpen: true,
+  }
+);
+
+export default fs;

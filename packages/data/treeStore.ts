@@ -1,17 +1,20 @@
 import { Readable, readable } from "svelte/store";
-import { IDataBackend, IDirectory } from "@notarium/types";
+import { IDirectory } from "@notarium/types";
+import type { FileSystem } from "@notarium/fs";
+import type { Doc } from "yjs";
 
-export function createTreeStore(backend: IDataBackend): Readable<IDirectory> {
-  return readable(
-    backend?.doc?.getMap("tree").toJSON() || {},
-    function start(set) {
-      backend.isLoaded.then(() => {
-        set(backend.doc.get("tree").toJSON());
-      });
-      return backend.doc.on("update", () => {
-        console.log("[adapt/store] update content");
-        set(backend.doc.get("tree").toJSON());
-      });
-    }
-  );
+export function createTreeStore(fs: FileSystem): Readable<IDirectory> {
+  return readable(undefined, function start(set) {
+    const tree = fs.openFile("tree");
+
+    fs.isLoaded.then(() => {
+      set(tree.getData().getMap("tree").toJSON() as IDirectory);
+    });
+    return tree.on("update", async () => {
+      console.log("[adapt/store] update content");
+      set(
+        ((await tree.getData()) as Doc).getMap("tree").toJSON() as IDirectory
+      );
+    });
+  });
 }

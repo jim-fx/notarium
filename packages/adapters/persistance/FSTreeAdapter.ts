@@ -120,6 +120,8 @@ async function syncFsWithFile(rootPath: string, file: IFile, memFile: IFile) {
 }
 
 export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
+  const id = Symbol("adapt/tree");
+
   const { rootPath = resolve(process.env.HOME, "Notes") } = fs;
 
   const { emit, on } = createEventEmitter();
@@ -137,10 +139,6 @@ export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
     // syncFsWithFile(rootPath, fsdata, docdata);
 
     finishTask();
-  }
-
-  async function loadDocument() {
-    syncFile(fs, data, id);
   }
 
   // const file = await fs.openFile("tree");
@@ -182,18 +180,26 @@ export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
   });
 
   return {
+    id,
     on,
     async requestFile(f: File) {
+      if (f.path !== "tree") return;
+
       const data = await readFile(rootPath as string);
 
-      f.getData().then((doc) => {});
+      f.isLoaded.then(() => {
+        console.log("SSYYYNC TREE", data);
+        syncFile(f, data);
+      });
 
       console.log("read tree", data);
     },
     async closeFile(f: File) {
+      if (f.path !== "tree") return;
       console.log("close tree", f);
     },
     async saveFile(f: File) {
+      if (f.path !== "tree") return;
       console.log("save tree", f);
     },
   };

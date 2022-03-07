@@ -10,7 +10,7 @@ export default function wrapBinary(file, d, adapters) {
         }
       });
     },
-    async getData() {
+    getData() {
       return data;
     },
     destroy() {},

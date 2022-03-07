@@ -3,14 +3,16 @@ import { tinyws } from "tinyws";
 import type { TinyWSRequest } from "tinyws";
 import WSClient, { connect } from "@notarium/adapters/network/WSClient";
 import fs from "./src/fs";
-import { parseCookie } from "@notarium/common";
+import { parseCookie, splitPath } from "@notarium/common";
 
 const app = polka();
 app.use(tinyws() as any);
 
-// app.get("/", async (_, res) => {
-//   res.end(JSON.stringify(tree.findNode("/")));
-// });
+app.get("/", async (_, res) => {
+  const f = fs.openFile("tree");
+  await f.load();
+  res.end(JSON.stringify(f.getData().getMap("tree").toJSON()));
+});
 
 // WSClient.on("file.request", createFile);
 
@@ -28,20 +30,37 @@ app.use(tinyws() as any);
 //   );
 // });
 
-// app.get("/doc/*", async (req, res) => {
-//   const { path } = req;
-//   let cleanPath = splitPath(path.replace("/doc", "")).join("/");
-//   const file = tree.findNode(cleanPath);
+app.get("/doc/*", async (req, res) => {
+  const { path } = req;
 
-//   if (!file) {
-//     res.statusCode = 404;
-//     return res.end();
-//   }
+  const uriPath = decodeURIComponent(path);
 
-//   const doc = await createDoc(cleanPath);
+  let cleanPath = splitPath(uriPath.replace("/doc", "")).join("/");
 
-//   res.end(JSON.stringify(doc._doc));
-// });
+  console.log(cleanPath);
+
+  await fs.load();
+
+  const file = fs.findFile(cleanPath);
+
+  if (!file) {
+    res.statusCode = 404;
+    return res.end("File not found");
+  }
+
+  const f = fs.openFile(cleanPath);
+
+  await f.load();
+
+  if (f.mimetype.startsWith("text/")) {
+    const text = f.getData().getText("content").toString();
+    res.end(text);
+  }
+});
+
+app.get("/ids", (req, res) => {
+  res.end(JSON.stringify(globalThis["connections"].map((v) => v.id)));
+});
 
 // app.get("/file/*", async (req, res) => {
 //   const { path } = req;

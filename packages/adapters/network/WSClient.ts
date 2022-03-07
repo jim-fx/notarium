@@ -1,23 +1,23 @@
 import { nanoid } from "nanoid";
 import type WebSocket from "ws";
 import { createEventEmitter } from "@notarium/common";
-let connections: {
+const connections: {
   id: string;
   ws: WebSocket;
 }[] = [];
+
+globalThis["connections"] = connections;
 
 const { on, emit } = createEventEmitter();
 
 export const getId = () => "server";
 
 export function sendTo(peerId: string, eventType: string, data: unknown) {
-  const peer = connections.find((c) => c.id === peerId);
-  // console.log("wss::sendto", eventType, peerId);
-  if (peer) {
-    peer.ws.send(JSON.stringify({ type: eventType, data }));
-  } else {
-    console.log("[ws] cant send to ", peerId);
-  }
+  connections.forEach((c) => {
+    if (c.id === peerId) {
+      c.ws.send(JSON.stringify({ type: eventType, data }));
+    }
+  });
 }
 
 export function broadcast(eventType: string, data: unknown) {
@@ -54,7 +54,7 @@ export function connect(ws: WebSocket, id = nanoid()) {
 
     const { type, data } = JSON.parse(msg);
 
-    console.log("[ws] handleMessage ", type, data);
+    console.log("[ws] handleMessage ", type);
 
     // Request to connect to other peer over p2p
     if (type === "p2p-signal") {
@@ -62,23 +62,25 @@ export function connect(ws: WebSocket, id = nanoid()) {
       const partner = connections.find((v) => v.id === _id);
       if (partner) {
         partner.ws.send(
-          JSON.stringify({ type: "p2p-signal", data: { id, signal } })
+          JSON.stringify({ type: "p2p-signal", data: { id: _id, signal } })
         );
+      } else {
+        console.log("cant find partner");
       }
     }
 
-    emit(type, data, id);
+    emit(type, data, { peerId: id });
   });
 
   ws.on("close", () => {
-    connections = connections.filter((c) => c.id !== id);
-    connections.forEach(({ ws: _ws }) =>
-      _ws.send(JSON.stringify({ type: "p2p-disconnect", data: id }))
-    );
+    const index = connections.findIndex((c) => c.id === id);
+    connections.splice(index, 1);
+    // connections.forEach(({ ws: _ws }) =>
+    //   _ws.send(JSON.stringify({ type: "p2p-disconnect", data: id }))
+    // );
   });
 
   emit("connect", id);
-
   ws.send(
     JSON.stringify({
       type: "p2p-id",
@@ -98,6 +100,7 @@ export default {
   on,
   sendTo,
   broadcast,
+  requestFile,
   getId,
   connect,
 };

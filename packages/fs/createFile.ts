@@ -7,23 +7,14 @@ import {
   detectMimeFromPath,
   logger,
 } from "@notarium/common";
-import { Adapter, File, FileSystem } from "./types";
-import { MimeType } from "@notarium/types";
-import { Doc } from "yjs";
+import { DataCore, File, FileSystem } from "./types";
+import type { MimeType } from "@notarium/types";
+import { Doc, encodeStateAsUpdateV2 } from "yjs";
 
 function mimeSupportsCRDT(s: MimeType) {
   const supported: MimeType[] = ["tree", "text/markdown"];
 
   return supported.includes(s);
-}
-
-interface DataCore {
-  update(
-    cb: (d: Doc | Uint8Array) => Promise<void> | void,
-    originalAdapter?: Adapter
-  ): Promise<void>;
-  getData(): Promise<Doc | Uint8Array>;
-  destroy(): void;
 }
 
 const log = logger("file");
@@ -33,42 +24,55 @@ export function createFile(path: string, fs: FileSystem) {
 
   const emitter = createEventEmitter();
 
-  let isLoaded = false;
+  let core: DataCore;
   const [corePromise, setCore] = createResolvablePromise<DataCore>();
-  corePromise.then(() => {
-    isLoaded = true;
+  corePromise.then((c) => {
+    core = c;
   });
 
-  const mutex = createMutexFactory();
+  log("open file", path);
 
   const file: File = {
     path,
     mimetype,
+    mutex: createMutexFactory(),
     get isCRDT() {
       return mimeSupportsCRDT(file.mimetype);
     },
-    async getData() {
-      return (await corePromise).getData();
+    getData() {
+      if (!core) console.trace("FIle not yet loaded");
+      return core.getData();
+    },
+    async getBinaryData() {
+      const data = await (await corePromise).getData();
+      if (!this.isCRDT) {
+        return data as Uint8Array;
+      }
+      return encodeStateAsUpdateV2(data as Doc);
     },
     async read() {
       return (await corePromise).getData();
     },
     // this cant be called by adapters, only interfaces
-    async update(cb) {
-      const f = await mutex();
-      await (await corePromise).update(cb);
+    async update(cb, adapterSymbol) {
+      const f = await this.mutex();
+      const core = await corePromise;
+      await core.update(cb, adapterSymbol);
       f();
+      emitter.emit("update", await core.getData());
     },
-    get isLoaded() {
-      return isLoaded;
-    },
+    isLoaded: corePromise,
     load,
     on: emitter.on,
     close,
   };
 
   async function load() {
-    let data: unknown;
+    if (core) return;
+
+    log("loading", file);
+
+    let data: Uint8Array;
     for (const a of fs.adapters) {
       const d = await a.requestFile(file);
       if (d) {
@@ -76,11 +80,11 @@ export function createFile(path: string, fs: FileSystem) {
       }
     }
 
-    const core = file.isCRDT
-      ? createCRDTCore(file, data, fs.adapters)
-      : createBinaryCore(file, data, fs.adapters);
-
-    setCore(core);
+    setCore(
+      file.isCRDT
+        ? createCRDTCore(file, data, fs.adapters)
+        : createBinaryCore(file, data, fs.adapters)
+    );
 
     log("loaded", file);
   }

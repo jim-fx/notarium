@@ -217,6 +217,7 @@ importers:
     specifiers:
       '@notarium/adapters': link:../adapters
       '@notarium/common': link:../common
+      '@notarium/fs': link:../fs
       '@notarium/parser': link:../parser
       '@notarium/types': link:../types
       '@types/diff-match-patch': ^1.0.32
@@ -226,6 +227,7 @@ importers:
     dependencies:
       '@notarium/adapters': link:../adapters
       '@notarium/common': link:../common
+      '@notarium/fs': link:../fs
       '@notarium/parser': link:../parser
       '@notarium/types': link:../types
       svelte: 3.46.4

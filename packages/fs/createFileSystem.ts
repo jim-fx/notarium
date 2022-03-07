@@ -1,54 +1,52 @@
 import { createFile } from "./createFile";
-import { Adapter, AdapterFactory } from "./types";
+import { AdapterFactory, FileSystem, FileSystemFlags } from "./types";
 import {
   createEventEmitter,
   createResolvablePromise,
   logger,
 } from "@notarium/common";
 
+import * as treeFrontend from "./treeFrontend";
+
 const log = logger("fs");
 
 export function createFileSystem(
-  rootPath: string,
-  adaptersFactories: AdapterFactory[]
+  adaptersFactories: AdapterFactory[],
+  flags: FileSystemFlags
 ) {
-  const { on, emit } = createEventEmitter();
-
+  let isLoading = false;
   const [isLoaded, setLoaded] = createResolvablePromise();
 
-  const fs = {
+  const cache = {};
+
+  const fs: FileSystem = {
     isLoaded,
-    rootPath,
-    on,
+    flags,
     adapters: [],
-    tree: undefined,
-    async getContext(path: string) {
-      const config = createContext(path, this);
-      await config.load();
-      return config;
+    findFile(path: string) {
+      return treeFrontend.findFile(this, path)?.toJSON();
     },
-    async openFile(path: string) {
-      await isLoaded;
-      return createFile(path, this);
+    renameFile(oldPath: string, newPath: string) {
+      return treeFrontend.renameFile(this, oldPath, newPath);
     },
-    async findFile(path: string) {},
-    async renameFile(oldPath: string, newPath: string) {
-      await isLoaded;
-    },
-    async createFile(path: string) {
-      await isLoaded;
-    },
-    async deleteFile(path: string) {
-      await isLoaded;
-      console.log("delete file", path);
+    openFile(path: string) {
+      if (path in cache) return cache[path];
+      cache[path] = createFile(path, this);
+      return cache[path];
     },
     async load() {
+      if (isLoading) return isLoaded;
+      isLoading = true;
+
       this.adapters = await Promise.all(
-        adaptersFactories.map((fn) => fn(this))
+        adaptersFactories.map(async (fn) => {
+          return fn(this);
+        })
       );
 
-      this.tree = createFile("tree", this);
-      await this.tree.load();
+      const tree = this.openFile("tree");
+      await tree.load();
+
       setLoaded();
       log("loaded");
     },

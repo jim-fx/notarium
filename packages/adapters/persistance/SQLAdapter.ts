@@ -26,14 +26,28 @@ function parseBinary(s: string) {
   return Uint8Array.from(s.split(",").map((v) => parseInt(v)));
 }
 
+function toArrayBuffer(b: Buffer) {
+  return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+}
+
 export const SQLAdapter: AdapterFactory = (fs: FileSystem) => {
+  const id = Symbol("adapt/sql");
+
   return {
+    id,
     on() {},
-    async writeFile(f: File) {
+    async closeFile(f: File) {},
+    async saveFile(f: File) {
       const db = await dbPromise;
       console.log("[pers/sql] save document state", f.path);
 
-      const content = (await f.getData()).toString();
+      let data: Uint8Array;
+
+      if (f.isCRDT) {
+      } else {
+      }
+
+      const content = (await f.getBinaryData()).toString();
 
       const updateResult = await db.run(
         `UPDATE OR IGNORE documents 
@@ -59,6 +73,7 @@ export const SQLAdapter: AdapterFactory = (fs: FileSystem) => {
     async requestFile(f: File) {
       let doc = await readDocFromDB(f.path);
       console.log("[pers/sql] read doc", f.path, "from db");
+      console.log(doc);
       if (doc?.content) return parseBinary(doc.content) as Uint8Array;
       return;
     },

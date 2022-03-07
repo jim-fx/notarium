@@ -1,4 +1,3 @@
-export * from "./treeFrontend";
 export * from "./documentFrontend";
 
 export * from "./treeStore";

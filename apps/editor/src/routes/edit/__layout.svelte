@@ -3,7 +3,7 @@
 
 	export async function load({ params }) {
 		if (browser) {
-			await treeBackend.load();
+			await fs.load();
 		}
 		return {
 			props: {
@@ -14,15 +14,8 @@
 </script>
 
 <script lang="ts">
-	import {
-		activeNode,
-		hasActiveNodeIndexMD,
-		activeNodeId,
-		treeBackend,
-		configStore
-	} from '$lib/stores';
-
-	const config = $configStore;
+	import fs from '$lib/fs';
+	import { activeNode, hasActiveNodeIndexMD, activeNodeId } from '$lib/stores';
 </script>
 
 <details>
@@ -44,13 +37,6 @@
 			<td>dir</td>
 			<td>
 				<code>{JSON.stringify($activeNode)}</code>
-			</td>
-		</tr>
-
-		<tr>
-			<td>Config</td>
-			<td>
-				<pre>{JSON.stringify($config, null, 2)}</pre>
 			</td>
 		</tr>
 	</table>

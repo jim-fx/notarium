@@ -20,14 +20,19 @@ const files: Record<string, File> = {};
 const log = logger("adapt/idb");
 
 export const IDBAdapter: AdapterFactory = (fs: FileSystem) => {
+  const id = Symbol("adapt/idb");
+
   const saveDocument = delayExecution(async (ids) => {
     const db = await getDb();
     ids.forEach(async (id) => {
-      await db.put("documents", files[id].getData(), id);
+      const file = files[id];
+      let data = await file.getBinaryData();
+      await db.put("documents", data, id);
     });
   }, 2000);
 
   return {
+    id,
     on() {},
     async saveFile(f: File) {
       files[f.path] = f;
@@ -35,7 +40,7 @@ export const IDBAdapter: AdapterFactory = (fs: FileSystem) => {
     },
     async requestFile(f: File) {
       files[f.path] = f;
-      log("loaded document ", { path: f.path });
+      log("loading file " + f.path, f);
       return await (await getDb()).get("documents", f.path);
     },
     async closeFile(f: File) {
