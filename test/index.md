@@ -1,13 +1,13 @@
 ---
-private: false
+private: true
 ---
-
 # JimFX's Personal Wiki
 
-[Ressources](Ressources)
+[Resources](Resources)
 
 [Archive](Archive)
 
 [Projects](Projects)
 
 [Areas](Areas)
+

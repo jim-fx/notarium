@@ -8,7 +8,7 @@ export interface DataCore {
     cb: (d: Doc | Uint8Array) => Promise<void> | void,
     originalAdapter?: Symbol
   ): Promise<void>;
-  getData(): Promise<Doc | Uint8Array>;
+  getData(): Doc | Uint8Array;
   destroy(): void;
 }
 
@@ -18,14 +18,15 @@ export interface File {
   readonly isCRDT: boolean;
   isLoaded: Promise<any>;
 
-  on: EventEmitter<{}>["on"];
+  on: EventEmitter<{ update: void }>["on"];
 
   mutex(): Promise<() => void>;
+
+  stuff: Record<string, any>;
 
   getData(): Uint8Array | Doc;
   getBinaryData(): Promise<Uint8Array>;
 
-  read(): Promise<unknown>;
   load(): Promise<unknown>;
   close(): void;
   update(
@@ -54,11 +55,14 @@ export interface FileSystem {
   flags: FileSystemFlags;
   adapters: Adapter[];
 
+  load(): Promise<void>;
   openFile(path: string): File;
 
+  setOffline(o: boolean): void;
+
+  isDir(path: string | string[]): boolean;
   findFile(path: string | string[]): IFile;
-  renameFile(oldPath: string, newPath: string): IFile;
-  createFile(path: string): Promise<void>;
-  deleteFile(path: string): Promise<void>;
-  load(): Promise<void>;
+  renameFile(oldPath: string, newPath: string): void;
+  createFile(path: string): void;
+  deleteFile(path: string): void;
 }

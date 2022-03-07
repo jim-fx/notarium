@@ -2,10 +2,7 @@
 	export let block;
 </script>
 
-<table
-	class="border-collapse space-y-6 p-4 rounded-md divide-y divide-opacity-30 divide-gray-50"
-	style="background-color: rgb(0, 44, 69);"
->
+<table class="border-collapse space-y-6 p-4 rounded-md divide-y divide-opacity-30 divide-gray-50">
 	<tr class="divide-x divide-opacity-30 divide-gray-50">
 		{#each block.data.headers as header}
 			<th class="p-2 font-bold">{header}</th>

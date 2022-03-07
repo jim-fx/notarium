@@ -39,19 +39,17 @@ export function createFile(path: string, fs: FileSystem) {
     get isCRDT() {
       return mimeSupportsCRDT(file.mimetype);
     },
+    stuff: {},
     getData() {
       if (!core) console.trace("FIle not yet loaded");
       return core.getData();
     },
     async getBinaryData() {
-      const data = await (await corePromise).getData();
+      const data = (await corePromise).getData();
       if (!this.isCRDT) {
         return data as Uint8Array;
       }
       return encodeStateAsUpdateV2(data as Doc);
-    },
-    async read() {
-      return (await corePromise).getData();
     },
     // this cant be called by adapters, only interfaces
     async update(cb, adapterSymbol) {
@@ -59,7 +57,7 @@ export function createFile(path: string, fs: FileSystem) {
       const core = await corePromise;
       await core.update(cb, adapterSymbol);
       f();
-      emitter.emit("update", await core.getData());
+      emitter.emit("update", core.getData());
     },
     isLoaded: corePromise,
     load,
@@ -80,13 +78,15 @@ export function createFile(path: string, fs: FileSystem) {
       }
     }
 
-    setCore(
-      file.isCRDT
-        ? createCRDTCore(file, data, fs.adapters)
-        : createBinaryCore(file, data, fs.adapters)
-    );
+    let c = file.isCRDT
+      ? createCRDTCore(file, data, fs.adapters)
+      : createBinaryCore(file, data, fs.adapters);
+
+    setCore(c);
 
     log("loaded", file);
+
+    return c.getData();
   }
 
   async function close() {

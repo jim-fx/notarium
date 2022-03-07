@@ -4,9 +4,12 @@ import type { TinyWSRequest } from "tinyws";
 import WSClient, { connect } from "@notarium/adapters/network/WSClient";
 import fs from "./src/fs";
 import { parseCookie, splitPath } from "@notarium/common";
+import cors from "cors";
 
 const app = polka();
 app.use(tinyws() as any);
+
+app.use(cors({ origin: true }));
 
 app.get("/", async (_, res) => {
   const f = fs.openFile("tree");
@@ -30,18 +33,18 @@ app.get("/", async (_, res) => {
 //   );
 // });
 
-app.get("/doc/*", async (req, res) => {
+app.get("/file/*", async (req, res) => {
   const { path } = req;
 
   const uriPath = decodeURIComponent(path);
 
-  let cleanPath = splitPath(uriPath.replace("/doc", "")).join("/");
-
-  console.log(cleanPath);
+  let cleanPath = splitPath(uriPath.replace("/file", "")).join("/");
 
   await fs.load();
 
   const file = fs.findFile(cleanPath);
+
+  console.log({ file, cleanPath });
 
   if (!file) {
     res.statusCode = 404;
@@ -55,6 +58,9 @@ app.get("/doc/*", async (req, res) => {
   if (f.mimetype.startsWith("text/")) {
     const text = f.getData().getText("content").toString();
     res.end(text);
+  } else {
+    res.setHeader("Content-Type", file.mimetype);
+    res.end(await f.getBinaryData());
   }
 });
 

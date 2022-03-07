@@ -71,7 +71,7 @@
 		{#if $isEditing}
 			{#if browser}
 				{#await import('$lib/elements/TextEditor.svelte')}
-					<p>Loading Text</p>
+					<p>Loading Editor...</p>
 				{:then editorComponent}
 					<svelte:component this={editorComponent.default} bind:value={$text} />
 				{/await}

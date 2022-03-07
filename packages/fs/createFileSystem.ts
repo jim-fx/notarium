@@ -3,7 +3,9 @@ import { AdapterFactory, FileSystem, FileSystemFlags } from "./types";
 import {
   createEventEmitter,
   createResolvablePromise,
+  groupArray,
   logger,
+  wait,
 } from "@notarium/common";
 
 import * as treeFrontend from "./treeFrontend";
@@ -29,10 +31,43 @@ export function createFileSystem(
     renameFile(oldPath: string, newPath: string) {
       return treeFrontend.renameFile(this, oldPath, newPath);
     },
+    isDir(path: string) {
+      return treeFrontend.isDir(path);
+    },
     openFile(path: string) {
       if (path in cache) return cache[path];
       cache[path] = createFile(path, this);
       return cache[path];
+    },
+    async setOffline(o) {
+      if (!o) return;
+      await isLoaded;
+
+      console.log("FS:offline", o);
+
+      const allFiles = treeFrontend.findAllFiles(this);
+
+      const groups = groupArray(allFiles, 5);
+
+      let amount = allFiles.length;
+      let done = 0;
+
+      console.log(allFiles);
+
+      while (groups.length) {
+        const g = groups.pop();
+        console.log("Loading", g);
+        await Promise.all(
+          g.map(async (filePath) => {
+            if (!filePath) return;
+            const file = this.openFile(filePath);
+            await file.load();
+            done++;
+          })
+        );
+        await wait(200);
+        console.log(Math.floor((done / amount) * 1000) / 10 + "% loaded");
+      }
     },
     async load() {
       if (isLoading) return isLoaded;

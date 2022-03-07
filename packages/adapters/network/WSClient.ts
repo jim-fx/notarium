@@ -16,7 +16,7 @@ export function sendTo(peerId: string, eventType: string, data: unknown) {
   if (peer) {
     peer.ws.send(JSON.stringify({ type: eventType, data }));
   } else {
-    console.log("[ws] cant send to ", peerId);
+    console.trace("[ws] cant send to ", peerId);
   }
 }
 
@@ -58,7 +58,7 @@ export function connect(ws: WebSocket, id = nanoid()) {
       }
     }
 
-    emit(type, data, id);
+    emit(type, data, { peerId: id });
   });
 
   ws.on("close", () => {
@@ -85,9 +85,14 @@ export function connect(ws: WebSocket, id = nanoid()) {
   );
 }
 
+async function requestFile(path: string) {
+  return;
+}
+
 export default {
   on,
   sendTo,
+  requestFile,
   broadcast,
   getId,
   connect,

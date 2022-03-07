@@ -35,8 +35,6 @@ export default function wrapCRDT(
     }
   });
 
-  console.log("initialized crdt", file.path);
-
   return {
     getData() {
       return doc;

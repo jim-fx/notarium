@@ -122,7 +122,7 @@ async function syncFsWithFile(rootPath: string, file: IFile, memFile: IFile) {
 export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
   const id = Symbol("adapt/tree");
 
-  const { rootPath = resolve(process.env.HOME, "Notes") } = fs;
+  const { rootPath = resolve(process.env.HOME, "Notes") } = fs.flags;
 
   const { emit, on } = createEventEmitter();
 
@@ -130,45 +130,34 @@ export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
 
   const createMutex = createMutexFactory();
 
-  async function saveDocument() {
-    const finishTask = await createMutex("applyDocToFS");
-
-    const fsdata = await readFile(rootPath);
-    // const docdata = frontend.findNode("/");
-
-    // syncFsWithFile(rootPath, fsdata, docdata);
-
-    finishTask();
-  }
-
-  // const file = await fs.openFile("tree");
-  // await file.load();
-
   const watcher = FSWatcher(rootPath);
 
   watcher.on("changes", async (changes) => {
     const finishTask = await createMutex("applyFsToDoc");
 
-    backend.update(async () => {
-      return;
+    const file = fs.openFile("tree");
+
+    await file.isLoaded;
+
+    file.update(async () => {
       await Promise.all(
         changes.map(async (change) => {
           switch (change.type) {
             case "rename":
-              frontend.renameNode(change.path, change.newPath, id);
+              fs.renameFile(change.path, change.newPath, id);
               break;
             case "delete":
-              frontend.deleteNode(change.path, id);
+              fs.deleteFile(change.path, id);
               break;
             case "add":
               if (change.isDirectory) {
-                frontend.createNode(change.path, "dir", id);
+                fs.createFile(change.path, "dir", id);
               } else {
-                frontend.createNode(change.path, change.mimetype, id);
+                fs.createFile(change.path, change.mimetype, id);
               }
               break;
             case "unlink":
-              frontend.deleteNode(change.path, id);
+              fs.deleteFile(change.path, id);
               break;
             default:
               break;
@@ -188,19 +177,14 @@ export async function FSTreeAdapter(fs: FileSystem): Promise<Adapter> {
       const data = await readFile(rootPath as string);
 
       f.isLoaded.then(() => {
-        console.log("SSYYYNC TREE", data);
         syncFile(f, data);
       });
-
-      console.log("read tree", data);
     },
     async closeFile(f: File) {
       if (f.path !== "tree") return;
-      console.log("close tree", f);
     },
     async saveFile(f: File) {
       if (f.path !== "tree") return;
-      console.log("save tree", f);
     },
   };
 }

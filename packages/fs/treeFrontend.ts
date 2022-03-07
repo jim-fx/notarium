@@ -60,7 +60,11 @@ export function findFile(fs: FileSystem, path: string | string[] = "/"): YNode {
   return currentNode;
 }
 
-function createFile(path: string, mimetype: MimeType, origin: Symbol = myId) {
+export function createFile(
+  path: string,
+  mimetype: MimeType,
+  origin: Symbol = myId
+) {
   const p = split(path);
 
   console.log("tree.frontend.create", p);
@@ -83,6 +87,37 @@ function createFile(path: string, mimetype: MimeType, origin: Symbol = myId) {
       children.push([child as YNode]);
     }
   }, origin);
+}
+
+export function findAllFiles(fs: FileSystem) {
+  const t = getRootNode(fs).toJSON() as IDirectory;
+
+  let currentChildren: TempFile[] = t.children.map((c) => {
+    return {
+      path: c.path,
+      file: c,
+    };
+  });
+
+  const output: string[] = [];
+
+  while (currentChildren.length) {
+    const cu = currentChildren.shift();
+    if ("children" in cu.file) {
+      currentChildren.push(
+        ...cu.file.children.map((c) => {
+          return {
+            path: cu.path + "/" + c.path,
+            file: c,
+          };
+        })
+      );
+    } else {
+      output.push(cu.path);
+    }
+  }
+
+  return output;
 }
 
 export function renameFile(fs: FileSystem, path: string, newPath: string) {
@@ -109,7 +144,7 @@ export function renameFile(fs: FileSystem, path: string, newPath: string) {
   }, origin);
 }
 
-function deleteNode(path: string, origin: Symbol = myId) {
+export function deleteFile(path: string, origin: Symbol = myId) {
   const p = split(path);
 
   // Disallow deleting of root dir
@@ -127,6 +162,6 @@ function deleteNode(path: string, origin: Symbol = myId) {
   }, origin);
 }
 
-function isDir(path: string) {
-  return !!findNode(path)?.toJSON()?.children;
+export function isDir(fs: FileSystem, path: string) {
+  return !!findChild(fs, path)?.toJSON()?.children;
 }

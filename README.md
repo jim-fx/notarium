@@ -65,7 +65,7 @@ $ pnpm dev
   - Maybe use yaml, seems more resistant to format changes
   - Context Store (index.md+frontmatter, config.json)
 - [ ] Sync Tree with Document, eg (document deletion);
-- [ ] Sync Binary files with peers, maybe simple-peer-files
+- [x] Sync Binary files with peers, maybe simple-peer-files
 - [ ] Authentication / Authorization, okay p2p auth seems hard
 - [ ] Theming Support
 - [ ] Awareness Information

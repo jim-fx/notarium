@@ -7,8 +7,12 @@ import { browser } from '$app/env';
 import { splitPath, detectMimeFromPath } from '@notarium/common';
 
 import fs from '../fs';
+import { get } from './localStore';
 
 export const treeStore = createTreeStore(fs);
+
+export const offline = get('offline', false);
+offline.subscribe((o) => fs.setOffline(o));
 
 export const activeNodeId = derived([page], ([p]) => {
 	return p.params?.editPath;
@@ -32,8 +36,6 @@ export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nod
 		path.pop();
 		n = fs.findFile(path) as IDirectory;
 	}
-
-	console.log({ n, nodeId });
 
 	const indexMd = n.children.find((c) => c.path === 'index.md');
 	if (indexMd) {

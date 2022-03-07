@@ -2,11 +2,31 @@ let ws: Promise<WebSocket>;
 import SimplePeer from "simple-peer";
 import { EventMap } from "@notarium/types";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { createEventEmitter, logger } from "@notarium/common";
+import {
+  createEventEmitter,
+  createResolvablePromise,
+  logger,
+} from "@notarium/common";
 
 const log = logger("adapt/p2p");
 
-const peers: { peer: SimplePeer.Instance; id: string }[] = [];
+interface WSPeer {
+  id: string;
+  send(event: string, data: unknown): Promise<void>;
+  requestFile(path: string): Promise<unknown>;
+  peer: SimplePeer.Instance;
+}
+
+interface RTCPeer {
+  id: string;
+  send(event: string, data: unknown): Promise<void>;
+  requestFile(path: string): Promise<unknown>;
+  ws: WebSocket;
+}
+
+type Peer = WSPeer | RTCPeer;
+
+const peers: Peer[] = [];
 
 const { emit, on } = createEventEmitter<EventMap>();
 
@@ -57,7 +77,20 @@ function connectToPeer(
     initiator: !signal,
   }) as unknown as SimplePeer.Instance;
 
-  peers.push({ peer, id });
+  const [connected, setConnected] = createResolvablePromise();
+
+  async function send(type: string, data: unknown) {
+    await connected;
+    if (peer.connected) {
+      peer.send(JSON.stringify({ type, data }));
+    }
+  }
+
+  async function requestFile(path: string) {
+    console.log("RequestFile", path);
+  }
+
+  peers.push({ peer, id, requestFile, send });
 
   if (signal) {
     peer.signal(signal);
@@ -77,6 +110,7 @@ function connectToPeer(
     log("connected to ", { id });
     // peer.send(JSON.stringify({ type: "connect", data: "hello" }));
     emit("connect", id);
+    setConnected();
   });
 
   peer.on("close", () => removePeer(id));
@@ -129,10 +163,19 @@ async function handleMessage(msg: string, peerId?: string) {
     });
   }
 
-  emit(type, data, peerId);
+  emit(type, data, { peerId });
 }
 
 export async function connect(url: string) {
+  let server = url;
+
+  server = server.replace("/ws", "");
+  if (server.startsWith("ws://")) {
+    server = server.replace("ws://", "http://");
+  } else if (server.startsWith("wss://")) {
+    server = server.replace("wss://", "https://");
+  }
+
   const id = getId();
 
   if (id) {
@@ -159,30 +202,38 @@ export async function connect(url: string) {
   _ws.onmessage = (msg) => {
     handleMessage(msg.data, "server");
   };
+
+  async function send(type: string, data: unknown) {
+    (await ws).send(JSON.stringify({ type, data }));
+  }
+
+  async function requestFile(path: string) {
+    const res = await fetch(server + "/file/" + path + "?nosw");
+    if (!res.ok) return;
+    return res.arrayBuffer();
+  }
+
+  peers.push({
+    id: "server",
+    send,
+    requestFile,
+    ws: _ws as unknown as WebSocket,
+  });
 }
 
-async function sendToServer(eventType: string, data?: unknown) {
-  (await ws).send(JSON.stringify({ type: eventType, data }));
+export async function requestFile(path: string) {
+  return Promise.race(peers.map((p) => p.requestFile(path)));
 }
 
 export const broadcast: typeof emit = async (type: string, data: unknown) => {
-  const msg = JSON.stringify({ type, data });
-  peers.forEach((p) => {
-    if (p.peer.connected) {
-      p.peer.send(msg);
-    }
-  });
-  (await ws).send(msg);
+  log("broadcast", { type, data });
+  peers.forEach((p) => p.send(type, data));
 };
 
 export async function sendTo(id: string, type: string, data: unknown) {
-  if (id === "server") {
-    return sendToServer(type, data);
-  }
-
   const p = peers.find((p) => p.id === id);
-  if (p && p.peer.connected) {
-    p.peer.send(JSON.stringify({ type, data }));
+  if (p) {
+    p.send(type, data);
   }
 }
 

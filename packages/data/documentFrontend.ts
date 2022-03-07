@@ -26,6 +26,8 @@ export function createDocumentFrontend(file: File) {
 
     const currentContent = getText();
 
+    if (currentContent === t) return;
+
     // Compute the diff:
     const diff = dmp.diff_main(currentContent, t);
 

@@ -1,3 +1,6 @@
+---
+type: default
+---
 ### Theorie Runde 
 
 * what you design now is a process in the future  
@@ -11,10 +14,9 @@
 
 Christopher Alexander war interessant - Pattern Recognition 
 
-
 Jede hat einen Raum um sich, in dem die eigenen Regeln gelten
      Aura
-     
+
 * wie können wir designen um Menschen in ein anderes mindset zu bringen - weg vom mechanistischen weltbild - 
 
 der raum/ das objekt erzählt dir was du in/mit ihm machen kannst
@@ -31,7 +33,6 @@ Realität ist nur im Kopf, änder die Gedanken --> ändert die Realität
 Räume in echt kaputt machen --> Räume/Grenzen im Kopf kaputtmachen
 
 Probleme enstehen oft wenn sich Menschen ihrern 
-
 
 Raum gegenseitig überschneidet
 
@@ -63,10 +64,10 @@ Framing Sheet von Franzi
 
 Narrativ für verschiedene Funktionalitäten des Badge 
 
-#### Merksätze und Tricks für kritisches Gestalten
+#### #### #### #### #### Merksätze und Tricks für kritisches Gestalten
+
 * What could possibly go wrong? 
 * Was werden die anderen sehen in dem was ich tue? 
 * Was hat mir ermöglicht das hier zu tun und wie kann ich das für future usix zugänglich machen? 
 * Welche Mittel der Macht gibt es in dem was ich gestalte und wer hat dazu Zugang (Bsp Admin-Interface, Laminiergerät, Schilder, Schlüssel...)
 * 
-

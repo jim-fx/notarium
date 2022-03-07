@@ -1,18 +1,23 @@
-import { createBinaryBackend } from '@notarium/data';
-import { P2PClient, IDBAdapter } from '@notarium/adapters';
+import fs from '$lib/fs';
 
 export default function createBinaryHandler(channel: BroadcastChannel) {
 	channel.addEventListener('message', async (event) => {
 		const { type, url } = event.data;
 		if (type === 'request') {
-			const cleanUrl = url.replace(`${window.location.origin}/api/content/`, '');
-			const backend = createBinaryBackend(cleanUrl, {
-				persistanceAdapterFactory: IDBAdapter,
-				messageAdapter: P2PClient
-			});
-			console.log('URL:REQUEST', cleanUrl);
+			const f = fs.findFile(url);
 
-			await backend.load();
+			if (!f) return;
+
+			console.log('SWREQ:', url);
+			const file = fs.openFile(url);
+			const data = await file.load();
+
+			if (data) {
+				channel.postMessage({
+					url,
+					data
+				});
+			}
 		}
 	});
 }

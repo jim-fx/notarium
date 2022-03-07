@@ -1,12 +1,10 @@
 <script lang="ts">
-	import { activeNode, activeNodeId } from '$lib/stores';
+	import { activeNode, activeNodeId, offline } from '$lib/stores';
 
 	import { Text, Directory, Image } from '$lib/fileviews';
-
-	function makeOffline() {}
 </script>
 
-<button on:click={makeOffline}>Make Offline</button>
+<button on:click={() => ($offline = !$offline)}>Make Offline</button>
 
 {#if !$activeNode}
 	<p>404</p>

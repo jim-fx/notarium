@@ -1,18 +1,15 @@
 import {
-  createCachedFactory,
-  createEventListener,
+  createEventEmitter,
   createResolvablePromise,
   logger,
   mergeObjects,
   splitPath,
 } from "@notarium/common";
 import { parseFrontmatter } from "@notarium/parser";
+import type { FileSystem, File } from "./types";
 
-import { createDataBackend } from "./backend";
-import { createDocument } from "./documentFrontend";
-import { createTree } from "./treeFrontend";
+import { createDocumentFrontend } from "@notarium/data";
 
-import type { IDataBackend } from "@notarium/types";
 import { readable } from "svelte/store";
 
 const log = logger("data/config");
@@ -23,33 +20,26 @@ function getAllPossibleConfigs(rawPath: string) {
   });
 }
 
-export const createConfigStore = createCachedFactory(_createConfigStore);
-export const createConfig = createCachedFactory(_createConfig);
-
-function createConfigStore(b: ReturnType<typeof _createConfig>) {
+function createConfigStore(b: ReturnType<typeof createConfig>) {
   return readable({}, (set) => {
     b.on("config", (c) => set(c));
   });
 }
 
-function createConfig(docId: string, fs: FileSystem) {
-  log("new", { docId });
+function createConfig(path: string, fs: FileSystem) {
+  log("new", { path });
 
-  const { on, emit } = createEventListener<{ config: any }>();
+  const { on, emit } = createEventEmitter<{ config: any }>();
 
-  const treeStore = createDataBackend("tree", {
-    messageAdapter,
-    persistanceAdapterFactory,
-  });
-
-  const tree = createTree(treeStore);
+  const tree = fs.openFile("tree");
 
   let paths: string[] = [];
+
   let backends: {
-    backend: IDataBackend;
+    file: File;
     listener: () => unknown;
     frontmatter: any;
-    frontend: ReturnType<typeof createDocument>;
+    frontend: ReturnType<typeof createDocumentFrontend>;
   }[] = [];
   const [isLoaded, setLoaded] = createResolvablePromise<boolean>();
 
@@ -69,20 +59,12 @@ function createConfig(docId: string, fs: FileSystem) {
   }
 
   function updateBackendStores() {
-    // Unsubscribe old backends
-    backends.forEach((b) => {
-      b.backend.doc.off("update", b.listener);
-    });
-
     backends = paths.map((b) => {
-      const backend = createDataBackend(b, {
-        messageAdapter,
-        persistanceAdapterFactory,
-      });
-      const frontend = createDocument(backend);
+      const file = fs.openFile(b);
+      const frontend = createDocumentFrontend(file);
 
       const r = {
-        backend,
+        file,
         listener,
         frontend,
         frontmatter: {},
@@ -92,27 +74,27 @@ function createConfig(docId: string, fs: FileSystem) {
         r.frontmatter = parseFrontmatter(frontend.getText());
         updateConfig();
       }
-      backend.doc.on("update", listener);
+      file.on("update", listener);
 
       return r;
     });
 
     Promise.all(
-      backends.map((b) => {
-        b.backend.load();
+      backends.map(async (b) => {
+        await b.file.load();
         b.listener();
       })
     ).then(() => {
       backends.forEach((b) => b.listener());
-      log("loaded", { docId });
+      log("loaded", { path });
       updateConfig();
     });
   }
 
   function updatePossiblePaths() {
-    paths = getAllPossibleConfigs(docId).filter((p) => {
-      if (!tree.findNode(p)) return false;
-      if (tree.isDir(p)) return false;
+    paths = getAllPossibleConfigs(path).filter((p) => {
+      if (!fs.findFile(p)) return false;
+      if (!fs.isDir(p)) return false;
       return true;
     });
 
@@ -120,14 +102,9 @@ function createConfig(docId: string, fs: FileSystem) {
   }
   updatePossiblePaths();
 
-  treeStore.doc.on("update", () => {
-    updatePossiblePaths();
-  });
+  tree.on("update", () => updatePossiblePaths());
 
   return {
-    get docId() {
-      return docId;
-    },
     get() {
       return JSON.parse(JSON.stringify(config));
     },

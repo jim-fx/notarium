@@ -15,6 +15,30 @@ corremos
 correis
 corren
 
+## hablar - sprechen
+hablo
+hablas
+habla
+hablamos
+habláis
+hablan
+
+## dicer - sagen
+dizo
+dices
+dice
+dicemos
+dicéis
+dicen
+
+## andar - gehen
+ando
+andas
+anda
+andamos
+andáis
+andan
+
 ## caminar - gehen
 camino
 caminas
@@ -147,14 +171,6 @@ venemos
 veis
 ven
 
-## crear - denken, glauben
-creo
-creas
-crea
-creamos
-creáis
-crean
-
 ## dar - geben
 doy
 das
@@ -186,3 +202,27 @@ acuna
 acunamos
 acunais
 acunan
+
+## pensar - denken,überlegen
+pienso
+piensas
+piensa
+pensamos
+pensáis
+piensan
+
+## crear - denken, glauben
+creo
+creas
+crea
+creamos
+creáis
+crean
+
+## oler - riechen
+huelo
+hueles
+huele
+olemos
+oléis
+huelen

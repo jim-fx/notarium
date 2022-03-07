@@ -15,17 +15,25 @@ export const FSTextAdapter: AdapterFactory = (fs: FileSystem) => {
   const { rootPath = resolve(process.env.HOME, "Notes") } = fs.flags;
   const { on, emit } = createEventEmitter();
 
+  const files: Record<string, File> = {};
+
   const watcher = FSWatcher(rootPath);
 
   watcher.on("changes", (changes) => {
     changes.forEach(async (change) => {
       const changePath = splitPath(change.path).join("/");
-      // const content = await readFile(filePath, "utf8");
-      emit(changePath + ".change", "helloo");
+      const file = files[changePath];
+      if (file && file.mimetype.startsWith("text/")) {
+        await file.load();
+        const content = await readFile(rootPath + "/" + changePath, "utf8");
+
+        const frontend = file.stuff.frontend || createDocumentFrontend(file);
+        file.stuff.frontend = frontend;
+
+        frontend.setText(content);
+      }
     });
   });
-
-  const files: Record<string, File> = {};
 
   return {
     id,
@@ -41,9 +49,8 @@ export const FSTextAdapter: AdapterFactory = (fs: FileSystem) => {
 
       const mimetype = await detectMimeType(filePath);
 
-      console.log("fs load mimetype", f.path, mimetype);
-
       if (!mimetype.startsWith("text/")) return;
+      console.log(" load", { path: f.path, mimetype });
 
       if (s) {
         if (!s.isFile()) return;

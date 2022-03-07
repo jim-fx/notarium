@@ -5,6 +5,7 @@
 	import { localStore, treeStore } from '$lib/stores';
 
 	import fs from '$lib/fs';
+	import createBinaryHandler from '$lib/binaryHandler';
 
 	const loadOffline = localStore.get('load-offline', false);
 	const hideTree = localStore.get('show-tree', false);
@@ -22,9 +23,9 @@
 	}
 
 	onMount(async () => {
-		/* const channel = new BroadcastChannel('sw-messages'); */
+		const channel = new BroadcastChannel('sw-messages');
 
-		/* createBinaryHandler(channel); */
+		createBinaryHandler(channel);
 
 		await fs.load();
 

@@ -5,6 +5,7 @@ import {
   SQLAdapter,
   FSTextAdapter,
   FSTreeAdapter,
+  FSFileAdapter,
 } from "@notarium/adapters/fs";
 import { createNetworkAdapter } from "@notarium/adapters";
 
@@ -14,6 +15,7 @@ const fs = createFileSystem(
   [
     SQLAdapter,
     FSTextAdapter,
+    FSFileAdapter,
     FSTreeAdapter,
     createNetworkAdapter([], WSClient),
   ],

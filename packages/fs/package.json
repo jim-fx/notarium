@@ -11,6 +11,9 @@
   "license": "ISC",
   "dependencies": {
     "@notarium/common": "link:../common",
+    "@notarium/data": "link:../data",
+    "@notarium/parser": "link:../parser",
+    "svelte": "^3.46.4",
     "types": "link:../types",
     "yjs": "^13.5.28"
   }

@@ -3,6 +3,7 @@
 	import { GenericParser } from '@notarium/parser';
 	import { ChecklistBlock, TableBlock, HeadingBlock } from './blocks';
 	import ParagraphBlock from './blocks/ParagraphBlock.svelte';
+	import CodeBlock from './blocks/CodeBlock.svelte';
 
 	export let text: Writable<string>;
 
@@ -35,6 +36,8 @@
 			<HeadingBlock bind:block />
 		{:else if block.type === 'paragraph'}
 			<ParagraphBlock bind:block edit={isEditing} />
+		{:else if block.type === 'code'}
+			<CodeBlock bind:block />
 		{:else}
 			<p>Block Type: {block.type} not implemented</p>
 		{/if}
