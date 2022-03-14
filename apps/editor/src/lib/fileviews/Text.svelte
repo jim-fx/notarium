@@ -31,9 +31,21 @@
 
 	$: blockAvailable = !!frontMatter?.type;
 
-	$: preferBlock = localStore.get(activeNodeId + '-prefer-block', false);
+	/* let blockAvailable = _blockAvailable; */
+	/* let timeout: NodeJS.Timeout; */
+	/* if (_blockAvailable) { */
+	/* 	if (!timeout) { */
+	/* 		timeout = setTimeout(() => { */
+	/* 			blockAvailable = _blockAvailable; */
+	/* 			timeout = undefined; */
+	/* 		}, 100); */
+	/* 	} */
+	/* } */
 
-	$: editorType = blockAvailable && $preferBlock ? 'block' : 'text';
+	let preferBlockStore = localStore.get(activeNodeId + '-prefer-block', false);
+	let preferBlock = $preferBlockStore;
+
+	$: editorType = blockAvailable && preferBlock ? 'block' : 'text';
 
 	$: parser = blockAvailable && getParser(frontMatter?.type);
 
@@ -44,16 +56,16 @@
 
 <header>
 	{#if blockAvailable}
-		{#if $preferBlock}
+		{#if preferBlock}
 			<button
 				on:click={() => {
-					$preferBlock = false;
+					preferBlock = false;
 				}}>text</button
 			>
 		{:else}
 			<button
 				on:click={() => {
-					$preferBlock = true;
+					preferBlock = true;
 				}}>block</button
 			>
 		{/if}

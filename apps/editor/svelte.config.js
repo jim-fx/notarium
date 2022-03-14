@@ -19,7 +19,7 @@ const config = {
 					// see https://github.com/remorses/esbuild-plugins/blob/master/node-modules-polyfill/src/polyfills.ts
 					// process and buffer are excluded because already managed
 					// by node-globals-polyfill
-					stream: 'rollup-plugin-node-polyfills/polyfills/stream'
+					// stream: 'rollup-plugin-node-polyfills/polyfills/stream'
 				}
 			},
 			optimizeDeps: {
@@ -27,24 +27,8 @@ const config = {
 					// Node.js global to browser globalThis
 					define: {
 						global: 'globalThis'
-					},
+					}
 					// Enable esbuild polyfill plugins
-					plugins: [
-						NodeGlobalsPolyfillPlugin({
-							process: true,
-							buffer: true
-						}),
-						NodeModulesPolyfillPlugin()
-					]
-				}
-			},
-			build: {
-				rollupOptions: {
-					plugins: [
-						// Enable rollup polyfills plugin
-						// used during production bundling
-						rollupNodePolyFill()
-					]
 				}
 			}
 		},

@@ -36,6 +36,7 @@ export function createFileSystem(
     },
     openFile(path: string) {
       if (path in cache) return cache[path];
+      log("open file", { path });
       cache[path] = createFile(path, this);
       return cache[path];
     },

@@ -4,6 +4,7 @@ import {
   isCodeClosing,
   isCodeOpening,
   isFrontMatter,
+  isLatexLine,
   isLineHeading,
   isLineTable,
   splitLine,
@@ -40,7 +41,14 @@ export function parseLines(lines: string[]): NotariumBlock[] {
     if (line.trim().length < 1 && currentBlock.type !== "code") {
       close();
     } else {
-      if (isFrontMatter(line)) {
+      if (isLatexLine(line)) {
+        if (currentBlock.type === "latex") {
+          close();
+        }
+        currentBlock.type = "latex";
+      } else if (currentBlock.type === "latex") {
+        add(line);
+      } else if (isFrontMatter(line)) {
         if (currentBlock.type === "frontmatter") close();
         currentBlock.type = "frontmatter";
       } else if (isLineTable(line)) {
@@ -83,6 +91,7 @@ export default function parseDocument(input: string): NotariumDocument {
   const frontMatterBlocks: NotariumFrontmatterBlock[] = [];
 
   for (const b of parseLines(lines)) {
+    console.log(b);
     if (b.type === "frontmatter") {
       frontMatterBlocks.push(b);
     } else {
@@ -93,6 +102,13 @@ export default function parseDocument(input: string): NotariumDocument {
   const frontmatter = frontMatterBlocks.reduce((a, b) => {
     return { ...a, ...b.data };
   }, {});
+
+  console.log("parsedDocument", {
+    lines,
+    blocks,
+    frontmatter,
+    frontMatterBlocks,
+  });
 
   return {
     frontmatter,

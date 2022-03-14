@@ -2,7 +2,7 @@
 	import './app.css';
 	import { onMount } from 'svelte';
 	import File from '$lib/elements/File.svelte';
-	import { localStore, treeStore } from '$lib/stores';
+	import { localStore, treeStore, activeNodeId } from '$lib/stores';
 
 	import fs from '$lib/fs';
 	import createBinaryHandler from '$lib/binaryHandler';
@@ -33,14 +33,14 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Notarium | {$activeNodeId}</title>
+</svelte:head>
+
 <main class:hide-tree={$hideTree}>
 	<aside>
 		<header>
-			<button
-				on:click={() => {
-					$hideTree = !$hideTree;
-				}}>hide</button
-			>
+			<button on:click={() => ($hideTree = !$hideTree)}>hide</button>
 		</header>
 
 		{#if $treeStore?.mimetype === 'dir'}

@@ -13,7 +13,6 @@ import { Doc, encodeStateAsUpdateV2 } from "yjs";
 
 function mimeSupportsCRDT(s: MimeType) {
   const supported: MimeType[] = ["tree", "text/markdown"];
-
   return supported.includes(s);
 }
 

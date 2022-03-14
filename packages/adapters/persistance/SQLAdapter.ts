@@ -1,6 +1,9 @@
+import { logger } from "@notarium/common";
 import type { AdapterFactory, FileSystem, File } from "@notarium/fs";
 
 import Database from "sqlite-async";
+
+const log = logger("adapt/sql");
 
 const dbPromise = Database.open("./db.sql")
   .then(async (db) => {
@@ -9,11 +12,11 @@ const dbPromise = Database.open("./db.sql")
         "CREATE TABLE IF NOT EXISTS documents(docId text PRIMARY KEY, content text)"
       ),
     ]);
-    console.log("[fs] sqlite initialized", res);
+    log("sqlite initialized", res);
     return db;
   })
   .catch((err: Error) => {
-    console.error(err);
+    log.error(err);
   });
 
 async function readDocFromDB(docId: string) {
@@ -30,22 +33,16 @@ function toArrayBuffer(b: Buffer) {
   return b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
 }
 
-export const SQLAdapter: AdapterFactory = (fs: FileSystem) => {
+export const SQLAdapter: AdapterFactory = () => {
   const id = Symbol("adapt/sql");
 
   return {
     id,
     on() {},
-    async closeFile(f: File) {},
+    async closeFile() {},
     async saveFile(f: File) {
       const db = await dbPromise;
-      console.log("[pers/sql] save document state", f.path);
-
-      let data: Uint8Array;
-
-      if (f.isCRDT) {
-      } else {
-      }
+      log("save document state", f.path);
 
       const content = (await f.getBinaryData()).toString();
 
@@ -63,17 +60,16 @@ export const SQLAdapter: AdapterFactory = (fs: FileSystem) => {
             content,
           ])
           .then((res) => {
-            console.log("[pers/sql] saved doc", f.path, "to db");
+            log("saved doc" + f.path + "to db");
           })
           .catch((err) => {
-            console.error(err);
+            log.error(err);
           });
       }
     },
     async requestFile(f: File) {
       let doc = await readDocFromDB(f.path);
-      console.log("[pers/sql] read doc", f.path, "from db");
-      console.log(doc);
+      log("read doc " + f.path + " from db", doc);
       if (doc?.content) return parseBinary(doc.content) as Uint8Array;
       return;
     },

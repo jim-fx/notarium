@@ -3,11 +3,11 @@ private: true
 ---
 # JimFX's Personal Wiki
 
-[Resources](Resources)
+[Ressources](Ressources/index.md)
 
-[Archive](Archive)
+[Archive](Archive/index.md)
 
-[Projects](Projects)
+[Projects](Projects/index.md)
 
-[Areas](Areas)
+[Areas](Areas/index.md)
 

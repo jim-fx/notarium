@@ -21,9 +21,9 @@ export default async function detectMimeType(path: string): Promise<MimeType> {
   if (s.isDirectory()) return "dir";
 
   let mime = detectMimeFromPath(path);
-  if (mime) return mime;
+  if (mime && mime !== "unknown") return mime;
 
-  mime = await detectMagicMime(path);
+  mime = (await detectMagicMime(path)) as MimeType;
   if (mime) return mime;
 
   return "unknown";

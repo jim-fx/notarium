@@ -1,7 +1,8 @@
 import YAML from "yaml";
 import { isLineChecked, isTableSeperator } from "../regex";
 import renderMarkdown from "../renderMarkdownToHTML";
-import { NotariumBlock, NotariumRawBlock } from "../types";
+import { NotariumBlock, NotariumRawBlock } from "./types";
+import katex from "katex";
 
 export function parseHeading([line]: string[]) {
   let weight = 1;
@@ -65,6 +66,7 @@ export function parseFrontMatter(lines: string[]) {
 
   try {
     const res = YAML.parse(content);
+    console.log("Frontmatter", { res, content, lines });
     return res;
   } catch (err) {
     console.log("[parser] error parsing frontmatter");
@@ -72,12 +74,20 @@ export function parseFrontMatter(lines: string[]) {
   }
 }
 
+export function parseLatex(lines: string[]) {
+  const content = lines.join("\n");
+  return katex.renderToString(content, {
+    throwOnError: false,
+    fleqn: true,
+  });
+}
+
 export function parseBlock(block: NotariumRawBlock): NotariumBlock {
   const md = (
     Array.isArray(block.data) ? block.data.join("\n") : block.data
   ) as string;
-  const html = renderMarkdown(md);
 
+  let html = renderMarkdown(md);
   let data;
 
   switch (block.type) {
@@ -95,6 +105,10 @@ export function parseBlock(block: NotariumRawBlock): NotariumBlock {
       break;
     case "frontmatter":
       data = parseFrontMatter(block.data);
+      break;
+    case "latex":
+      html = parseLatex(block.data);
+      data = block.data;
       break;
     default:
       data = md;

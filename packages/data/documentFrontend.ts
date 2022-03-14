@@ -3,6 +3,8 @@ import { File } from "@notarium/fs";
 import { Doc } from "yjs";
 
 export function createDocumentFrontend(file: File) {
+  if (file.stuff.documentFrontend) return file.stuff.documentFrontend;
+
   const dmp = new diff_match_patch();
 
   let timeout: NodeJS.Timeout;

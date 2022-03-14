@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Writable } from 'svelte/store';
 	import { GenericParser } from '@notarium/parser';
-	import { ChecklistBlock, TableBlock, HeadingBlock } from './blocks';
+	import { ChecklistBlock, TableBlock, HeadingBlock, LatexBlock } from './blocks';
 	import ParagraphBlock from './blocks/ParagraphBlock.svelte';
 	import CodeBlock from './blocks/CodeBlock.svelte';
 
@@ -38,6 +38,8 @@
 			<ParagraphBlock bind:block edit={isEditing} />
 		{:else if block.type === 'code'}
 			<CodeBlock bind:block />
+		{:else if block.type === 'latex'}
+			<LatexBlock {block} />
 		{:else}
 			<p>Block Type: {block.type} not implemented</p>
 		{/if}

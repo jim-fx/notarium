@@ -9,7 +9,7 @@ import {
 
 import YAML from "yaml";
 import { splitLine } from "../regex";
-import { NotariumBlock } from "./types";
+import { NotariumBlock, NotariumLatexBlock } from "./types";
 
 export function renderChecklist(b: NotariumChecklistBlock) {
   return b.data.map((v) => `- [${v.checked ? "x" : " "}] ${v.text}`);
@@ -64,6 +64,11 @@ export function renderCode(d: NotariumCodeBlock) {
   return ["```" + d.data.language, ...d.data.text, "```"];
 }
 
+export function renderLatex(b: NotariumLatexBlock) {
+  console.log("RenderLatex", b);
+  return ["$$", ...b.data, "$$"];
+}
+
 export function renderBlock(b: NotariumBlock) {
   switch (b.type) {
     case "table":
@@ -76,6 +81,8 @@ export function renderBlock(b: NotariumBlock) {
       return renderCode(b);
     case "paragraph":
       return renderParagraph(b);
+    case "latex":
+      return renderLatex(b);
     default:
       console.error("Need to implement render for type", b.type);
       return [];
@@ -86,10 +93,12 @@ export function renderFrontMatter(d: NotariumDocument) {
   if (!d.frontmatter) return [];
   const keys = Object.keys(d.frontmatter);
 
+  const lines = splitLine(YAML.stringify(d.frontmatter));
+
+  console.log("RenderFrontmatter", { lines, keys, d });
+
   if (keys.length) {
-    return ["---", ...splitLine(YAML.stringify(d.frontmatter)), "---"].filter(
-      (l) => l.length
-    );
+    return ["---", ...lines, "---"].filter((l) => l.length);
   } else {
     return [];
   }

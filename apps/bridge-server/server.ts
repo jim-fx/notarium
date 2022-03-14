@@ -1,8 +1,9 @@
 import polka from "polka";
 import { tinyws } from "tinyws";
 import type { TinyWSRequest } from "tinyws";
-import WSClient, { connect } from "@notarium/adapters/network/WSClient";
+import { connect } from "@notarium/adapters/network/WSClient";
 import fs from "./src/fs";
+import { Doc } from "yjs";
 import { parseCookie, splitPath } from "@notarium/common";
 import cors from "cors";
 
@@ -14,7 +15,7 @@ app.use(cors({ origin: true }));
 app.get("/", async (_, res) => {
   const f = fs.openFile("tree");
   await f.load();
-  res.end(JSON.stringify(f.getData().getMap("tree").toJSON()));
+  res.end(JSON.stringify((f.getData() as Doc).getMap("tree").toJSON()));
 });
 
 // WSClient.on("file.request", createFile);
@@ -43,8 +44,6 @@ app.get("/file/*", async (req, res) => {
   await fs.load();
 
   const file = fs.findFile(cleanPath);
-
-  console.log({ file, cleanPath });
 
   if (!file) {
     res.statusCode = 404;

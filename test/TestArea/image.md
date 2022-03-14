@@ -1,3 +1,3 @@
 # Image of a telephone:
 
-![](/api/content/TestArea/test.jpg)
+![Image of a telephone](test.jpg)

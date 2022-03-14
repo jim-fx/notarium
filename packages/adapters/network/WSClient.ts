@@ -1,6 +1,6 @@
 import { nanoid } from "nanoid";
 import type WebSocket from "ws";
-import { createEventEmitter } from "@notarium/common";
+import { createEventEmitter, logger } from "@notarium/common";
 let connections: {
   id: string;
   ws: WebSocket;
@@ -10,13 +10,14 @@ const { on, emit } = createEventEmitter();
 
 export const getId = () => "server";
 
+const log = logger("ws");
+
 export function sendTo(peerId: string, eventType: string, data: unknown) {
   const peer = connections.find((c) => c.id === peerId);
-  // console.log("wss::sendto", eventType, peerId);
   if (peer) {
     peer.ws.send(JSON.stringify({ type: eventType, data }));
   } else {
-    console.trace("[ws] cant send to ", peerId);
+    log.warn("cant send to ", peerId);
   }
 }
 
@@ -31,7 +32,7 @@ export function getPeerIds() {
 }
 
 export function connect(ws: WebSocket, id = nanoid()) {
-  console.log("[ws] new connection", id);
+  log("new connection", id);
 
   const localConnection = {
     id,
@@ -45,7 +46,7 @@ export function connect(ws: WebSocket, id = nanoid()) {
 
     const { type, data } = JSON.parse(msg);
 
-    console.log("[ws] handleMessage ", type);
+    log("handleMessage ", type);
 
     // Request to connect to other peer over p2p
     if (type === "p2p-signal") {

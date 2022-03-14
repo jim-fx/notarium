@@ -42,7 +42,6 @@ export interface Adapter {
   saveFile(file: File, update?: any): Promise<void>;
   requestFile(file: File): Promise<void | Uint8Array>;
   closeFile(file: File): Promise<void>;
-  on: EventEmitter<{}>["on"];
 }
 
 export interface FileSystemFlags {
@@ -63,6 +62,6 @@ export interface FileSystem {
   isDir(path: string | string[]): boolean;
   findFile(path: string | string[]): IFile;
   renameFile(oldPath: string, newPath: string): void;
-  createFile(path: string): void;
+  createFile(path: string, mimetype?: MimeType): void;
   deleteFile(path: string): void;
 }

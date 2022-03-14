@@ -8,11 +8,14 @@ export default function renderDocumentToMarkdown(d: NotariumDocument): string {
 
   const renderedBlocks = d.blocks.map((b) => renderBlock(b));
 
-  return [
+  const lines = [
     ...frontMatter,
     ...renderedBlocks
       .map((block) => (Array.isArray(block) ? block : [block]))
       .map((block) => [...block, ""])
       .flat(),
-  ].join("\n");
+  ];
+  console.log("RenderDocument", { renderedBlocks, lines, d });
+
+  return lines.join("\n");
 }

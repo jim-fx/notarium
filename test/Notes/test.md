@@ -1,3 +1,7 @@
+---
+type: blocks
+---
+
 ## Delete Me1
 
 ## Delete Me2

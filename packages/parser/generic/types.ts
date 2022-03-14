@@ -23,7 +23,8 @@ export type NotariumBlock =
   | NotariumCodeBlock
   | NotariumTableBlock
   | NotariumChecklistBlock
-  | NotariumFrontmatterBlock;
+  | NotariumFrontmatterBlock
+  | NotariumLatexBlock;
 
 export interface NotariumFrontmatterBlock extends DefNotariumBlock {
   type: "frontmatter";
@@ -32,6 +33,11 @@ export interface NotariumFrontmatterBlock extends DefNotariumBlock {
 
 export interface NotariumTextBlock extends DefNotariumBlock {
   type: "paragraph";
+  data: string[];
+}
+
+export interface NotariumLatexBlock extends DefNotariumBlock {
+  type: "latex";
   data: string[];
 }
 

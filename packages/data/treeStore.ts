@@ -8,13 +8,12 @@ export function createTreeStore(fs: FileSystem): Readable<IDirectory> {
     const tree = fs.openFile("tree");
 
     fs.isLoaded.then(() => {
-      set(tree.getData().getMap("tree").toJSON() as IDirectory);
+      set((tree.getData() as Doc).getMap("tree").toJSON() as IDirectory);
     });
+
     return tree.on("update", async () => {
       console.log("[adapt/store] update content");
-      set(
-        ((await tree.getData()) as Doc).getMap("tree").toJSON() as IDirectory
-      );
+      set((tree.getData() as Doc).getMap("tree").toJSON() as IDirectory);
     });
   });
 }

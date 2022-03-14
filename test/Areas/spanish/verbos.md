@@ -4,7 +4,6 @@ dictionary:
   type: verbs
 ---
 
-
 # Verbos
 
 ## correr - laufen
@@ -70,7 +69,8 @@ esta
 estamos
 estáis
 están
-### example
+
+### ejemplo
 yo estoy feliz
 
 ## ser - sein (permanent)
@@ -80,7 +80,8 @@ es
 somos
 sois
 son
-### example
+
+### ejemplo
 Yo soy un hombre
 
 ## parecer - aussehen
@@ -130,6 +131,7 @@ tiene
 tenemos
 tenéis
 tienen
+
 
 ## hacer - machen
 hago

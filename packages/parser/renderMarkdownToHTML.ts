@@ -8,6 +8,7 @@ import yaml from "highlight.js/lib/languages/yaml";
 
 import MarkdownIt from "markdown-it";
 import MarkdownFrontMatter from "markdown-it-front-matter";
+import MarkdownLatex from "@iktakahiro/markdown-it-katex";
 
 // Register languages
 hljs.registerLanguage("javascript", javascript);
@@ -36,6 +37,7 @@ const md = new MarkdownIt({
   },
 });
 
+md.use(MarkdownLatex, { fleqn: true });
 md.use(MarkdownFrontMatter, () => {});
 
 export default (input: string): string => {

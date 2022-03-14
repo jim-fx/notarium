@@ -6,7 +6,10 @@ import {
   encodeStateAsUpdateV2,
   encodeStateVector,
 } from "yjs";
-import { parseBinary } from "@notarium/common";
+import { logger, parseBinary } from "@notarium/common";
+
+const log = logger("adapt/net");
+
 export function createNetworkAdapter(
   urls: string[],
   adapter: IMessageAdapter
@@ -28,9 +31,9 @@ export function createNetworkAdapter(
           files[path] = fs.openFile(path);
         }
 
-        peers[path] = (peers[path] || new Set()).add(peerId);
-
         if (path in files) {
+          log("Open File", { peerId, path });
+          peers[path] = (peers[path] || new Set()).add(peerId);
           const file = files[path];
 
           await file.load();
@@ -82,6 +85,7 @@ export function createNetworkAdapter(
       id,
       on: adapter.on,
       async requestFile(f: File) {
+        log("request file", f);
         if (f.isCRDT) {
           f.isLoaded.then(() => {
             const doc = f.getData() as Doc;
@@ -94,7 +98,7 @@ export function createNetworkAdapter(
         files[f.path] = f;
       },
       async saveFile(f: File, update: Uint8Array) {
-        console.log("network/save", peers, f.path);
+        log("save", peers, f.path);
         if (f.path in peers && update) {
           peers[f.path].forEach((id) => {
             adapter.sendTo(id, "doc.update", {

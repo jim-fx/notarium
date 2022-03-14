@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="394.715" height="253.012" viewBox="0, 0, 877.143, 562.25">
+  <g id="Layer_1">
+    <path d="M140.643,441.452 C349.114,444.779 388.779,274.004 473.643,44.457" fill-opacity="0" stroke="#000000" stroke-width="3"/>
+    <path d="M181.643,441.452 C439.571,444.779 488.646,274.004 593.643,44.457" fill-opacity="0" stroke="#FB0000" stroke-width="3"/>
+    <path d="M257.643,441.452 C543.743,444.779 598.178,274.004 714.643,44.457" fill-opacity="0" stroke="#F78400" stroke-width="3"/>
+    <path d="M359.643,441.452 C658.89,444.779 715.826,274.004 837.643,44.457" fill-opacity="0" stroke="#002AD6" stroke-width="3"/>
+    <path d="M140.643,9.5 L140.643,441.5 L868.643,441.5" fill-opacity="0" stroke="#656565" stroke-width="5"/>
+    <path d="M275.143,441 L285.818,465.5 L295.639,441 L275.143,441" fill="#656565"/>
+    <path d="M420.143,441 L430.818,465.5 L440.639,441 L420.143,441" fill="#656565"/>
+    <path d="M562.143,441 L572.818,465.5 L582.639,441 L562.143,441" fill="#656565"/>
+    <path d="M705.143,441 L715.818,465.5 L725.639,441 L705.143,441" fill="#656565"/>
+    <path d="M140.143,359.002 L115.643,369.677 L140.143,379.498 L140.143,359.002" fill="#656565"/>
+    <path d="M140.143,287.002 L115.643,297.677 L140.143,307.498 L140.143,287.002" fill="#656565"/>
+    <path d="M140.143,214.752 L115.643,225.427 L140.143,235.248 L140.143,214.752" fill="#656565"/>
+    <path d="M140.143,141.752 L115.643,152.427 L140.143,162.248 L140.143,141.752" fill="#656565"/>
+    <path d="M140.143,72.505 L115.643,83.179 L140.143,93 L140.143,72.505" fill="#656565"/>
+    <text transform="matrix(1, 0, 0, 1, 79.823, 369.25)">
+      <tspan x="-16.68" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">10</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 285.391, 494.25)">
+      <tspan x="-8.34" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">1</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 430.391, 494.25)">
+      <tspan x="-8.34" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">2</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 572.391, 494.25)">
+      <tspan x="-8.34" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">3</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 715.391, 494.25)">
+      <tspan x="-8.34" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">4</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 723.751, 538.75)">
+      <tspan x="-133.665" y="6.5" font-family="Avenir-Medium" font-size="30" fill="#656565">Forward voltage (V)</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 419.643, 32.5)">
+      <tspan x="-53.625" y="6.5" font-family="Avenir-Medium" font-size="30" fill="#656565">Infrared</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 567.643, 32.5)">
+      <tspan x="-26.67" y="6.5" font-family="Avenir-Medium" font-size="30" fill="#656565">Red</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 691.143, 32.5)">
+      <tspan x="-51.66" y="6.5" font-family="Avenir-Medium" font-size="30" fill="#656565">Orange</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 807.643, 32.5)">
+      <tspan x="-29.73" y="6.5" font-family="Avenir-Medium" font-size="30" fill="#656565">Blue</tspan>
+    </text>
+    <text transform="matrix(0, -1, 1, 0, 24.751, 193.637)">
+      <tspan x="-147.3" y="5.249" font-family="Avenir-Medium" font-size="30" fill="#656565">Cathode current (mA)</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 79.823, 225)">
+      <tspan x="-16.68" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">30</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 79.823, 152)">
+      <tspan x="-16.68" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">40</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 79.823, 82.752)">
+      <tspan x="-16.68" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">50</tspan>
+    </text>
+    <text transform="matrix(1, 0, 0, 1, 79.823, 297.25)">
+      <tspan x="-16.68" y="9" font-family="Avenir-Medium" font-size="30" fill="#656565">20</tspan>
+    </text>
+  </g>
+</svg>

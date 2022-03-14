@@ -4,6 +4,7 @@ interface Logger {
   error(err: Error): void;
   disable(): void;
   enable(): void;
+  isolate(): void;
 }
 
 let filters: string[] = [];
@@ -78,6 +79,8 @@ function saveHistory() {
     localStorage.setItem(localStorageId, JSON.stringify(history));
 }
 
+const onlyThese: Set<string> = new Set();
+
 function log(scope: string): Logger {
   let enabled = true;
 
@@ -93,41 +96,42 @@ function log(scope: string): Logger {
     history.length = Math.min(100, history.length);
     saveHistory();
     if (!enabled && _level !== 0) return;
-    if ((!filters.length || filters.includes(scope)) && _level <= level) {
-      // Handle all errors
-      if (args instanceof Error) {
-        console.error(`[${scope.padEnd(longestName, " ")}]`, args);
+    if (filters.length && !filters.includes(scope) && _level > level) return;
+
+    // Handle all errors
+    if (args instanceof Error) {
+      console.error(`[${scope.padEnd(longestName, " ")}]`, args);
+      return;
+    }
+
+    if (onlyThese.size && !onlyThese.has(scope)) return;
+
+    // Make some logs better to read
+    if (_level === 2) {
+      if (
+        Array.isArray(args) &&
+        typeof args[0] === "string" &&
+        typeof args[1] === "object"
+      ) {
+        console.groupCollapsed(
+          `%c[${scope.padEnd(longestName, " ")}]`,
+          `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
+          args[0]
+        );
+        console.log(...args.slice(1));
+        console.groupEnd();
         return;
+      } else {
+        console.log(
+          `%c[${scope.padEnd(longestName, " ")}]`,
+          `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
+          ...args
+        );
       }
+    }
 
-      // Make some logs better to read
-
-      if (_level === 2) {
-        if (
-          Array.isArray(args) &&
-          typeof args[0] === "string" &&
-          typeof args[1] === "object"
-        ) {
-          console.groupCollapsed(
-            `%c[${scope.padEnd(longestName, " ")}]`,
-            `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
-            args[0]
-          );
-          console.log(...args.slice(1));
-          console.groupEnd();
-          return;
-        } else {
-          console.log(
-            `%c[${scope.padEnd(longestName, " ")}]`,
-            `color: hsl(${myIndex * 30}deg 68% 64%); font-weight: bold;`,
-            ...args
-          );
-        }
-      }
-
-      if (_level === 1) {
-        console.warn(`[${scope.padEnd(longestName, " ")}]`, ...args);
-      }
+    if (_level === 1) {
+      console.warn(`[${scope.padEnd(longestName, " ")}]`, ...args);
     }
   };
 
@@ -138,6 +142,15 @@ function log(scope: string): Logger {
   };
   log.disable = () => {
     enabled = false;
+  };
+
+  log.isolate = () => {
+    if (onlyThese.has(scope)) {
+      onlyThese.delete(scope);
+    } else {
+      console.log("[log] isolate ", scope);
+      onlyThese.add(scope);
+    }
   };
 
   log.warn = (...args: []) => handleLog(args, 1);
