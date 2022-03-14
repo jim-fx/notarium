@@ -2,8 +2,11 @@ import { diff_match_patch } from "diff-match-patch";
 import { File } from "@notarium/fs";
 import { Doc } from "yjs";
 
+/**
+ * This function caches it result in the file, so you can call it as often as you like
+ */
 export function createDocumentFrontend(file: File) {
-  if (file.stuff.documentFrontend) return file.stuff.documentFrontend;
+  if (file.stuff.docFrontend) return file.stuff.docFrontend;
 
   const dmp = new diff_match_patch();
 
@@ -11,6 +14,7 @@ export function createDocumentFrontend(file: File) {
   let lastExecution = 0;
 
   function getText() {
+    if (!file.isCRDT) console.trace("Open Frontend for non Text File", file);
     const doc = file.getData() as Doc;
     return doc.getText("content").toString();
   }

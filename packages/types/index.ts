@@ -9,7 +9,8 @@ export type MimeType =
   | "nota/theme"
   | "image/jpg"
   | "image/png"
-  | "image/svg";
+  | "image/svg"
+  | "application/pdf";
 
 export type IFile = IContentFile | IDirectory | IBinary;
 

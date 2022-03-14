@@ -5,110 +5,116 @@ import {
   mergeObjects,
   splitPath,
 } from "@notarium/common";
-import { parseFrontmatter } from "@notarium/parser";
-import type { FileSystem, File } from "./types";
-
 import { createDocumentFrontend } from "@notarium/data";
+import { parseFrontmatter } from "@notarium/parser";
+import type { File, FileSystem } from "./types";
 
-import { readable } from "svelte/store";
+const log = logger("fs/context");
 
-const log = logger("data/config");
+log.disable();
 
-function getAllPossibleConfigs(rawPath: string) {
-  return [...splitPath(rawPath), "index.md"].map((_, i, a) => {
-    return [...a.slice(0, i), "index.md"].join("/");
-  });
+function getPossiblePaths(rawPath: string) {
+  return [...splitPath(rawPath), "index.md"]
+    .map((_, i, a) => {
+      return [...a.slice(0, i), "index.md"].join("/");
+    })
+    .filter((p) => p !== rawPath);
 }
 
-function createConfigStore(b: ReturnType<typeof createConfig>) {
-  return readable({}, (set) => {
-    b.on("config", (c) => set(c));
-  });
-}
-
-function createConfig(path: string, fs: FileSystem) {
-  log("new", { path });
-
-  const { on, emit } = createEventEmitter<{ config: any }>();
+export function createContext(fs: FileSystem, file: File) {
+  log("new", { path: file.path });
 
   const tree = fs.openFile("tree");
 
-  let paths: string[] = [];
+  const { on, emit } = createEventEmitter();
 
-  let backends: {
-    file: File;
-    listener: () => unknown;
-    frontmatter: any;
-    frontend: ReturnType<typeof createDocumentFrontend>;
-  }[] = [];
-  const [isLoaded, setLoaded] = createResolvablePromise<boolean>();
+  let parentContextFile: File;
 
-  let config = {};
-  async function updateConfig() {
-    let _config = {};
+  let frontmatter = {};
+  let parentContext = {};
+  let context = {};
+  let oldContext = JSON.stringify(context);
 
-    backends.forEach((b) => {
-      if (b?.frontmatter) {
-        _config = mergeObjects(_config, b.frontmatter);
-      }
-    });
+  let [isLoaded, setLoaded] = createResolvablePromise<void>();
 
-    emit("config", _config);
-    config = _config;
-    setLoaded(true);
+  async function updateParentContext() {
+    if (parentContextFile) {
+      await parentContextFile.context.isLoaded;
+
+      parentContext = parentContextFile.context.get();
+    }
+
+    updateMyContext();
   }
 
-  function updateBackendStores() {
-    backends = paths.map((b) => {
-      const file = fs.openFile(b);
+  async function updateMyContext() {
+    await file.isLoaded;
+
+    if (file.isCRDT) {
       const frontend = createDocumentFrontend(file);
 
-      const r = {
-        file,
-        listener,
-        frontend,
-        frontmatter: {},
-      };
+      frontmatter = parseFrontmatter(frontend.getText());
+    }
 
-      function listener() {
-        r.frontmatter = parseFrontmatter(frontend.getText());
-        updateConfig();
-      }
-      file.on("update", listener);
+    context = mergeObjects(parentContext, frontmatter);
 
-      return r;
-    });
+    const newContext = JSON.stringify(context);
 
-    Promise.all(
-      backends.map(async (b) => {
-        await b.file.load();
-        b.listener();
-      })
-    ).then(() => {
-      backends.forEach((b) => b.listener());
-      log("loaded", { path });
-      updateConfig();
-    });
+    if (oldContext !== newContext) {
+      oldContext = newContext;
+      emit("context", context);
+    }
+
+    setLoaded();
+  }
+
+  async function setParentFile(f: File) {
+    if (parentContextFile && parentContextFile !== f) {
+      // TODO: unsubscribe from all listeners
+    }
+
+    parentContextFile = f;
+
+    if (parentContextFile) {
+      parentContextFile.on("context", () => updateParentContext());
+    }
+
+    updateParentContext();
   }
 
   function updatePossiblePaths() {
-    paths = getAllPossibleConfigs(path).filter((p) => {
+    const possiblePaths = getPossiblePaths(file.path);
+
+    const parentPath = possiblePaths.reverse().find((p) => {
       if (!fs.findFile(p)) return false;
-      if (!fs.isDir(p)) return false;
+      if (fs.isDir(p)) return false;
+      const f = fs.openFile(p);
+      console.log(f);
+      if (!f.isCRDT) return false;
       return true;
     });
 
-    updateBackendStores();
+    if (parentPath) {
+      const parentFile = fs.openFile(parentPath);
+      parentFile.load();
+      setParentFile(parentFile);
+    } else {
+      setParentFile(null);
+    }
   }
-  updatePossiblePaths();
 
-  tree.on("update", () => updatePossiblePaths());
+  Promise.all([tree.isLoaded, file.isLoaded]).then(() => {
+    updatePossiblePaths();
+    // TODO: Need to somehow remove all the event listeners when the file gets destroyed
+    file.on("update", () => updateMyContext());
+    tree.on("update", () => updatePossiblePaths());
+  });
 
   return {
+    on,
     get() {
-      return JSON.parse(JSON.stringify(config));
+      return JSON.parse(JSON.stringify(context));
     },
     isLoaded,
-    on,
   };
 }

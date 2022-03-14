@@ -1,14 +1,12 @@
-import { createFile } from "./createFile";
-import { AdapterFactory, FileSystem, FileSystemFlags } from "./types";
 import {
-  createEventEmitter,
   createResolvablePromise,
   groupArray,
   logger,
   wait,
 } from "@notarium/common";
-
+import { createFile } from "./createFile";
 import * as treeFrontend from "./treeFrontend";
+import { AdapterFactory, FileSystem, FileSystemFlags } from "./types";
 
 const log = logger("fs");
 
@@ -32,19 +30,22 @@ export function createFileSystem(
       return treeFrontend.renameFile(this, oldPath, newPath);
     },
     isDir(path: string) {
-      return treeFrontend.isDir(path);
+      return treeFrontend.isDir(this, path);
+    },
+    createFile(path: string) {
+      return treeFrontend.createFile(this, path, "text/markdown");
+    },
+    deleteFile(path: string) {
+      return treeFrontend.deleteFile(this, path);
     },
     openFile(path: string) {
       if (path in cache) return cache[path];
-      log("open file", { path });
       cache[path] = createFile(path, this);
       return cache[path];
     },
     async setOffline(o) {
       if (!o) return;
       await isLoaded;
-
-      console.log("FS:offline", o);
 
       const allFiles = treeFrontend.findAllFiles(this);
 

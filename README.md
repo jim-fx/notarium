@@ -59,7 +59,7 @@ $ pnpm dev
 - [x] Add mimetype to treeData
 - [x] Implement Document parsing
 - [x] Offline Mode (eg, button to download all documents);
-  - Still need save the "I am in offline mode" in localStorage
+  - [x] Still need save the "I am in offline mode" in localStorage
 - [x] Context Loading, for a certain path check if there is a .config file or a .theme file in the directory
   - Cant sync config.json with
   - Maybe use yaml, seems more resistant to format changes
@@ -67,6 +67,7 @@ $ pnpm dev
 - [ ] Sync Tree with Document, eg (document deletion);
 - [x] Sync Binary files with peers, maybe simple-peer-files
 - [ ] Authentication / Authorization, okay p2p auth seems hard
+- [ ] Render Static Public Content
 - [ ] Theming Support
 - [ ] Awareness Information
 - [ ] Probably need a Backend Manager to garbage collect old Backends

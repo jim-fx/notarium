@@ -2,6 +2,7 @@ import { MimeType } from "@notarium/types";
 import type { Doc } from "yjs";
 import type { EventEmitter } from "@notarium/common";
 import { IFile } from "types";
+import { createContext } from "./createContext";
 
 export interface DataCore {
   update(
@@ -18,7 +19,7 @@ export interface File {
   readonly isCRDT: boolean;
   isLoaded: Promise<any>;
 
-  on: EventEmitter<{ update: void }>["on"];
+  on: EventEmitter<{ update: void; context: Record<string, any> }>["on"];
 
   mutex(): Promise<() => void>;
 
@@ -26,6 +27,8 @@ export interface File {
 
   getData(): Uint8Array | Doc;
   getBinaryData(): Promise<Uint8Array>;
+
+  context: ReturnType<typeof createContext>;
 
   load(): Promise<unknown>;
   close(): void;

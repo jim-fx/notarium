@@ -16,8 +16,7 @@ async function setTextFileContent(file: File, path: string) {
   await file.load();
   const content = await readFile(path, "utf8");
 
-  const { frontend = createDocumentFrontend(file) } = file.stuff;
-  file.stuff.frontend = frontend;
+  const frontend = createDocumentFrontend(file);
 
   frontend.setText(content);
 }

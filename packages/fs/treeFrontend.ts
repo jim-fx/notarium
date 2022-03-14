@@ -1,19 +1,19 @@
-import { createCachedFactory, splitPath } from "@notarium/common";
-import { IDataBackend, IFile, MimeType, YNode } from "@notarium/types";
-import * as Y from "yjs";
+import { splitPath } from "@notarium/common";
+import { MimeType, YNode } from "@notarium/types";
+import { Doc, Array } from "yjs";
 
-import { File, FileSystem } from "./types";
+import { FileSystem } from "./types";
 
 function findChild(node: YNode, name: string) {
   if (!node.has("children")) return;
   const children = node.get("children");
-  return children?.toArray().find((c) => c.get("path") === name);
+  return children?.toArray().find((c: YNode) => c.get("path") === name);
 }
 
 function findChildIndex(node: YNode, name: string) {
   if (node.get("mimetype") !== "dir") return -1;
 
-  const children = node.get("children") as Y.Array<YNode>;
+  const children = node.get("children") as Array<YNode>;
 
   return children?.toArray().findIndex((c) => c.get("path") === name) ?? -1;
 }
@@ -26,7 +26,7 @@ function deleteChild(node: YNode, name: string) {
 }
 
 function getRootNode(fs: FileSystem) {
-  return fs.openFile("tree").getData().getMap("tree") as YNode;
+  return (fs.openFile("tree").getData() as Doc).getMap("tree") as YNode;
 }
 
 function split(fs: FileSystem, s: string | string[]) {
@@ -56,23 +56,16 @@ export function findFile(fs: FileSystem, path: string | string[] = "/"): YNode {
     }
     currentNode = findChild(currentNode, name);
   }
-
   return currentNode;
 }
 
-export function createFile(
-  path: string,
-  mimetype: MimeType,
-  origin: Symbol = myId
-) {
-  const p = split(path);
-
-  console.log("tree.frontend.create", p);
+export function createFile(fs: FileSystem, path: string, mimetype: MimeType) {
+  const p = split(fs, path);
 
   const lastFileName = p.pop();
 
   backend.update(() => {
-    const parentNode = findNode(p);
+    const parentNode = findFile(fs, p);
 
     if (parentNode && parentNode.get("mimetype") === "dir") {
       const child = new Y.Map();
@@ -122,16 +115,16 @@ export function findAllFiles(fs: FileSystem) {
 
 export function renameFile(fs: FileSystem, path: string, newPath: string) {
   backend.update(() => {
-    const op = split(path);
-    const np = split(newPath);
+    const op = split(fs, path);
+    const np = split(fs, newPath);
 
     const oldNodeName = op.pop();
-    const oldParent = findNode(op);
+    const oldParent = findFile(fs, op);
 
     const nodeToMove = findChild(oldParent, oldNodeName);
 
     const newNodeName = np.pop();
-    const newParent = findNode(np);
+    const newParent = findFile(fs, np);
 
     if (!oldParent || !newParent || !newNodeName) return;
 
@@ -144,8 +137,8 @@ export function renameFile(fs: FileSystem, path: string, newPath: string) {
   }, origin);
 }
 
-export function deleteFile(path: string, origin: Symbol = myId) {
-  const p = split(path);
+export function deleteFile(fs: FileSystem, path: string) {
+  const p = split(fs, path);
 
   // Disallow deleting of root dir
   if (!p.length) return;
@@ -153,7 +146,7 @@ export function deleteFile(path: string, origin: Symbol = myId) {
   const lastFileName = p.pop();
 
   backend.update(() => {
-    const parentOfDelete = findNode(p);
+    const parentOfDelete = findFile(fs, p);
     if (parentOfDelete) {
       deleteChild(parentOfDelete, lastFileName);
     } else {
@@ -163,5 +156,5 @@ export function deleteFile(path: string, origin: Symbol = myId) {
 }
 
 export function isDir(fs: FileSystem, path: string) {
-  return !!findChild(fs, path)?.toJSON()?.children;
+  return !!findFile(fs, path)?.toJSON()?.children;
 }

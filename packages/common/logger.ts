@@ -96,15 +96,13 @@ function log(scope: string): Logger {
     history.length = Math.min(100, history.length);
     saveHistory();
     if (!enabled && _level !== 0) return;
-    if (filters.length && !filters.includes(scope) && _level > level) return;
+    if (filters.length && !filters.includes(scope)) return;
 
     // Handle all errors
     if (args instanceof Error) {
       console.error(`[${scope.padEnd(longestName, " ")}]`, args);
       return;
     }
-
-    if (onlyThese.size && !onlyThese.has(scope)) return;
 
     // Make some logs better to read
     if (_level === 2) {
@@ -151,6 +149,7 @@ function log(scope: string): Logger {
       console.log("[log] isolate ", scope);
       onlyThese.add(scope);
     }
+    filters = [...onlyThese.keys()];
   };
 
   log.warn = (...args: []) => handleLog(args, 1);
