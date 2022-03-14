@@ -1,11 +1,10 @@
-import { createTreeStore } from '@notarium/data';
-
-import type { IDirectory } from '@notarium/types';
-import { derived, writable } from 'svelte/store';
-import { page } from '$app/stores';
 import { browser } from '$app/env';
-import { splitPath, detectMimeFromPath } from '@notarium/common';
-
+import { page } from '$app/stores';
+import { detectMimeFromPath, splitPath } from '@notarium/common';
+import { createTreeStore } from '@notarium/data';
+import type { File } from '@notarium/fs';
+import type { IDirectory } from '@notarium/types';
+import { derived, readable, writable } from 'svelte/store';
 import fs from '../fs';
 import { get } from './localStore';
 
@@ -16,6 +15,24 @@ offline.subscribe((o) => fs.setOffline(o));
 
 export const activeNodeId = derived([page], ([p]) => {
 	return p.params?.editPath;
+});
+
+export const activeFile = readable<File | undefined>(undefined, function start(set) {
+	let currentFile: File;
+
+	const unsub = activeNodeId.subscribe((p) => {
+		if (p !== currentFile?.path) {
+			set(undefined);
+			if (!fs.findFile(p)) return;
+			currentFile = fs.openFile(p);
+			currentFile.load();
+			currentFile.isLoaded.then(() => {
+				set(currentFile);
+			});
+		}
+	});
+
+	return unsub;
 });
 
 export const activeMimeType = derived([activeNodeId], ([p]) => {

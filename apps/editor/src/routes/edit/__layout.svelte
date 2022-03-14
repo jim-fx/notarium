@@ -15,7 +15,10 @@
 
 <script lang="ts">
 	import fs from '$lib/fs';
-	import { activeNode, hasActiveNodeIndexMD, activeNodeId } from '$lib/stores';
+	import { activeNode, hasActiveNodeIndexMD, activeNodeId, activeFile } from '$lib/stores';
+	import { createConfigStore } from '@notarium/data';
+
+	$: context = $activeFile && createConfigStore($activeFile);
 </script>
 
 <details>
@@ -31,6 +34,12 @@
 		<tr>
 			<td>hasIndexMD</td>
 			<td>{$hasActiveNodeIndexMD}</td>
+		</tr>
+		<tr>
+			<td>Context</td>
+			<td>
+				<code>{JSON.stringify($context)}</code>
+			</td>
 		</tr>
 
 		<tr>

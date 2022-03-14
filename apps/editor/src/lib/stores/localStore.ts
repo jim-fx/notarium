@@ -14,7 +14,7 @@ if (browser && 'nota-settings' in localStorage) {
 	}
 }
 
-export const get = createCachedFactory(_get, (key) => key);
+export const get = createCachedFactory(_get, (key) => key) as typeof _get;
 function _get<T>(key: string, def: T): Writable<T> {
 	let _def = def;
 	if (key in globalStore) {

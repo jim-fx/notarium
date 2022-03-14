@@ -13,8 +13,11 @@
 {:else if $activeNode?.mimetype?.startsWith('text/')}
 	<Text activeNode={$activeNode} activeNodeId={$activeNodeId} />
 {:else if $activeNode?.mimetype?.startsWith('image/')}
-	<Image />
+	<Image activeNode={$activeNode} />
 	<p>Image</p>
+{:else if $activeNode?.mimetype === 'application/pdf'}
+	<i>TODO: implement PDF</i>
+	<!--<embed src={$activeNodeId} width="500" height="375" type="application/pdf" />-->
 {:else}
 	<p>No Editor for Mimetype</p>
 	<p>{$activeNode?.mimetype}</p>

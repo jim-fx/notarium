@@ -1,7 +1,6 @@
 import fs from '$lib/fs';
 
 export default function createBinaryHandler(channel: BroadcastChannel) {
-	console.log('created binary handler', channel);
 	channel.addEventListener('message', async (event) => {
 		const { type, url } = event.data;
 		console.table({ type, url });
@@ -10,7 +9,6 @@ export default function createBinaryHandler(channel: BroadcastChannel) {
 
 			if (!f) return;
 
-			console.log('SWREQ:', url);
 			const file = fs.openFile(url);
 			const data = await file.load();
 

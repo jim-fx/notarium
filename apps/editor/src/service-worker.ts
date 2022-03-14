@@ -39,7 +39,9 @@ self.addEventListener('fetch', async function (event: FetchEvent) {
 	if (
 		u.pathname.endsWith('.jpg') ||
 		u.pathname.endsWith('.png') ||
-		u.pathname.endsWith('.webp' || u.pathname.endsWith('.gif'))
+		u.pathname.endsWith('.pdf') ||
+		u.pathname.endsWith('.webp') ||
+		u.pathname.endsWith('.gif')
 	) {
 		const fileId = splitPath(u.pathname.replace(u.search, '')).join('/').replace('edit/', '');
 
