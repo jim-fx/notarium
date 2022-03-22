@@ -1,20 +1,20 @@
 import { MimeType } from "@notarium/types";
 import { lstat } from "fs/promises";
-import { Magic, MAGIC_MIME_TYPE } from "mmmagic";
+// import { Magic, MAGIC_MIME_TYPE } from "mmmagic";
 
-let ma: Magic;
+// let ma: Magic;
 
 import { detectMimeFromPath } from "./detectMimeFromPath";
 
-const detectMagicMime = (path: string) => {
-  if (!ma) ma = new Magic(MAGIC_MIME_TYPE);
-  return new Promise((res) => {
-    ma.detectFile(path, (err, result) => {
-      if (err) return res(false);
-      return res(result);
-    });
-  });
-};
+// const detectMagicMime = (path: string) => {
+//   if (!ma) ma = new Magic(MAGIC_MIME_TYPE);
+//   return new Promise((res) => {
+//     ma.detectFile(path, (err, result) => {
+//       if (err) return res(false);
+//       return res(result);
+//     });
+//   });
+// };
 
 export default async function detectMimeType(path: string): Promise<MimeType> {
   const s = await lstat(path);
@@ -23,8 +23,8 @@ export default async function detectMimeType(path: string): Promise<MimeType> {
   let mime = detectMimeFromPath(path);
   if (mime && mime !== "unknown") return mime;
 
-  mime = (await detectMagicMime(path)) as MimeType;
-  if (mime) return mime;
+  // mime = (await detectMagicMime(path)) as MimeType;
+  // if (mime) return mime;
 
   return "unknown";
 }

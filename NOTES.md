@@ -317,7 +317,9 @@ Cons:
 - always have to sync entire tree
 - much harder to get the contexts
 
-# Refactor 2
+# ~~Refactor 2~~
+
+Finished, woorks wayy better than the old system
 
 ```ts
 
@@ -338,3 +340,7 @@ Adapter Interface
 
 
 ```
+
+# AuthZ for tree
+
+With the current tree structure we can’t partially sync the tree because the whole tree is stored in a single document.

@@ -1,9 +1,29 @@
-import { createFileSystem } from '@notarium/fs';
+import {createFileSystem, type FileSystem} from '@notarium/fs';
 
-import { P2PClient, createNetworkAdapter, IDBAdapter } from '@notarium/adapters';
+import {P2PClient, createNetworkAdapter, IDBAdapter} from '@notarium/adapters';
 
-const networkAdapter = createNetworkAdapter(['ws://localhost:3000/ws'], P2PClient);
+import {browser} from '$app/env';
 
-globalThis['n'] = P2PClient;
+const adapters = [];
 
-export default createFileSystem([IDBAdapter, networkAdapter], { rootPath: 'main' });
+let rootPath = "main"
+
+if (browser) {
+  const networkAdapter =
+      createNetworkAdapter([ 'ws://localhost:3000/ws' ], P2PClient);
+  globalThis['n'] = P2PClient;
+  adapters.push(IDBAdapter, networkAdapter);
+}
+else {
+
+  rootPath = import.meta.env.VITE_ROOT_PATH as string;
+
+  adapters.push(async (fs: FileSystem) => {
+    const {FSAdapter} =
+        await import('@notarium/adapters/persistance/FSAdapter');
+
+    return FSAdapter(fs);
+  });
+}
+
+export default createFileSystem(adapters, {rootPath});

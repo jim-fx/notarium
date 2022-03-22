@@ -1,5 +1,5 @@
 let ws: Promise<WebSocket>;
-import SimplePeer from "simple-peer";
+import type SimplePeer from "simple-peer";
 import { EventMap } from "@notarium/types";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import {
@@ -13,14 +13,14 @@ const log = logger("adapt/p2p");
 interface WSPeer {
   id: string;
   send(event: string, data: unknown): Promise<void>;
-  requestFile(path: string): Promise<unknown>;
+  requestFile(path: string): Promise<void | Uint8Array>;
   peer: SimplePeer.Instance;
 }
 
 interface RTCPeer {
   id: string;
   send(event: string, data: unknown): Promise<void>;
-  requestFile(path: string): Promise<unknown>;
+  requestFile(path: string): Promise<void | Uint8Array>;
   ws: WebSocket;
 }
 

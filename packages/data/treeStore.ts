@@ -12,7 +12,6 @@ export function createTreeStore(fs: FileSystem): Readable<IDirectory> {
     });
 
     return tree.on("update", async () => {
-      console.log("[adapt/store] update content");
       set((tree.getData() as Doc).getMap("tree").toJSON() as IDirectory);
     });
   });

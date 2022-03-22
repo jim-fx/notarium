@@ -1,91 +1,71 @@
-import { browser } from '$app/env';
-import { page } from '$app/stores';
-import { detectMimeFromPath, splitPath } from '@notarium/common';
-import { createTreeStore } from '@notarium/data';
-import type { File } from '@notarium/fs';
-import type { IDirectory } from '@notarium/types';
-import { derived, readable, writable } from 'svelte/store';
+import {browser} from '$app/env';
+import {page} from '$app/stores';
+import {detectMimeFromPath, splitPath} from '@notarium/common';
+import {createTreeStore} from '@notarium/data';
+import type {File} from '@notarium/fs';
+import type {IDirectory} from '@notarium/types';
+import {derived, readable, writable, type Unsubscriber} from 'svelte/store';
 import fs from '../fs';
-import { get } from './localStore';
+import {get} from './localStore';
 
 export const treeStore = createTreeStore(fs);
 
 export const offline = get('offline', false);
 offline.subscribe((o) => fs.setOffline(o));
 
-export const activeNodeId = derived([page], ([p]) => {
-	return p.params?.editPath;
-});
+export const activeNodeId =
+    derived([ page ], ([ p ]) => { return p.params?.editPath;});
 
-export const activeFile = readable<File | undefined>(undefined, function start(set) {
-	let currentFile: File;
+export const activeMimeType =
+    derived([ activeNodeId ], ([ p ]) => { return detectMimeFromPath(p);});
 
-	const unsub = activeNodeId.subscribe((p) => {
-		if (p !== currentFile?.path) {
-			set(undefined);
-			if (!fs.findFile(p)) return;
-			currentFile = fs.openFile(p);
-			currentFile.load();
-			currentFile.isLoaded.then(() => {
-				set(currentFile);
-			});
-		}
-	});
+export const activeNode =
+    derived([ activeNodeId, treeStore ], ([ path, tree ]) => {
+      if (!path || !tree)
+        return undefined;
+      return fs.findFile(path);
+    });
 
-	return unsub;
-});
+export const hasActiveNodeIndexMD =
+    derived([ activeNode, activeNodeId ], ([ n, nodeId ]) => {
+      if (!n)
+        return undefined;
 
-export const activeMimeType = derived([activeNodeId], ([p]) => {
-	return detectMimeFromPath(p);
-});
+      // If the current node is not a folder go to the parent node
+      const path = splitPath(nodeId);
+      if (n.mimetype !== 'dir') {
+        path.pop();
+        n = fs.findFile(path) as IDirectory;
+      }
 
-export const activeNode = derived([activeNodeId, treeStore], ([path, tree]) => {
-	if (!path || !tree) return undefined;
-	return fs.findFile(path);
-});
+      const indexMd = n.children.find((c) => c.path === 'index.md');
+      if (indexMd) {
+        return [...path, 'index.md' ].join('/');
+      }
 
-export const hasActiveNodeIndexMD = derived([activeNode, activeNodeId], ([n, nodeId]) => {
-	if (!n) return undefined;
-
-	// If the current node is not a folder go to the parent node
-	const path = splitPath(nodeId);
-	if (n.mimetype !== 'dir') {
-		path.pop();
-		n = fs.findFile(path) as IDirectory;
-	}
-
-	const indexMd = n.children.find((c) => c.path === 'index.md');
-	if (indexMd) {
-		return [...path, 'index.md'].join('/');
-	}
-
-	return undefined;
-});
+      return undefined;
+    });
 
 let _isEditing = false;
 let _editorType = 'text';
 
 if (browser && window.location.hash) {
-	const [type, editing] = window.location.hash.replace('#', '').split('.');
-	_editorType = type || 'text';
-	_isEditing = editing === 'edit';
+  const [type, editing] = window.location.hash.replace('#', '').split('.');
+  _editorType = type || 'text';
+  _isEditing = editing === 'edit';
 }
 
 export const isEditing = writable(_isEditing);
 export const editorType = writable(_editorType);
 
 function setHash(type = _editorType, edit = _isEditing) {
-	if (browser) {
-		window.location.hash = _editorType + (_isEditing ? '.edit' : '');
-	}
+  if (browser) {
+    window.location.hash = _editorType + (_isEditing ? '.edit' : '');
+  }
 }
 
-isEditing.subscribe((v) => {
-	setHash(undefined, v);
-});
+isEditing.subscribe((v) => { setHash(undefined, v); });
 
-editorType.subscribe((v) => {
-	setHash(v, undefined);
-});
+editorType.subscribe((v) => { setHash(v, undefined); });
 
 export * as localStore from './localStore';

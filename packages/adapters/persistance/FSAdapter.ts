@@ -23,7 +23,7 @@ async function setTextFileContent(file: File, path: string) {
 
 async function writeTextFile(f: File, filePath: string) {
   const content = (f.getData() as Doc).getText("content").toString();
-  console.log("save file", { content });
+  log("save file", { content });
   await writeFile(filePath, content, "utf8");
 }
 

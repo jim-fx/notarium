@@ -67,7 +67,21 @@ $ pnpm dev
 - [ ] Sync Tree with Document, eg (document deletion);
 - [x] Sync Binary files with peers, maybe simple-peer-files
 - [ ] Authentication / Authorization, okay p2p auth seems hard
+  - [ ] Move Doc Syncing into NetworkAdapter
+  - [ ] Transitioning to Y-WebRTC
+  - [ ] Awareness Information
 - [ ] Render Static Public Content
 - [ ] Theming Support
-- [ ] Awareness Information
-- [ ] Probably need a Backend Manager to garbage collect old Backends
+- [ ] Switch from Ace to CodeMirror
+  - [ ] [Could be used for variables](https://github.com/replit/codemirror-interact)
+  - [ ] [VIM Bindings for CodeMirror6](https://github.com/replit/codemirror-vim)
+  - [ ] [CodeMirror6 YJS Binding](https://github.com/yjs/y-codemirror.next)
+
+# Future Features
+
+- [ ] **Table with Filtering**
+- [ ] **CircuitJS Embedding**
+- [ ] **Latex Rendering**
+- [ ] **Running Code Blocks**
+- [ ] **Charts**
+- [ ] **Variables**

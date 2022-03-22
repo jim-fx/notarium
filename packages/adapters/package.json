@@ -11,7 +11,7 @@
     "@notarium/data": "workspace:^1.0.0",
     "@notarium/fs": "link:../fs",
     "@notarium/types": "link:../types",
-    "idb": "^7.0.0",
+    "idb": "^7.0.1",
     "lib0": "^0.2.46",
     "mmmagic": "^0.5.3",
     "nanoid": "^3.3.1",

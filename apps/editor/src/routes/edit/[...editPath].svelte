@@ -1,17 +1,38 @@
+<script context="module" lang="ts">
+	import fs from '$lib/fs';
+
+	/** @type {import('./[...editPath]').Load} */
+	export async function load({ params }) {
+		await fs.load();
+		const f = fs.openFile(params.editPath);
+		await f.load();
+		await f.context.isLoaded;
+
+		return {
+			props: {
+				file: f
+			}
+		};
+	}
+</script>
+
 <script lang="ts">
 	import { activeNode, activeNodeId, offline } from '$lib/stores';
 
 	import { Text, Directory, Image } from '$lib/fileviews';
+	import type { File } from '@notarium/fs';
+
+	export let file: File;
 </script>
 
 <button on:click={() => ($offline = !$offline)}>Make Offline</button>
 
-{#if !$activeNode}
+{#if !file}
 	<p>404</p>
 {:else if $activeNode?.mimetype === 'dir'}
 	<Directory activeNodeId={$activeNodeId} activeNode={$activeNode} />
-{:else if $activeNode?.mimetype?.startsWith('text/')}
-	<Text activeNode={$activeNode} activeNodeId={$activeNodeId} />
+{:else if file.isCRDT}
+	<Text {file} />
 {:else if $activeNode?.mimetype?.startsWith('image/')}
 	<Image activeNode={$activeNode} />
 	<p>Image</p>

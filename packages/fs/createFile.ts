@@ -73,7 +73,7 @@ export function createFile(path: string, fs: FileSystem) {
       });
     }
 
-    log("loading", file);
+    log("loading", { path: file.path, mimetype: file.mimetype });
 
     let data: Uint8Array;
     for (const a of fs.adapters) {
@@ -90,7 +90,7 @@ export function createFile(path: string, fs: FileSystem) {
     core = c;
     setCore(c);
 
-    log("loaded", file);
+    log("loaded", { path: file.path, mimetype: file.mimetype });
 
     return c.getData();
   }

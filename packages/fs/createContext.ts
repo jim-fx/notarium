@@ -54,6 +54,8 @@ export function createContext(fs: FileSystem, file: File) {
       const frontend = createDocumentFrontend(file);
 
       frontmatter = parseFrontmatter(frontend.getText());
+    } else {
+      frontmatter = {};
     }
 
     context = mergeObjects(parentContext, frontmatter);

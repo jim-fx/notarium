@@ -1,31 +1,14 @@
 <script lang="ts">
-	import type { IFile } from '@notarium/types';
-	import { GenericParser, renderMarkdownToHTML, parseFrontmatter } from '@notarium/parser';
+	import { renderMarkdownToHTML, parseFrontmatter } from '@notarium/parser';
 	import { getParser } from './blocks';
 	import { createWritableDocumentStore } from '@notarium/data';
 	import { isEditing, localStore } from '$lib/stores';
 	import { browser } from '$app/env';
-	import fs from '$lib/fs';
 	import type { File } from '@notarium/fs';
 
-	export let activeNode: IFile;
-	export let activeNodeId: string;
+	export let file: File;
 
-	let activeFile: File;
-	function loadFile(path: string) {
-		/* if (activeFile && activeFile.path === path) return; */
-		/* if (activeFile) activeFile.close(); */
-		const file = fs.openFile(path);
-		file.load().then(() => {
-			if (activeNodeId === path) {
-				activeFile = file;
-			}
-		});
-	}
-
-	$: activeNode && loadFile(activeNodeId);
-
-	$: text = activeFile && createWritableDocumentStore(activeFile);
+	$: text = file && createWritableDocumentStore(file);
 
 	$: frontMatter = text && parseFrontmatter($text);
 
@@ -42,7 +25,7 @@
 	/* 	} */
 	/* } */
 
-	let preferBlockStore = localStore.get(activeNodeId + '-prefer-block', false);
+	let preferBlockStore = localStore.get(file.path + '-prefer-block', false);
 	let preferBlock = $preferBlockStore;
 
 	$: editorType = blockAvailable && preferBlock ? 'block' : 'text';
@@ -78,36 +61,28 @@
 	{/if}
 </header>
 
-{#if activeFile}
-	{#if editorType === 'text'}
-		{#if $isEditing}
-			{#if browser}
-				{#await import('$lib/elements/TextEditor.svelte')}
-					<p>Loading Editor...</p>
-				{:then editorComponent}
-					<svelte:component this={editorComponent.default} bind:value={$text} />
-				{/await}
-			{:else}
-				<textarea name="" id="" cols="30" rows="10" />
-			{/if}
-		{:else}
-			<div id="md-container">
-				{@html renderMarkdownToHTML($text)}
-			</div>
-		{/if}
-	{:else if editorType === 'block'}
-		{#if blockAvailable}
-			{#if parser}
-				<svelte:component this={parser} {text} isEditing={$isEditing} />
-			{:else}
-				<p>No parser available for {frontMatter?.type}</p>
-			{/if}
-		{:else}
-			<p>No Block Data avaialbned</p>
-		{/if}
+{#if editorType === 'text'}
+	{#if $isEditing && browser}
+		{#await import('$lib/elements/TextEditor.svelte')}
+			<p>Loading Editor</p>
+		{:then comp}
+			<svelte:component this={comp.default} bind:value={$text} />
+		{/await}
+	{:else}
+		<div id="md-container">
+			{@html renderMarkdownToHTML($text)}
+		</div>
 	{/if}
-{:else}
-	<p>Loadin</p>
+{:else if editorType === 'block'}
+	{#if blockAvailable}
+		{#if parser}
+			<svelte:component this={parser} {text} isEditing={$isEditing} />
+		{:else}
+			<p>No parser available for {frontMatter?.type}</p>
+		{/if}
+	{:else}
+		<p>No Block Data avaialbned</p>
+	{/if}
 {/if}
 
 <style>

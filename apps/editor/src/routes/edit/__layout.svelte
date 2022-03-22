@@ -2,12 +2,14 @@
 	import { browser } from '$app/env';
 
 	export async function load({ params }) {
-		if (browser) {
-			await fs.load();
-		}
+		await fs.load();
+		const f = fs.openFile(params.editPath);
+		await f.load();
+		await f.context.isLoaded;
+
 		return {
 			props: {
-				editPath: params?.editPath
+				file: f
 			}
 		};
 	}
@@ -15,10 +17,13 @@
 
 <script lang="ts">
 	import fs from '$lib/fs';
-	import { activeNode, hasActiveNodeIndexMD, activeNodeId, activeFile } from '$lib/stores';
+	import { activeNode, hasActiveNodeIndexMD, activeNodeId } from '$lib/stores';
 	import { createConfigStore } from '@notarium/data';
+	import type { File } from '@notarium/fs';
 
-	$: context = $activeFile && createConfigStore($activeFile);
+	export let file: File;
+
+	const context = createConfigStore(file);
 </script>
 
 <details>

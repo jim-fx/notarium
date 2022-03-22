@@ -1,9 +1,17 @@
 import adapter from '@sveltejs/adapter-static';
+import { resolve } from 'path';
 import preprocess from 'svelte-preprocess';
 
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill';
-import rollupNodePolyFill from 'rollup-plugin-node-polyfills';
+process.env.VITE_ROOT_PATH = resolve('../../test/');
+
+let alias = {};
+
+if (process.env.NODE_ENV === 'production') {
+	alias = {
+		// path: './polyfills/path.ts',
+		// 'fs/promises': './polyfills/fs.ts'
+	};
+}
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -12,29 +20,18 @@ const config = {
 	preprocess: preprocess(),
 
 	kit: {
+		prerender: {
+			default: true
+		},
 		vite: {
-			resolve: {
-				alias: {
-					// This Rollup aliases are extracted from @esbuild-plugins/node-modules-polyfill,
-					// see https://github.com/remorses/esbuild-plugins/blob/master/node-modules-polyfill/src/polyfills.ts
-					// process and buffer are excluded because already managed
-					// by node-globals-polyfill
-					// stream: 'rollup-plugin-node-polyfills/polyfills/stream'
-				}
+			build: {
+				target: 'ESNext'
 			},
-			optimizeDeps: {
-				esbuildOptions: {
-					// Node.js global to browser globalThis
-					define: {
-						global: 'globalThis'
-					}
-					// Enable esbuild polyfill plugins
-				}
+			resolve: {
+				alias
 			}
 		},
-		adapter: adapter({
-			fallback: '200.html'
-		})
+		adapter: adapter({ fallback: null })
 	}
 };
 
