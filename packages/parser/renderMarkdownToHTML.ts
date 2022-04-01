@@ -9,6 +9,7 @@ import yaml from "highlight.js/lib/languages/yaml";
 import MarkdownIt from "markdown-it";
 import MarkdownFrontMatter from "markdown-it-front-matter";
 import MarkdownLatex from "@iktakahiro/markdown-it-katex";
+import MarkdownMathjax from "markdown-it-mathjax3";
 
 // Register languages
 hljs.registerLanguage("javascript", javascript);
@@ -37,7 +38,8 @@ const md = new MarkdownIt({
   },
 });
 
-md.use(MarkdownLatex, { fleqn: true });
+// md.use(MarkdownLatex, { fleqn: true });
+md.use(MarkdownMathjax, { svg: { displayAlign: "left" } });
 md.use(MarkdownFrontMatter, () => {});
 
 export default (input: string): string => {

@@ -99,7 +99,9 @@ export async function FSAdapter(fs: FileSystem): Promise<Adapter> {
       if (f.path !== "tree") return;
     },
     async saveFile(f: File) {
-      if (f.path !== "tree") return;
+      if (f.path === "tree") {
+        return;
+      }
 
       const filePath = resolve(rootPath, f.path);
 
@@ -107,6 +109,7 @@ export async function FSAdapter(fs: FileSystem): Promise<Adapter> {
         return writeTextFile(f, filePath);
       } else {
         // TODO: implement binary file save
+        console.warn("TODO: implement binary file save");
       }
     },
   };

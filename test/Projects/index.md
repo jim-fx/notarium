@@ -1,4 +1,0 @@
----
-protected: true
----
-# Projects

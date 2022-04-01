@@ -1,13 +1,7 @@
 ---
-private: true
+protected: true
 ---
-# JimFX's Personal Wiki
 
-[Ressources](Ressources/index.md)
+# Notarium Test
 
-[Archive](Archive/index.md)
-
-[Projects](Projects/index.md)
-
-[Areas](Areas/index.md)
-
+## [./blocks](blocks)
