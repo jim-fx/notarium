@@ -45,6 +45,14 @@ $ pnpm i -r
 $ pnpm dev
 ```
 
+# Importance List:
+
+- Good Markdown Editing Experience in the Browser
+  - [ ] Simple Authentication
+- Multi User Editing
+  - [ ] Password/URL for single file sharing
+- Rendering to Static HTML
+
 # TODO
 
 - [x] P2P Messaging
@@ -85,3 +93,4 @@ $ pnpm dev
 - [ ] **Running Code Blocks**
 - [ ] **Charts**
 - [ ] **Variables**
+- [ ] **Drawings (Excalidraw)**
