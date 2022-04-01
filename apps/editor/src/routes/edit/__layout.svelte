@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-	import { browser } from '$app/env';
+	import fs from '$lib/fs';
 
 	export async function load({ params }) {
 		await fs.load();
@@ -16,7 +16,6 @@
 </script>
 
 <script lang="ts">
-	import fs from '$lib/fs';
 	import { activeNode, hasActiveNodeIndexMD, activeNodeId } from '$lib/stores';
 	import { createConfigStore } from '@notarium/data';
 	import type { File } from '@notarium/fs';

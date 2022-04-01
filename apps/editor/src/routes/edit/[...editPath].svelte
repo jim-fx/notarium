@@ -1,13 +1,14 @@
 <script context="module" lang="ts">
 	import fs from '$lib/fs';
 
+	export const prerender = true;
+
 	/** @type {import('./[...editPath]').Load} */
 	export async function load({ params }) {
 		await fs.load();
 		const f = fs.openFile(params.editPath);
 		await f.load();
 		await f.context.isLoaded;
-
 		return {
 			props: {
 				file: f

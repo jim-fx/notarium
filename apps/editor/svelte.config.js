@@ -2,16 +2,8 @@ import adapter from '@sveltejs/adapter-static';
 import { resolve } from 'path';
 import preprocess from 'svelte-preprocess';
 
-process.env.VITE_ROOT_PATH = resolve('../../test/');
-
-let alias = {};
-
-if (process.env.NODE_ENV === 'production') {
-	alias = {
-		// path: './polyfills/path.ts',
-		// 'fs/promises': './polyfills/fs.ts'
-	};
-}
+const { ROOT_PATH = resolve('../../test') } = process.env;
+process.env.VITE_ROOT_PATH = ROOT_PATH;
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
@@ -21,14 +13,13 @@ const config = {
 
 	kit: {
 		prerender: {
-			default: true
+			default: true,
+			crawl: true,
+			entries: ['*', '/', '/edit', '/edit/*']
 		},
 		vite: {
 			build: {
 				target: 'ESNext'
-			},
-			resolve: {
-				alias
 			}
 		},
 		adapter: adapter({ fallback: null })

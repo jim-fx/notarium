@@ -1,11 +1,25 @@
+<script context="module">
+	import _fs from '$lib/fs';
+
+	export async function load() {
+		return {
+			props: {
+				fs: _fs
+			}
+		};
+	}
+</script>
+
 <script lang="ts">
 	import './app.css';
 	import { onMount } from 'svelte';
 	import File from '$lib/elements/File.svelte';
 	import { localStore, treeStore, activeNodeId } from '$lib/stores';
 
-	import fs from '$lib/fs';
 	import createBinaryHandler from '$lib/binaryHandler';
+	import type { FileSystem } from '@notarium/fs';
+
+	export let fs: FileSystem;
 
 	const loadOffline = localStore.get('load-offline', false);
 	const hideTree = localStore.get('show-tree', false);
