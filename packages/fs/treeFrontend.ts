@@ -38,6 +38,26 @@ function split(fs: FileSystem, s: string | string[]) {
   return p;
 }
 
+export function listFiles(fs: FileSystem) {
+  const rootNode = getRootNode(fs);
+
+  const foundFiles: YNode[] = [];
+  const toDo = [rootNode];
+
+  while (toDo.length) {
+    const f = toDo.shift();
+    foundFiles.push(f);
+
+    const children = f.get("children");
+
+    if (children && children.length) {
+      toDo.push(...f.children);
+    }
+  }
+
+  return foundFiles.map((f) => f.get("path"));
+}
+
 export function findFile(fs: FileSystem, path: string | string[] = "/"): YNode {
   const rootNode = getRootNode(fs);
 

@@ -1,5 +1,5 @@
 import { MimeType } from "@notarium/types";
-import { lstat } from "fs/promises";
+// import { lstat } from "node:fs/promises";
 // import { Magic, MAGIC_MIME_TYPE } from "mmmagic";
 
 // let ma: Magic;
@@ -17,8 +17,12 @@ import { detectMimeFromPath } from "./detectMimeFromPath";
 // };
 
 export default async function detectMimeType(path: string): Promise<MimeType> {
-  const s = await lstat(path);
-  if (s.isDirectory()) return "dir";
+  const { lstat } = await import("node:fs/promises");
+
+  if (lstat) {
+    const s = await lstat(path);
+    if (s.isDirectory()) return "dir";
+  }
 
   let mime = detectMimeFromPath(path);
   if (mime && mime !== "unknown") return mime;

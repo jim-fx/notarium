@@ -13,8 +13,8 @@
     "@notarium/common": "link:../common",
     "@notarium/data": "link:../data",
     "@notarium/parser": "link:../parser",
-    "svelte": "^3.46.4",
+    "svelte": "^3.46.6",
     "types": "link:../types",
-    "yjs": "^13.5.28"
+    "yjs": "^13.5.33"
   }
 }

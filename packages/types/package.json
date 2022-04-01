@@ -11,6 +11,6 @@
   "license": "ISC",
   "devDependencies": {
     "@notarium/common": "workspace:^1.0.0",
-    "yjs": "^13.5.28"
+    "yjs": "^13.5.33"
   }
 }

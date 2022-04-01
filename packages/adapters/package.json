@@ -12,9 +12,9 @@
     "@notarium/fs": "link:../fs",
     "@notarium/types": "link:../types",
     "idb": "^7.0.1",
-    "lib0": "^0.2.46",
+    "lib0": "^0.2.48",
     "mmmagic": "^0.5.3",
-    "nanoid": "^3.3.1",
+    "nanoid": "^3.3.2",
     "reconnecting-websocket": "^4.4.0",
     "simple-peer": "^9.11.1",
     "simple-peer-files": "^1.2.3",
@@ -24,7 +24,7 @@
     "vite-compatible-simple-peer": "^9.11.0",
     "watcher": "^1.2.0",
     "ws": "^8.5.0",
-    "yjs": "^13.5.28"
+    "yjs": "^13.5.33"
   },
   "keywords": [],
   "author": "",

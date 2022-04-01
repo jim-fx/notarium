@@ -26,6 +26,9 @@ export function createFileSystem(
     findFile(path: string) {
       return treeFrontend.findFile(this, path)?.toJSON();
     },
+    listFiles() {
+      return treeFrontend.listFiles(this);
+    },
     renameFile(oldPath: string, newPath: string) {
       return treeFrontend.renameFile(this, oldPath, newPath);
     },
@@ -53,8 +56,6 @@ export function createFileSystem(
 
       let amount = allFiles.length;
       let done = 0;
-
-      console.log(allFiles);
 
       while (groups.length) {
         const g = groups.pop();

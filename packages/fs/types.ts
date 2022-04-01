@@ -62,6 +62,7 @@ export interface FileSystem {
 
   setOffline(o: boolean): void;
 
+  listFiles(): string[];
   isDir(path: string | string[]): boolean;
   findFile(path: string | string[]): IFile;
   renameFile(oldPath: string, newPath: string): void;

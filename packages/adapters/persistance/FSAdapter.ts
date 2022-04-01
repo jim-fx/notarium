@@ -1,7 +1,5 @@
 import { logger, splitPath } from "@notarium/common";
 import { Adapter, File, FileSystem } from "@notarium/fs";
-import { readFile, stat, writeFile } from "fs/promises";
-import { resolve } from "path";
 import { FSWatcher } from "./FSAdapter/Watcher";
 import { FSTreeAdapter } from "./FSAdapter/TreeAdapter";
 import { createDocumentFrontend } from "@notarium/data";
@@ -13,6 +11,8 @@ const log = logger("adapt/fs");
 log.isolate();
 
 async function setTextFileContent(file: File, path: string) {
+  const { readFile } = await import("node:fs/promises");
+
   await file.load();
   const content = await readFile(path, "utf8");
 
@@ -22,12 +22,16 @@ async function setTextFileContent(file: File, path: string) {
 }
 
 async function writeTextFile(f: File, filePath: string) {
+  const { writeFile } = await import("node:fs/promises");
   const content = (f.getData() as Doc).getText("content").toString();
   log("save file", { content });
   await writeFile(filePath, content, "utf8");
 }
 
 export async function FSAdapter(fs: FileSystem): Promise<Adapter> {
+  const { resolve } = await import("node:path");
+  const { readFile, stat } = await import("node:fs/promises");
+
   const id = Symbol("adapt/fs");
 
   const { rootPath = resolve(process.env.HOME, "Notes") } = fs.flags;

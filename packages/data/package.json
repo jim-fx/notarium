@@ -12,7 +12,7 @@
     "@notarium/fs": "link:../fs",
     "@notarium/parser": "link:../parser",
     "@notarium/types": "link:../types",
-    "svelte": "^3.46.4"
+    "svelte": "^3.46.6"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,6 @@
   "devDependencies": {
     "@types/diff-match-patch": "^1.0.32",
     "ucans": "^0.8.0",
-    "yjs": "^13.5.28"
+    "yjs": "^13.5.33"
   }
 }

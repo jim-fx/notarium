@@ -3,11 +3,12 @@ import detectMimeType from "@notarium/common/detectMime";
 
 import * as Y from "yjs";
 
-import { basename } from "path";
-import { lstat, readdir, rm } from "fs/promises";
 import { File, FileSystem } from "@notarium/fs";
 
 export async function readTextFile(path: string): Promise<IFile> {
+  const { lstat, readdir } = await import("node:fs/promises");
+  const { basename } = await import("node:path");
+
   const stat = await lstat(path);
 
   if (stat.isDirectory()) {
