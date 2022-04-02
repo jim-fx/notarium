@@ -1,7 +1,6 @@
 ---
-protected: true
+type: block
 ---
+# Welcome to Notarium
 
-# Notarium Test
-
-## [./blocks](blocks)
+**[Blocks](./blocks)**
