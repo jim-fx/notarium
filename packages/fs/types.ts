@@ -36,6 +36,8 @@ export interface File {
     cb: (data: Uint8Array | Doc) => Promise<void> | void,
     adapter?: Symbol
   ): Promise<void>;
+
+  toJSON(): { context: File["context"], mimetype: File["mimetype"] }
 }
 
 export type AdapterFactory = (fs: FileSystem) => Adapter | Promise<Adapter>;

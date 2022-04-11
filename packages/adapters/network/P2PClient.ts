@@ -34,7 +34,7 @@ const { getId, setId } = (() => {
   if (!("localStorage" in globalThis))
     return {
       getId: () => "",
-      setId: (v) => {},
+      setId: (v) => { },
     };
 
   let _id: string;
@@ -178,19 +178,15 @@ export async function connect(url: string) {
 
   const id = getId();
 
-  if (id) {
-    document.cookie = "X-Authorization=" + id + "; path=/; SameSite=Strict;";
-  }
 
-  const _ws = new ReconnectingWebSocket(url);
+  document.cookie = "X-Authorization=" + id + "; path=/; SameSite=Strict;";
+  const _ws = new ReconnectingWebSocket(url + "/ws");
+  document.cookie = "";
 
   _ws.onerror = ({ error }) => {
     log.error(error);
   };
 
-  setTimeout(() => {
-    document.cookie = "";
-  });
 
   ws = new Promise((res) => {
     _ws.onopen = () => {

@@ -4,6 +4,7 @@ import {
   logger,
   wait,
 } from "@notarium/common";
+import { File } from ".";
 import { createFile } from "./createFile";
 import * as treeFrontend from "./treeFrontend";
 import { AdapterFactory, FileSystem, FileSystemFlags } from "./types";
@@ -17,7 +18,7 @@ export function createFileSystem(
   let isLoading = false;
   const [isLoaded, setLoaded] = createResolvablePromise();
 
-  const cache = {};
+  const openFiles: Map<string, File> = new Map();
 
   const fs: FileSystem = {
     isLoaded,
@@ -42,9 +43,10 @@ export function createFileSystem(
       return treeFrontend.deleteFile(this, path);
     },
     openFile(path: string) {
-      if (path in cache) return cache[path];
-      cache[path] = createFile(path, this);
-      return cache[path];
+      if (openFiles.has(path)) return openFiles.get(path);
+      const file = createFile(path, this);
+      openFiles.set(path, file);
+      return file;
     },
     async setOffline(o) {
       if (!o) return;

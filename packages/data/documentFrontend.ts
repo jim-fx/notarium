@@ -21,6 +21,8 @@ export function createDocumentFrontend(file: File) {
 
   async function setText(t: string) {
     if (timeout) clearTimeout(timeout);
+
+    console.log("FRONTEND FUCKING UP");
     const now = Date.now();
     if (now - lastExecution < 500) {
       await new Promise((res) => {

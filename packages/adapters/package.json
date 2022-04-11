@@ -24,6 +24,8 @@
     "vite-compatible-simple-peer": "^9.11.0",
     "watcher": "^1.2.0",
     "ws": "^8.5.0",
+    "y-webrtc": "^10.2.2",
+    "y-websocket": "^1.4.0",
     "yjs": "^13.5.33"
   },
   "keywords": [],

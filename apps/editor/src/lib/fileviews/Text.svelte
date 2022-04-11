@@ -14,17 +14,6 @@
 
 	$: blockAvailable = !!frontMatter?.type;
 
-	/* let blockAvailable = _blockAvailable; */
-	/* let timeout: NodeJS.Timeout; */
-	/* if (_blockAvailable) { */
-	/* 	if (!timeout) { */
-	/* 		timeout = setTimeout(() => { */
-	/* 			blockAvailable = _blockAvailable; */
-	/* 			timeout = undefined; */
-	/* 		}, 100); */
-	/* 	} */
-	/* } */
-
 	let preferBlockStore = localStore.get(file.path + '-prefer-block', false);
 	let preferBlock = $preferBlockStore;
 
@@ -66,7 +55,7 @@
 		{#await import('$lib/elements/TextEditor.svelte')}
 			<p>Loading Editor</p>
 		{:then comp}
-			<svelte:component this={comp.default} bind:value={$text} />
+			<svelte:component this={comp.default} {file} />
 		{/await}
 	{:else}
 		<div id="md-container">

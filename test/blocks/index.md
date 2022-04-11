@@ -1,11 +1,17 @@
-# Notarium Block
+# Very Nice
+very nice, great successsss
 
-## Latex / MathJax Support
+The why is very now hh
+as this is
 
-$$
-\begin{flalign}
-&V = I * R&\\\
-&I = \frac{V}{R}\\
-&R = \frac{V}{I}\\
-\end{flalign}
-$$
+this seems now a lot more stable to me
+
+thisih
+
+asdasd
+
+Now we get intro the unstabe territory
+
+asd
+
+

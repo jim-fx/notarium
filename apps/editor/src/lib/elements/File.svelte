@@ -17,7 +17,7 @@
 	</h3>
 
 	{#if 'children' in file}
-		{#each file.children as _file}
+		{#each file.children.sort((a, b) => (a.path > b.path ? -1 : 1)) as _file}
 			<svelte:self file={_file} parentPath={ownPath + '/'} {handleDelete} {handleCreate} />
 		{/each}
 	{/if}

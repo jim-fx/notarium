@@ -1,6 +1,6 @@
 export function createResolvablePromise<T = void>(): [
   Promise<T>,
-  (value: T) => void
+  (value?: T) => void
 ] {
   let res: (value: T) => void;
   const p = new Promise<T>((r) => (res = r));

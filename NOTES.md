@@ -344,3 +344,13 @@ Adapter Interface
 # AuthZ for tree
 
 With the current tree structure we can’t partially sync the tree because the whole tree is stored in a single document.
+
+# How to use the YJS Providers for the NetworkAdapter
+
+openFile
+
+- is it a crdt?
+  - yes -> am i running in the browser?
+    - yes -> Create WebRTC/WebSocket Provider
+    - no -> Don't do anything it is handled by the internal WebSocket Code
+  - no -> handle it with the P2P Provider

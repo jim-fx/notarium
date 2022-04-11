@@ -52,11 +52,12 @@ export function createContext(fs: FileSystem, file: File) {
 
     if (file.isCRDT) {
       const frontend = createDocumentFrontend(file);
-
       frontmatter = parseFrontmatter(frontend.getText());
     } else {
       frontmatter = {};
     }
+
+    if (!frontmatter) frontmatter = {};
 
     context = mergeObjects(parentContext, frontmatter);
 
@@ -91,7 +92,6 @@ export function createContext(fs: FileSystem, file: File) {
       if (!fs.findFile(p)) return false;
       if (fs.isDir(p)) return false;
       const f = fs.openFile(p);
-      console.log(f);
       if (!f.isCRDT) return false;
       return true;
     });

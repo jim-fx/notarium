@@ -42,6 +42,7 @@
 		"reconnecting-websocket": "^4.4.0",
 		"simple-peer": "^9.11.1",
 		"watcher": "^1.2.0",
+		"y-codemirror.next": "^0.1.2",
 		"yaml": "^1.10.2",
 		"yjs": "^13.5.33"
 	},

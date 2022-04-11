@@ -57,6 +57,13 @@ export function createFile(path: string, fs: FileSystem) {
       f();
       emitter.emit("update", core.getData());
     },
+    toJSON() {
+      return {
+        mimetype: this.mimetype,
+        path: this.path,
+        context: this.context,
+      }
+    },
     isLoaded: corePromise,
     load,
     on: emitter.on,

@@ -6,26 +6,36 @@
 	import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
 	import { history } from '@codemirror/history';
 	import { vim } from '@replit/codemirror-vim';
+	import { yCollab } from 'y-codemirror.next';
+	import { type Doc, UndoManager } from 'yjs';
+	import type { File } from '@notarium/fs';
 
-	export let value: string = ''; // String, required
-	export let lang: string = 'markdown'; // String
+	export let file: File; // String, required
+	/* export let lang: string = 'markdown'; // String */
 
 	let wrapper: HTMLDivElement;
 
-	function handleUpdate(update: ViewUpdate) {
-		console.log(update.state.toJSON().doc);
-		value = update.state.toJSON().doc;
-	}
+	const doc = file.getData() as Doc;
+	const yText = doc.getText('content');
+
+	const provider = file.stuff['yjs.rtc'] || file.stuff['yjs.ws'];
+	provider.awareness.setLocalStateField(Math.random() + '', {
+		name: 'Anonymous ' + Math.floor(Math.random() * 100),
+		color: 'red',
+		colorLight: 'red'
+	});
+
+	const undoManager = new UndoManager(yText);
 
 	onMount(() => {
 		const state = EditorState.create({
-			doc: value,
+			doc: yText.toString(),
 			extensions: [
-				EditorView.updateListener.of(handleUpdate),
 				history(),
 				oneDarkHighlightStyle,
 				vim(),
-				markdown()
+				markdown(),
+				yCollab(yText, provider.awareness, { undoManager })
 			]
 		});
 
@@ -33,8 +43,6 @@
 			state,
 			parent: wrapper
 		});
-
-		console.log({ state, view });
 	});
 </script>
 

@@ -92,7 +92,7 @@ function log(scope: string): Logger {
   currentIndex++;
 
   const handleLog = (args: unknown[] | Error, _level: number) => {
-    history.push({ scope, args, level: _level });
+    history.push({ scope, args: args[0], level: _level });
     history.length = Math.min(100, history.length);
     saveHistory();
     if (!enabled && _level !== 0) return;

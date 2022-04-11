@@ -4,11 +4,16 @@ import {
   applyUpdateV2,
   Doc,
   encodeStateAsUpdateV2,
-  encodeStateVector,
 } from "yjs";
 import { logger, parseBinary } from "@notarium/common";
+import { WebrtcProvider } from "y-webrtc";
+import { WebsocketProvider } from "y-websocket";
 
 const log = logger("adapt/net");
+
+logger.setFilter("")
+
+const IS_BROWSER = ("window" in globalThis);
 
 export function createNetworkAdapter(
   urls: string[],
@@ -27,7 +32,7 @@ export function createNetworkAdapter(
     adapter.on(
       "doc.open",
       async ({ path, stateVector: rawStateVector }, { peerId }) => {
-        if (fs.flags.autoOpen) {
+        if (fs.flags.autoOpen && !(path in files)) {
           files[path] = fs.openFile(path);
         }
 
@@ -68,7 +73,7 @@ export function createNetworkAdapter(
           if (file.isCRDT) {
             file.update((doc: Doc) => {
               const update = parseBinary(rawSyncData);
-              applyUpdateV2(doc, update, peerId);
+              // applyUpdateV2(doc, update, peerId);
             }, id);
           }
         }
@@ -84,21 +89,23 @@ export function createNetworkAdapter(
     return {
       id,
       on: adapter.on,
-      async requestFile(f: File) {
-        log("request file", f);
-        if (f.isCRDT) {
-          f.isLoaded.then(() => {
-            const doc = f.getData() as Doc;
-            const stateVector = encodeStateVector(doc).join();
-            adapter.broadcast("doc.open", { path: f.path, stateVector });
+      async requestFile(file: File) {
+        log("request file", file);
+        if (file.isCRDT) {
+          file.isLoaded.then(() => {
+            const doc = file.getData() as Doc;
+            if (IS_BROWSER) {
+              file.stuff["yjs.ws"] = new WebsocketProvider(urls[0] + "/yjs", file.path, doc);
+              file.stuff["yjs.rtc"] = new WebrtcProvider(file.path, doc, { signaling: [urls[0] + "/signal"] });
+            }
           });
         } else {
-          return adapter.requestFile(f.path);
+          return adapter.requestFile(file.path);
         }
-        files[f.path] = f;
+        files[file.path] = file;
       },
       async saveFile(f: File, update: Uint8Array) {
-        log("save", peers, f.path);
+        // log("save", peers, f.path);
         if (f.path in peers && update) {
           peers[f.path].forEach((id) => {
             adapter.sendTo(id, "doc.update", {

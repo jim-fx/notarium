@@ -80,6 +80,7 @@ export function assureArray<T>(v: T | T[]) {
 export * from "./eventemitter";
 export * from "./mutex";
 export * from "./fs";
+export * from "./map";
 export * from "./groupArray";
 
 export * from "./logger";

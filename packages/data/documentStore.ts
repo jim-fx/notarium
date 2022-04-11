@@ -1,6 +1,7 @@
 import { Readable, readable, writable } from "svelte/store";
 import { createDocumentFrontend } from "./documentFrontend";
 import { File } from "@notarium/fs";
+import { Doc } from "yjs";
 
 export function createDocumentStore(file: File): Readable<string> {
   const frontend = createDocumentFrontend(file);
@@ -9,7 +10,8 @@ export function createDocumentStore(file: File): Readable<string> {
     file.isLoaded.then(() => {
       set(frontend.getText());
     });
-    return file.on("update", () => {
+    return file.getData().on("update", () => {
+      console.log("UUPDATE")
       set(frontend.getText());
     });
   });
@@ -27,15 +29,17 @@ export function createWritableDocumentStore(file: File) {
     value = v;
     frontend.setText(v);
   });
+  console.log({ frontend, file })
 
   function handleBackendUpdate() {
+    console.log("UUPDATE")
     const v = frontend.getText();
     if (v === value) return;
     value = v;
     store.set(v);
   }
 
-  file.on("update", () => handleBackendUpdate());
+  (file.getData() as Doc).on("update", () => handleBackendUpdate());
 
   file.isLoaded.then(() => handleBackendUpdate());
 
