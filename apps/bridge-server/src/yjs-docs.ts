@@ -1,12 +1,9 @@
-import * as Y from 'yjs'
-import * as syncProtocol from 'y-protocols/sync'
-import * as awarenessProtocol from 'y-protocols/awareness'
+import { FileSystem } from '@notarium/fs';
+import { decoding, encoding } from "lib0";
 import { CONNECTING, OPEN, WebSocket } from "ws";
-
-import { encoding, decoding } from "lib0"
-import { Adapter, FileSystem, } from '@notarium/fs';
-import { createResolvablePromise } from '@notarium/common';
-
+import * as awarenessProtocol from 'y-protocols/awareness';
+import * as syncProtocol from 'y-protocols/sync';
+import * as Y from 'yjs';
 
 const docs: Map<string, WSSharedDoc> = new Map()
 

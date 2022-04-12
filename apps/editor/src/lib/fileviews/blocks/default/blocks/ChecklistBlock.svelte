@@ -1,8 +1,10 @@
-<script>
+<script lang="ts">
+	import type { NotariumChecklistBlock } from '@notarium/parser/generic/types';
+
 	import { tick } from 'svelte';
 	import { scale } from 'svelte/transition';
 
-	export let block;
+	export let block: NotariumChecklistBlock;
 
 	export let edit = false;
 
@@ -19,14 +21,11 @@
 		return pos;
 	}
 
-	let activeItem = -5;
-
-	async function handleKeyDown(ev, i) {
+	async function handleKeyDown(ev: KeyboardEvent, i: number) {
 		const content = ev.target.textContent;
 
 		if (ev.key === 'Escape') {
 			ev.target.blur();
-			activeItem = -1;
 		}
 
 		if (ev.key === 'Enter') {
@@ -46,14 +45,11 @@
 			block.data = block.data;
 			let _i = i;
 			await tick();
-			setTimeout(() => {
-				activeItem = _i;
-			}, 500);
 		}
 	}
 
-	function handleRemove(i) {
-		block.data = block.data.filter((_, _i) => i !== _i);
+	function handleRemove(i: number) {
+		block.data = block.data.filter((_: any, _i: number) => i !== _i);
 	}
 
 	$: done = block.data.filter((v) => v.checked).length;
@@ -80,7 +76,6 @@
 			<p
 				contenteditable
 				class="ml-2 w-full p-0.5"
-				autofocus={i === activeItem}
 				bind:textContent={item.text}
 				on:keydown={(ev) => handleKeyDown(ev, i)}
 			>

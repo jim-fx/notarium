@@ -1,36 +1,52 @@
-import { logger, splitPath } from "@notarium/common";
-import { Adapter, File, FileSystem } from "@notarium/fs";
-import { FSWatcher } from "./FSAdapter/Watcher";
-import { FSTreeAdapter } from "./FSAdapter/TreeAdapter";
-import { createDocumentFrontend } from "@notarium/data";
+import { createMutexFactory, createResolvablePromise, logger, splitPath, wait } from "@notarium/common";
 import detectMimeType from "@notarium/common/detectMime";
+import { createDocumentFrontend } from "@notarium/data";
+import { Adapter, File, FileSystem } from "@notarium/fs";
 import { Doc } from "yjs";
+import { FSTreeAdapter } from "./FSAdapter/TreeAdapter";
+import { FSWatcher } from "./FSAdapter/Watcher";
 
 const log = logger("adapt/fs");
 
 log.isolate();
 
-async function setTextFileContent(file: File, path: string) {
-  const { readFile } = await import("node:fs/promises");
+const lastWrites: Map<string, number> = new Map();
+
+const mutex = createMutexFactory();
+
+async function setTextFileContent(file: File, filePath: string) {
+
+  const f = await mutex();
+
+  const { readFile } = await import("fs/promises");
+
 
   await file.load();
-  const content = await readFile(path, "utf8");
+  const content = await readFile(filePath, "utf8");
 
-  const frontend = createDocumentFrontend(file);
 
-  frontend.setText(content);
+  if (content.length === 0) {
+    console.log("HOUSTON:", { content });
+  } else {
+    const frontend = createDocumentFrontend(file);
+    frontend.setText(content);
+  }
+  f();
 }
 
-async function writeTextFile(f: File, filePath: string) {
+async function writeTextFile(file: File, filePath: string) {
+  const f = await mutex();
   const { writeFile } = await import("node:fs/promises");
-  const content = (f.getData() as Doc).getText("content").toString();
+  const content = (file.getData() as Doc).getText("content").toString();
   log("save file", { content });
   await writeFile(filePath, content, "utf8");
+  lastWrites.set(filePath, performance.now());
+  f();
 }
 
 export async function FSAdapter(fs: FileSystem): Promise<Adapter> {
   const { resolve } = await import("node:path");
-  const { readFile, stat } = await import("node:fs/promises");
+  const { readFile, stat } = await import("fs/promises");
 
   const id = Symbol("adapt/fs");
 
@@ -55,7 +71,16 @@ export async function FSAdapter(fs: FileSystem): Promise<Adapter> {
       const filePath = resolve(rootPath, changePath);
 
       if (file && file.mimetype.startsWith("text/")) {
-        await setTextFileContent(file, filePath);
+
+        const content = file.getData().getText("content").toString();
+        await wait(200);
+        const newContent = file.getData().getText("content").toString();
+
+        if (content == newContent) {
+          setTextFileContent(file, filePath);
+        }
+
+
       } else {
         return readFile(filePath);
       }

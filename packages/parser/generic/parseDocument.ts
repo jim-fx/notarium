@@ -43,7 +43,7 @@ export function parseLines(lines: string[]): NotariumBlock[] {
     } else {
       if (isLatexLine(line)) {
         if (currentBlock.type === "latex") {
-          close();
+          return close();
         }
         currentBlock.type = "latex";
       } else if (currentBlock.type === "latex") {
@@ -91,7 +91,6 @@ export default function parseDocument(input: string): NotariumDocument {
   const frontMatterBlocks: NotariumFrontmatterBlock[] = [];
 
   for (const b of parseLines(lines)) {
-    console.log(b);
     if (b.type === "frontmatter") {
       frontMatterBlocks.push(b);
     } else {
@@ -102,13 +101,6 @@ export default function parseDocument(input: string): NotariumDocument {
   const frontmatter = frontMatterBlocks.reduce((a, b) => {
     return { ...a, ...b.data };
   }, {});
-
-  console.log("parsedDocument", {
-    lines,
-    blocks,
-    frontmatter,
-    frontMatterBlocks,
-  });
 
   return {
     frontmatter,

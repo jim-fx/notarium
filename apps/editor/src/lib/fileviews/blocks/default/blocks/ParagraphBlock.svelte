@@ -9,31 +9,6 @@
 		block.md = ev.target.textContent;
 	}
 
-	$: classes = edit && getClasses(block);
-
-	function getClasses(b) {
-		let _classes = [];
-		switch (b.type) {
-			case 'heading':
-				switch (b.data.weight) {
-					case 1:
-						_classes.push('text-4xl', 'font-bold');
-						break;
-					case 2:
-						_classes.push('text-xl', 'font-medium');
-						break;
-					case 3:
-						_classes.push('text-lg', 'font-light');
-						break;
-				}
-				break;
-			default:
-				break;
-		}
-
-		return _classes;
-	}
-
 	let el: HTMLSpanElement;
 
 	onMount(() => {
@@ -47,21 +22,13 @@
 	});
 </script>
 
-{#if edit}
-	<span
-		bind:this={el}
-		contenteditable
-		on:input={handleInput}
-		class={`max-w-full outline-none block-type-${block.type} whitespace-pre-wrap ${classes.join(
-			' '
-		)}`}
-		bind:textContent={block.md}
-	/>
-{:else}
-	<p class="block-type-{block.type}">
+<p class="block-type-{block.type}">
+	{#if edit}
+		<span bind:this={el} contenteditable on:input={handleInput} bind:textContent={block.md} />
+	{:else}
 		{@html block.html}
-	</p>
-{/if}
+	{/if}
+</p>
 
 <style>
 	p > :global(ul) {

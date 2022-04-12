@@ -1,17 +1,28 @@
-# Very Nice
-very nice, great successsss
+---
+type: blocks
+---
+# This is my new version
 
-The why is very now hh
-as this is
+## Use any editor u want?
 
-this seems now a lot more stable to me
+But what if you would want to edit in your terminal?
 
-thisih
+Edit in the browser and in your terminal
 
-asdasd
+maybe this is better than the old one, but, how do we fix this stuuupid debounce error
 
-Now we get intro the unstabe territory
+## Or try some interactive blocks:
 
-asd
+### Like maybe latex?
 
+$$
+\frac{1}{R_E} = \frac{1}{R_1} + \frac{1}{R_2}
+$$
 
+### Or maybe checklists?
+
+- [x] This is a github styled checklist
+- [x] With some items on it
+- [x] that do not mean anything
+- [x] He needs some milk
+- [x] God damn boyyyyyy

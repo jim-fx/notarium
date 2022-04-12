@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { createEventDispatcher, tick, onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import { EditorState } from '@codemirror/state';
-	import { EditorView, ViewUpdate } from '@codemirror/view';
+	import { EditorView } from '@codemirror/view';
 	import { markdown } from '@codemirror/lang-markdown';
-	import { oneDark, oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
+	import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
 	import { history } from '@codemirror/history';
 	import { vim } from '@replit/codemirror-vim';
 	import { yCollab } from 'y-codemirror.next';
@@ -18,7 +18,7 @@
 	const doc = file.getData() as Doc;
 	const yText = doc.getText('content');
 
-	const provider = file.stuff['yjs.rtc'] || file.stuff['yjs.ws'];
+	const provider = file.stuff['yjs.ws'] || file.stuff['yjs.rtc'];
 	provider.awareness.setLocalStateField(Math.random() + '', {
 		name: 'Anonymous ' + Math.floor(Math.random() * 100),
 		color: 'red',

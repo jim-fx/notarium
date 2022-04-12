@@ -11,8 +11,6 @@ import { WebsocketProvider } from "y-websocket";
 
 const log = logger("adapt/net");
 
-logger.setFilter("")
-
 const IS_BROWSER = ("window" in globalThis);
 
 export function createNetworkAdapter(

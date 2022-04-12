@@ -42,8 +42,6 @@
 		createBinaryHandler(channel);
 
 		await fs.load();
-
-		window['fs'] = fs;
 	});
 </script>
 

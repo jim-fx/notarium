@@ -33,13 +33,13 @@
 		{:else if block.type === 'table'}
 			<TableBlock bind:block />
 		{:else if block.type === 'heading'}
-			<HeadingBlock bind:block />
+			<HeadingBlock bind:block edit={isEditing} />
 		{:else if block.type === 'paragraph'}
 			<ParagraphBlock bind:block edit={isEditing} />
 		{:else if block.type === 'code'}
 			<CodeBlock bind:block />
 		{:else if block.type === 'latex'}
-			<LatexBlock {block} />
+			<LatexBlock bind:block edit={isEditing} />
 		{:else}
 			<p>Block Type: {block.type} not implemented</p>
 		{/if}

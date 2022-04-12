@@ -26,7 +26,7 @@ const _FSWatcher = (path: string) => {
   const w = new Watcher(path, {
     recursive: true,
     ignoreInitial: true,
-    debounce: 10,
+    debounce: 100,
     renameDetection: true,
     ignore: (path) => {
       return !!path.match(/(^|[\/\\])\../);
@@ -39,10 +39,8 @@ const _FSWatcher = (path: string) => {
     if (timeout) clearTimeout(timeout);
     const ev: Event = { type: e, path: p, newPath: s, mimetype };
     events.push(ev);
-    timeout = setTimeout(() => {
-      emit("changes", events);
-      events = [];
-    }, 20);
+    emit("changes", events);
+    events = [];
   }
 
   w.on("all", async (event, originalPath, targetPathNext) => {

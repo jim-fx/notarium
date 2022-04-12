@@ -2,17 +2,17 @@
 	export let block;
 </script>
 
-<table class="border-collapse space-y-6 p-4 rounded-md divide-y divide-opacity-30 divide-gray-50">
-	<tr class="divide-x divide-opacity-30 divide-gray-50">
+<table>
+	<tr>
 		{#each block.data.headers as header}
-			<th class="p-2 font-bold">{header}</th>
+			<th>{header}</th>
 		{/each}
 	</tr>
 
 	{#each block.data.rows as row}
-		<tr class="divide-x divide-gray-50 divide-opacity-30">
+		<tr>
 			{#each row as c}
-				<td class="p-2">{c}</td>
+				<td>{c}</td>
 			{/each}
 		</tr>
 	{/each}
@@ -20,6 +20,16 @@
 
 <style>
 	table {
-		border-spacing: 15px 15px;
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
+		text-align: left;
+		padding: 8px;
+	}
+
+	tr:nth-child(even) {
+		background-color: #f2f2f2;
 	}
 </style>

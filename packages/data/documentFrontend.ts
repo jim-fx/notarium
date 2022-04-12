@@ -19,10 +19,9 @@ export function createDocumentFrontend(file: File) {
     return doc.getText("content").toString();
   }
 
-  async function setText(t: string) {
+  async function setText(newContent: string) {
     if (timeout) clearTimeout(timeout);
 
-    console.log("FRONTEND FUCKING UP");
     const now = Date.now();
     if (now - lastExecution < 500) {
       await new Promise((res) => {
@@ -34,15 +33,22 @@ export function createDocumentFrontend(file: File) {
 
     const currentContent = getText();
 
-    if (currentContent === t) return;
+    if (newContent.length === 0) {
+      console.trace("SOMEBUDEY FIICLED IPÜ", { newContent, currentContent })
+    }
+
+
+    if (currentContent === newContent) return;
 
     // Compute the diff:
-    const diff = dmp.diff_main(currentContent, t);
+    const diff = dmp.diff_main(currentContent, newContent);
 
     // This cleans up the diff so that the diff is more human friendly.
     dmp.diff_cleanupSemantic(diff);
 
     const patches = dmp.patch_make(currentContent, diff);
+
+    console.log({ patches });
 
     file.update((doc: Doc) => {
       const text = doc.getText("content");

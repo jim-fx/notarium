@@ -7,3 +7,7 @@ It think it would be nice to still keep the current p2p adapters, for general co
 Maybe create a different adapter for browser and node.
 
 The nodejs
+
+```ts
+const d:number = 5;
+```

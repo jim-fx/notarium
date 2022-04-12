@@ -73,10 +73,3 @@
 		<p>No Block Data avaialbned</p>
 	{/if}
 {/if}
-
-<style>
-	textarea {
-		height: 90vh;
-		width: 100%;
-	}
-</style>

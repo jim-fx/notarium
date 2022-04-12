@@ -15,7 +15,6 @@ export default function renderDocumentToMarkdown(d: NotariumDocument): string {
       .map((block) => [...block, ""])
       .flat(),
   ];
-  console.log("RenderDocument", { renderedBlocks, lines, d });
 
   return lines.join("\n");
 }

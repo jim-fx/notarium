@@ -8,7 +8,8 @@ import yaml from "highlight.js/lib/languages/yaml";
 
 import MarkdownIt from "markdown-it";
 import MarkdownFrontMatter from "markdown-it-front-matter";
-import MarkdownLatex from "@iktakahiro/markdown-it-katex";
+import MarkownItCheckboxes from "markdown-it-checkbox"
+import MarkdownItHighlight from "markdown-it-highlightjs"
 import MarkdownMathjax from "markdown-it-mathjax3";
 
 // Register languages
@@ -18,29 +19,12 @@ hljs.registerLanguage("yaml", yaml);
 hljs.registerLanguage("json", json);
 hljs.registerLanguage("typescript", typescript);
 
-const md = new MarkdownIt({
-  highlight: function (str: string, language: string) {
-    if (language && hljs.getLanguage(language)) {
-      try {
-        return hljs.highlight(str, { language }).value;
-      } catch (err) {
-        /*"asdasd"*/
-      }
-    }
+const md = new MarkdownIt();
 
-    try {
-      return hljs.highlightAuto(str).value;
-    } catch (err) {
-      /*asdasd*/
-    }
-
-    return ""; // use external default escaping
-  },
-});
-
-// md.use(MarkdownLatex, { fleqn: true });
+md.use(MarkdownItHighlight, { hljs })
 md.use(MarkdownMathjax, { svg: { displayAlign: "left" } });
-md.use(MarkdownFrontMatter, () => {});
+md.use(MarkdownFrontMatter, () => { });
+md.use(MarkownItCheckboxes)
 
 export default (input: string): string => {
   return md.render(input);

@@ -11,7 +11,6 @@ export function createDocumentStore(file: File): Readable<string> {
       set(frontend.getText());
     });
     return file.getData().on("update", () => {
-      console.log("UUPDATE")
       set(frontend.getText());
     });
   });
@@ -29,10 +28,8 @@ export function createWritableDocumentStore(file: File) {
     value = v;
     frontend.setText(v);
   });
-  console.log({ frontend, file })
 
   function handleBackendUpdate() {
-    console.log("UUPDATE")
     const v = frontend.getText();
     if (v === value) return;
     value = v;

@@ -2,9 +2,9 @@ import WSClient from '@notarium/adapters/network/WSClient'
 import { IncomingMessage } from 'http'
 import { Duplex } from 'stream'
 import WebSocket from 'ws'
-import * as yjsSignal from './yjs-signal'
+import fs from "./fs"
 import * as yjsDoc from './yjs-docs'
-import fs from "./fs";
+import * as yjsSignal from './yjs-signal'
 
 const wss = new WebSocket.Server({ noServer: true })
 

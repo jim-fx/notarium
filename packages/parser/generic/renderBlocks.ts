@@ -5,7 +5,7 @@ import {
   NotariumHeadingBlock,
   NotariumTableBlock,
   NotariumTextBlock,
-} from "../types";
+} from "./types";
 
 import YAML from "yaml";
 import { splitLine } from "../regex";
@@ -65,7 +65,6 @@ export function renderCode(d: NotariumCodeBlock) {
 }
 
 export function renderLatex(b: NotariumLatexBlock) {
-  console.log("RenderLatex", b);
   return ["$$", ...b.data, "$$"];
 }
 
@@ -94,8 +93,6 @@ export function renderFrontMatter(d: NotariumDocument) {
   const keys = Object.keys(d.frontmatter);
 
   const lines = splitLine(YAML.stringify(d.frontmatter));
-
-  console.log("RenderFrontmatter", { lines, keys, d });
 
   if (keys.length) {
     return ["---", ...lines, "---"].filter((l) => l.length);
