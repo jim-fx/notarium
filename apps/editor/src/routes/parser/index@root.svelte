@@ -1,5 +1,4 @@
 <script lang="ts">
-	import './atom-one-light.css';
 	import { onMount } from 'svelte';
 	import { EditorState } from '@codemirror/state';
 	import { EditorView, ViewUpdate } from '@codemirror/view';

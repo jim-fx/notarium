@@ -1,6 +1,6 @@
 import { splitPath } from "@notarium/common";
 import { MimeType, YNode } from "@notarium/types";
-import { Doc, Array, Map } from "yjs";
+import { type Doc, Array, Map } from "yjs";
 
 import { FileSystem } from "./types";
 

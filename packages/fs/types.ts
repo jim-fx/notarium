@@ -28,7 +28,7 @@ export interface File {
   getData(): Uint8Array | Doc;
   getBinaryData(): Promise<Uint8Array>;
 
-  context: ReturnType<typeof createContext>;
+  getContext(): ReturnType<typeof createContext>;
 
   load(): Promise<unknown>;
   close(): void;
@@ -37,7 +37,7 @@ export interface File {
     adapter?: Symbol
   ): Promise<void>;
 
-  toJSON(): { context: File["context"], mimetype: File["mimetype"] }
+  toJSON(): { context: ReturnType<File["getContext"]>, mimetype: File["mimetype"], text?: string }
 }
 
 export type AdapterFactory = (fs: FileSystem) => Adapter | Promise<Adapter>;

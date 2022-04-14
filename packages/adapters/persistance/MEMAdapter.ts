@@ -1,12 +1,12 @@
 import type { IDataBackend, IPersistanceAdapter } from "@notarium/types";
-import * as Y from "yjs";
+import { Doc, encodeStateAsUpdateV2 } from "yjs";
 
 export function MEMAdapter<T>(backend: IDataBackend<T>): IPersistanceAdapter {
   let docData: Record<string, T | Uint8Array> = {};
 
   return {
-    async saveDocument(doc: Y.Doc) {
-      docData[backend.docId] = Y.encodeStateAsUpdate(backend.doc);
+    async saveDocument(doc: Doc) {
+      docData[backend.docId] = encodeStateAsUpdateV2(backend.doc);
     },
     async loadDocument(docId: string, fsPath?: string) {
       if (docId === "tree" && fsPath) {

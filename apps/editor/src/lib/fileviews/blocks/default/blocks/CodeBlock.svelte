@@ -1,5 +1,5 @@
 <script>
-	import './atom-one-dark.min.css';
+	import 'highlight.js/styles/atom-one-light.css';
 
 	export let block;
 </script>

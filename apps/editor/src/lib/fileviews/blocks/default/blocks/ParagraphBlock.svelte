@@ -22,7 +22,7 @@
 	});
 </script>
 
-<p class="block-type-{block.type}">
+<p class="block-type-{block.type} m-0 p-0">
 	{#if edit}
 		<span bind:this={el} contenteditable on:input={handleInput} bind:textContent={block.md} />
 	{:else}
@@ -31,7 +31,8 @@
 </p>
 
 <style>
-	p > :global(ul) {
+	p > :global(ul),
+	p > :global(p) {
 		margin: 0;
 	}
 

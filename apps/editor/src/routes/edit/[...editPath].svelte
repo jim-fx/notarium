@@ -8,7 +8,7 @@
 		await fs.load();
 		const f = fs.openFile(params.editPath);
 		await f.load();
-		await f.context.isLoaded;
+		await f.getContext().isLoaded;
 		return {
 			props: {
 				file: f

@@ -4,17 +4,31 @@
 	export let block: NotariumHeadingBlock;
 
 	export let edit = false;
-	const id = block.html.split(' ').join('-');
+	const id = block.data.text.replace(/\s/g, '-').toLowerCase();
+	function handleKeyDown(ev: KeyboardEvent) {
+		if (!edit) return;
+		if (ev.key === 'Escape') {
+			edit = false;
+		}
+	}
 </script>
 
-{#if block.data.weight === 1}
-	<h1 contenteditable={edit} {id}>{block.data.text}</h1>
-{:else if block.data.weight === 2}
-	<h2 contenteditable={edit} {id}>{block.data.text}</h2>
-{:else if block.data.weight === 3}
-	<h3 contenteditable={edit} {id}>{block.data.text}</h3>
-{:else if block.data.weight === 4}
-	<h4 contenteditable={edit} {id}>{block.data.text}</h4>
-{:else if block.data.weight === 5}
-	<h5 contenteditable={edit} {id}>{block.data.text}</h5>
+{#if edit}
+	<svelte:element
+		this={'h' + block.data.weight}
+		on:click={() => (edit = true)}
+		class="m-y-0"
+		on:keydown={handleKeyDown}
+		contenteditable="true"
+		bind:textContent={block.data.text}
+		{id}>{block.data.text}</svelte:element
+	>
+{:else}
+	<svelte:element
+		this={'h' + block.data.weight}
+		on:click={() => (edit = true)}
+		class="m-y-0"
+		on:keydown={handleKeyDown}
+		{id}>{block.data.text}</svelte:element
+	>
 {/if}

@@ -61,7 +61,7 @@
 {/if}
 
 {#each block.data as item, i}
-	<div class="flex items-center">
+	<div class="flex items-center" on:click={() => (edit = true)}>
 		{#if edit}
 			<button transition:scale class="mr-2 text-xs" on:click={() => handleRemove(i)}>✕</button>
 		{/if}
@@ -75,14 +75,14 @@
 		{#if edit}
 			<p
 				contenteditable
-				class="ml-2 w-full p-0.5"
+				class=""
 				bind:textContent={item.text}
 				on:keydown={(ev) => handleKeyDown(ev, i)}
 			>
 				{item.text}
 			</p>
 		{:else}
-			<p class="ml-2 w-full p-0.5">
+			<p class="m-y-2 m-l-2">
 				{item.text}
 			</p>
 		{/if}

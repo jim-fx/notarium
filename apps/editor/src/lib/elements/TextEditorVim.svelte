@@ -5,7 +5,7 @@
 	import { markdown } from '@codemirror/lang-markdown';
 	import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
 	import { history } from '@codemirror/history';
-	import { vim } from '@replit/codemirror-vim';
+	import { vim, Vim, getCM } from '@replit/codemirror-vim';
 	import { yCollab } from 'y-codemirror.next';
 	import { type Doc, UndoManager } from 'yjs';
 	import type { File } from '@notarium/fs';
@@ -27,22 +27,49 @@
 
 	const undoManager = new UndoManager(yText);
 
-	onMount(() => {
-		const state = EditorState.create({
-			doc: yText.toString(),
-			extensions: [
-				history(),
-				oneDarkHighlightStyle,
-				vim(),
-				markdown(),
-				yCollab(yText, provider.awareness, { undoManager })
-			]
-		});
+	const FontSizeTheme = EditorView.theme({
+		'&': {
+			fontSize: '12pt'
+		},
+		'.cm-content': {
+			fontFamily: 'Menlo, Monaco, Lucida Console, monospace',
+			minHeight: '200px'
+		},
+		'.cm-gutters': {
+			minHeight: '200px'
+		},
+		'.cm-scroller': {
+			overflow: 'auto',
+			maxHeight: '600px'
+		}
+	});
 
+	const vimPlugin = vim();
+
+	const state = EditorState.create({
+		doc: yText.toString(),
+		extensions: [
+			history(),
+			oneDarkHighlightStyle,
+			vimPlugin,
+			markdown(),
+			yCollab(yText, provider.awareness, { undoManager }),
+			FontSizeTheme
+		]
+	});
+
+	onMount(() => {
 		const view = new EditorView({
 			state,
-			parent: wrapper
+			parent: wrapper,
+			theme: [FontSizeTheme]
 		});
+
+		const cm = getCM(view);
+
+		window.vim = vimPlugin;
+		window.cm = cm;
+		window.vimo = Vim;
 	});
 </script>
 

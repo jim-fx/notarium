@@ -39,9 +39,9 @@ export function createContext(fs: FileSystem, file: File) {
 
   async function updateParentContext() {
     if (parentContextFile) {
-      await parentContextFile.context.isLoaded;
+      await parentContextFile.getContext().isLoaded;
 
-      parentContext = parentContextFile.context.get();
+      parentContext = parentContextFile.getContext().get();
     }
 
     updateMyContext();

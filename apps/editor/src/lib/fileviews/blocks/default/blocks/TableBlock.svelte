@@ -21,12 +21,19 @@
 <style>
 	table {
 		border-collapse: collapse;
+		border: solid thin lightgray;
 	}
 
 	th,
 	td {
 		text-align: left;
 		padding: 8px;
+		border-right: solid thin lightgray;
+	}
+
+	tr > td:last-child,
+	tr > th:last-child {
+		border-right: none !important;
 	}
 
 	tr:nth-child(even) {

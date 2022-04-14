@@ -3,6 +3,11 @@ type: block
 ---
 # Obsidian Features
 
-| a | b | c |
-| - | - | - |
-| a | b | a |
+This is 
+
+| a      | b | c |
+| ------ | - | - |
+| a      | b | a |
+| a      | b | a |
+| a      | b | a |
+| ^block |

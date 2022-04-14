@@ -1,75 +1,50 @@
 <script lang="ts">
-	import { renderMarkdownToHTML, parseFrontmatter } from '@notarium/parser';
 	import { getParser } from './blocks';
 	import { createWritableDocumentStore } from '@notarium/data';
-	import { isEditing, localStore } from '$lib/stores';
-	import { browser } from '$app/env';
+	import { localStore } from '$lib/stores';
+	import { createContextStore } from '@notarium/data';
 	import type { File } from '@notarium/fs';
 
 	export let file: File;
 
 	$: text = file && createWritableDocumentStore(file);
 
-	$: frontMatter = text && parseFrontmatter($text);
+	const context = createContextStore(file);
 
-	$: blockAvailable = !!frontMatter?.type;
-
-	let preferBlockStore = localStore.get(file.path + '-prefer-block', false);
-	let preferBlock = $preferBlockStore;
-
-	$: editorType = blockAvailable && preferBlock ? 'block' : 'text';
-
-	$: parser = blockAvailable && getParser(frontMatter?.type);
-
-	function toggleEditing() {
-		$isEditing = !$isEditing;
+	const editorTypes = ['vim', 'block'];
+	let editorType = localStore.get('prefer-editor-type', 'block');
+	if (!editorTypes.includes($editorType)) {
+		$editorType = editorTypes[0];
 	}
+
+	$: parser = getParser($context?.type);
 </script>
 
 <header>
-	{#if blockAvailable}
-		{#if preferBlock}
-			<button
-				on:click={() => {
-					preferBlock = false;
-				}}>text</button
-			>
-		{:else}
-			<button
-				on:click={() => {
-					preferBlock = true;
-				}}>block</button
-			>
-		{/if}
-	{/if}
-
-	{#if $isEditing}
-		<button on:click={toggleEditing}>exit edit</button>
-	{:else}
-		<button on:click={toggleEditing}>edit</button>
-	{/if}
+	{#each editorTypes as type}
+		<button
+			class:active={type === $editorType}
+			on:click={() => {
+				$editorType = type;
+			}}>{type}</button
+		>
+	{/each}
 </header>
 
-{#if editorType === 'text'}
-	{#if $isEditing && browser}
-		{#await import('$lib/elements/TextEditor.svelte')}
-			<p>Loading Editor</p>
-		{:then comp}
-			<svelte:component this={comp.default} {file} />
-		{/await}
-	{:else}
-		<div id="md-container">
-			{@html renderMarkdownToHTML($text)}
-		</div>
-	{/if}
-{:else if editorType === 'block'}
-	{#if blockAvailable}
-		{#if parser}
-			<svelte:component this={parser} {text} isEditing={$isEditing} />
-		{:else}
-			<p>No parser available for {frontMatter?.type}</p>
-		{/if}
-	{:else}
-		<p>No Block Data avaialbned</p>
-	{/if}
+{#if $editorType === 'vim'}
+	{#await import('$lib/elements/TextEditorVim.svelte')}
+		<p>Loading Editor</p>
+	{:then comp}
+		<svelte:component this={comp.default} {file} />
+	{/await}
+{:else if $editorType === 'block'}
+	<svelte:component this={parser} {text} />
+{:else if $editorType === 'quill'}
+	<p>quill</p>
 {/if}
+
+<style>
+	.active {
+		background-color: white;
+	}
+</style>

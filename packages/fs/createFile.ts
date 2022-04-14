@@ -9,7 +9,7 @@ import {
 } from "@notarium/common";
 import { DataCore, File, FileSystem } from "./types";
 import type { MimeType } from "@notarium/types";
-import { Doc, encodeStateAsUpdateV2 } from "yjs";
+import { type Doc, encodeStateAsUpdateV2 } from "yjs";
 import { createContext } from "./createContext";
 
 function mimeSupportsCRDT(s: MimeType) {
@@ -29,6 +29,8 @@ export function createFile(path: string, fs: FileSystem) {
 
   log("open file", path);
 
+  let context: ReturnType<typeof createContext>;
+
   const file: File = {
     path,
     mimetype,
@@ -37,7 +39,11 @@ export function createFile(path: string, fs: FileSystem) {
       return mimeSupportsCRDT(file.mimetype);
     },
     stuff: {},
-    context: undefined,
+    getContext() {
+      if (context) return context;
+      context = createContext(fs, file);
+      return context;
+    },
     getData() {
       if (!core) console.trace("File not yet loaded");
       return core.getData();
@@ -74,9 +80,9 @@ export function createFile(path: string, fs: FileSystem) {
     if (core) return;
 
     if (file.path !== "tree") {
-      file.context = createContext(fs, file);
-      file.context.on("context", () => {
-        emitter.emit("context", file.context.get());
+      context = file.getContext();
+      context.on("context", () => {
+        emitter.emit("context", context.get());
       });
     }
 

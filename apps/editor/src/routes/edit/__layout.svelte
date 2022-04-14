@@ -5,7 +5,7 @@
 		await fs.load();
 		const f = fs.openFile(params.editPath);
 		await f.load();
-		await f.context.isLoaded;
+		await f.getContext().isLoaded;
 
 		return {
 			props: {
@@ -17,12 +17,12 @@
 
 <script lang="ts">
 	import { activeNode, hasActiveNodeIndexMD, activeNodeId } from '$lib/stores';
-	import { createConfigStore } from '@notarium/data';
+	import { createContextStore } from '@notarium/data';
 	import type { File } from '@notarium/fs';
 
 	export let file: File;
 
-	const context = createConfigStore(file);
+	const context = createContextStore(file);
 </script>
 
 <details>

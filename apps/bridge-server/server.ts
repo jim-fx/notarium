@@ -1,6 +1,6 @@
 import polka from "polka";
 import fs from "./src/fs";
-import { Doc } from "yjs";
+import type { Doc } from "yjs";
 import { splitPath } from "@notarium/common";
 import cors from "cors";
 import handleWebsocket from "./src/websocket";
@@ -20,8 +20,6 @@ app.get("/api/*", async (req, res) => {
   const uriPath = decodeURIComponent(req.path);
 
   const cleanPath = splitPath(uriPath.replace("/api", "")).join("/");
-
-  console.log({ cleanPath })
 
   await fs.load();
 

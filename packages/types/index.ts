@@ -1,5 +1,5 @@
 export * from "./data";
-import * as Y from "yjs";
+import type { Array, Map } from "yjs";
 
 export type MimeType =
   | "tree"
@@ -32,9 +32,9 @@ export interface IDirectory {
   children: IFile[];
 }
 
-export interface YNode extends Y.Map<Y.Array<YNode> | string> {
-  get(key: "children"): Y.Array<YNode>;
-  set(key: "children", value: Y.Array<YNode>): string | Y.Array<YNode>;
+export interface YNode extends Map<Array<YNode> | string> {
+  get(key: "children"): Array<YNode>;
+  set(key: "children", value: Array<YNode>): string | Array<YNode>;
   get(key: "mimetype"): MimeType;
   set(key: "mimetype", value: MimeType): string;
   get(key: "path"): string;

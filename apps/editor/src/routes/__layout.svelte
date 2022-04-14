@@ -12,6 +12,7 @@
 
 <script lang="ts">
 	import './app.css';
+	import 'uno.css';
 	import { onMount } from 'svelte';
 	import File from '$lib/elements/File.svelte';
 	import { localStore, treeStore, activeNodeId } from '$lib/stores';
