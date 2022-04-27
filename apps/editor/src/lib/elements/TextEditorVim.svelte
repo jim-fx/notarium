@@ -2,10 +2,12 @@
 	import { onMount } from 'svelte';
 	import { EditorState } from '@codemirror/state';
 	import { EditorView } from '@codemirror/view';
+	import { history } from '@codemirror/commands';
+	import { materialDark } from 'cm6-theme-material-dark';
 	import { markdown } from '@codemirror/lang-markdown';
-	import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
-	import { history } from '@codemirror/history';
-	import { vim, Vim, getCM } from '@replit/codemirror-vim';
+	import { syntaxHighlighting, defaultHighlightStyle, bracketMatching } from '@codemirror/language';
+
+	import { vim } from '@replit/codemirror-vim';
 	import { yCollab } from 'y-codemirror.next';
 	import { type Doc, UndoManager } from 'yjs';
 	import type { File } from '@notarium/fs';
@@ -41,36 +43,42 @@
 		'.cm-scroller': {
 			overflow: 'auto',
 			maxHeight: '600px'
+		},
+		'.cm-o-replacement': {
+			display: 'inline-block',
+			width: '.5em',
+			height: '.5em',
+			borderRadius: '.25em'
 		}
 	});
 
-	const vimPlugin = vim();
-
-	const state = EditorState.create({
-		doc: yText.toString(),
-		extensions: [
-			history(),
-			oneDarkHighlightStyle,
-			vimPlugin,
-			markdown(),
-			yCollab(yText, provider.awareness, { undoManager }),
-			FontSizeTheme
-		]
-	});
-
 	onMount(() => {
-		const view = new EditorView({
-			state,
-			parent: wrapper,
-			theme: [FontSizeTheme]
+		const state = EditorState.create({
+			doc: yText.toString(),
+			extensions: [
+				history(),
+				syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
+				bracketMatching(),
+				vim(),
+				markdown(),
+				yCollab(yText, provider.awareness, { undoManager }),
+				FontSizeTheme
+			]
 		});
 
-		const cm = getCM(view);
+		const view = new EditorView({
+			state,
+			parent: wrapper
+		});
 
-		window.vim = vimPlugin;
-		window.cm = cm;
-		window.vimo = Vim;
+		/* const cm = getCM(view); */
 	});
 </script>
 
 <div bind:this={wrapper} />
+
+<style>
+	:global(.cm-scroller) {
+		max-height: 100% !important;
+	}
+</style>

@@ -99,5 +99,6 @@
 	}
 	p {
 		display: inline;
+		margin: 0;
 	}
 </style>

@@ -17,6 +17,7 @@
 	}
 
 	$: if (markdown) {
+		console.log('MARK:', markdown);
 		if (markdown !== $text) {
 			update();
 		}

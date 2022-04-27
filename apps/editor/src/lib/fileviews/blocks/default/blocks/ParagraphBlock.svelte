@@ -1,48 +1,45 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { clickOutside } from '$lib/helpers';
+	import { renderMarkdownToHTML } from '@notarium/parser';
+	import type { NotariumTextBlock } from '@notarium/parser/generic/types';
+	import { tick } from 'svelte';
 
-	export let block;
+	export let block: NotariumTextBlock;
 
 	export let edit = false;
 
-	function handleInput(ev) {
-		block.md = ev.target.textContent;
-	}
-
 	let el: HTMLSpanElement;
 
-	onMount(() => {
-		if (!el) return;
-		/* const range = document.createRange(); //Create a range (a range is a like the selection but invisible) */
-		/* range.selectNodeContents(el); //Select the entire contents of the element with the range */
-		/* range.collapse(false); //collapse the range to the end point. false means collapse to end rather than the start */
-		/* const selection = window.getSelection(); //get the selection object (allows you to change selection) */
-		/* selection.removeAllRanges(); //remove any selections already made */
-		/* selection.addRange(range); //make the range you have just created the visible selection */
-	});
+	async function toggleEdit() {
+		edit = true;
+		await tick();
+		el.focus();
+	}
 </script>
 
 <p class="block-type-{block.type} m-0 p-0">
 	{#if edit}
-		<span bind:this={el} contenteditable on:input={handleInput} bind:textContent={block.md} />
+		<p
+			bind:this={el}
+			contenteditable
+			use:clickOutside
+			on:click_outside={() => (edit = false)}
+			bind:textContent={block.md}
+		/>
 	{:else}
-		{@html block.html}
+		<div on:click={toggleEdit}>
+			{@html renderMarkdownToHTML(block.md)}
+		</div>
 	{/if}
 </p>
 
 <style>
-	p > :global(ul),
-	p > :global(p) {
+	p {
+		white-space: pre-wrap;
+		padding: 0;
 		margin: 0;
 	}
-
-	:global(.block-type-paragraph p) {
-		white-space: pre !important;
-	}
-
-	:global(.block-type-code) {
-		font-size: 1em;
-		font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
-			'Courier New', monospace;
+	div > :global(p) {
+		margin: 0;
 	}
 </style>

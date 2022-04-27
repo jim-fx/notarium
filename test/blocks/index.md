@@ -3,9 +3,7 @@
 ## Use any editor u want?
 
 But what if you would want to edit in your terminal?
-
-Edit in the browser and in your terminal
-
+r and in your terminal
 maybe this is better than the old one, but, how do we fix this stuuupid debounce error
 
 ## Or try some interactives blocks:
@@ -18,9 +16,11 @@ $$
 
 ### Or maybe checklists?
 
-- [x] This is a github styled checklist
-- [x] With some items on it
-- [x] that do not mean anything
-- [x] He needs some milk
-- [x] God damn boyyyyyy
-- [ ] List Item
+- [ ] This is a github styled checklist
+- [ ] With some items on it
+- [ ] that do not mean anything
+- [ ] He needs some milk
+- [ ] God damn boyyyyyy
+- [x] List Item
+- [x] This is my Test???
+- [ ] please delete this
