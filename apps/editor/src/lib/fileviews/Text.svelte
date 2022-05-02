@@ -32,15 +32,13 @@
 </header>
 
 {#if $editorType === 'vim'}
-	{#await import('$lib/elements/TextEditorVim.svelte')}
+	{#await import('$lib/elements/TextEditor.svelte')}
 		<p>Loading Editor</p>
 	{:then comp}
 		<svelte:component this={comp.default} {file} />
 	{/await}
 {:else if $editorType === 'block'}
 	<svelte:component this={parser} {text} />
-{:else if $editorType === 'quill'}
-	<p>quill</p>
 {/if}
 
 <style>

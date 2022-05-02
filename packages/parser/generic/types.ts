@@ -15,6 +15,7 @@ export interface NotariumRawBlock {
 interface DefNotariumBlock {
   md: string;
   html: string;
+  id: string;
 }
 
 export type NotariumBlock =

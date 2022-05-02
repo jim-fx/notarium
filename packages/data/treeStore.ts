@@ -7,7 +7,10 @@ export function createTreeStore(fs: FileSystem): Readable<IDirectory> {
   return readable(undefined, function start(set) {
     const tree = fs.openFile("tree");
 
+    const a = performance.now();
+
     fs.isLoaded.then(() => {
+      console.log(performance.now() - a);
       set((tree.getData() as Doc).getMap("tree").toJSON() as IDirectory);
     });
 

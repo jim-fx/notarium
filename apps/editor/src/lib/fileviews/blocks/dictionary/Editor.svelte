@@ -4,8 +4,6 @@
 
 	export let text: Writable<string>;
 
-	export let isEditing = false;
-
 	$: parsed = DictionaryParser.parse($text);
 
 	$: markdown = DictionaryParser.render(parsed);

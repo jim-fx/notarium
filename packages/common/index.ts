@@ -82,6 +82,7 @@ export * from "./mutex";
 export * from "./fs";
 export * from "./map";
 export * from "./groupArray";
+export * from "./modifyCursor";
 
 export * from "./logger";
 export * from "./detectMimeFromPath";

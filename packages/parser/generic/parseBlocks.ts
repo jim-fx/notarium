@@ -4,7 +4,10 @@ import renderMarkdown from "../renderMarkdownToHTML";
 import { NotariumBlock, NotariumRawBlock } from "./types";
 import katex from "katex";
 
-export function parseHeading([line]: string[]) {
+
+export function parseHeading(input: string[] | string) {
+
+  const line = Array.isArray(input) ? input[0] : input;
   let weight = 1;
 
   line.startsWith("##") && (weight = 2);
@@ -115,5 +118,5 @@ export function parseBlock(block: NotariumRawBlock): NotariumBlock {
       break;
   }
 
-  return { type: block.type, md, html, data };
+  return { type: block.type, md, html, data,id:Math.random().toString(16).slice(2) };
 }

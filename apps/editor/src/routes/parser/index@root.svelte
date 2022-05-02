@@ -1,17 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { EditorState } from '@codemirror/state';
-	import { EditorView, ViewUpdate } from '@codemirror/view';
-	import { markdown } from '@codemirror/lang-markdown';
-	import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
-	import { history } from '@codemirror/history';
-	import { vim } from '@replit/codemirror-vim';
 	import { localStore } from '$lib/stores';
 	import parseDocument from '@notarium/parser/generic/parseDocument';
 	import renderDocumentToMarkdown from '@notarium/parser/generic/renderDocument';
 	import { renderMarkdownToHTML } from '@notarium/parser';
 
 	import BlockEditor from '$lib/fileviews/blocks/default/Editor.svelte';
+	import createCodeMirror from '$lib/elements/createCodeMirror';
+	import { EditorView, ViewUpdate } from '@codemirror/view';
 
 	const text = localStore.get('parser-text', '# Empty');
 
@@ -22,25 +18,14 @@
 	let wrapper: HTMLDivElement;
 
 	onMount(() => {
-		const state = EditorState.create({
-			doc: $text,
+		return createCodeMirror($text, wrapper, {
 			extensions: [
-				history(),
-				oneDarkHighlightStyle,
-				vim(),
-				markdown(),
 				EditorView.updateListener.of((v: ViewUpdate) => {
 					if (v.docChanged) {
-						console.log(v.state.toJSON().doc);
 						$text = v.state.toJSON().doc;
 					}
 				})
 			]
-		});
-
-		const view = new EditorView({
-			state,
-			parent: wrapper
 		});
 	});
 </script>

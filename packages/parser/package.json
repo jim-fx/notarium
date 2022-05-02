@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@iktakahiro/markdown-it-katex": "^4.0.1",
+    "@notarium/common": "link:../common",
     "highlight.js": "^11.5.1",
     "katex": "^0.15.3",
     "markdown-it": "^13.0.0",

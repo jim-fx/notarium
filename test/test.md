@@ -1,5 +1,9 @@
-# THis is an file or not so empty anymore 
+# This is a file or not so empty anymore 
 
 $$
-f'(x) = 42
+f'(x) = \frac{2}{\sqrt[3]{\pi}}
 $$
+
+<dictionary type="verbs">
+
+</dictionary>

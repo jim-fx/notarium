@@ -25,6 +25,7 @@ const config = {
     },
     vite: {
       build: { target: "ESNext" },
+      optimizeDeps: { include: ["y-websocket"] },
       plugins: [UnoCss({ presets: [presetUno(), presetIcons()], extractors: [extractorSvelte] })]
     },
     adapter: adapter({ fallback: null })
