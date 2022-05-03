@@ -6,7 +6,8 @@
 ## Heading 2
 ### Heading 3
 
-This is the editor test And this block should be a simple paragraph.
+This is the editor test. And this block should be a simple paragraph.
+That has two lines.
 
 | asd | asd | asd | asd |
 |-----|-----|-----|-----|
@@ -41,4 +42,4 @@ This is the editor test And this block should be a simple paragraph.
 
 {type}
 
-<svelte:component this={Editor} {text} />
+<svelte:component this={Editor} {text} debug />

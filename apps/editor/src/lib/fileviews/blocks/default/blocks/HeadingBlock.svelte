@@ -10,7 +10,8 @@
 	export let block: NotariumHeadingBlock;
 
 	const activeIndex = getContext<Writable<number>>('activeIndex');
-	const insertBlock = getContext<(index: number, b: NotariumBlock) => void>('insertBlock');
+	const insertBlock =
+		getContext<(index: number, b: NotariumBlock | NotariumBlock[]) => void>('insertBlock');
 	export let index: number;
 	let elem: HTMLHeadingElement;
 
@@ -32,9 +33,6 @@
 	let text = block.data.text;
 	$: text && edit && handleTextUpdate();
 	async function handleTextUpdate() {
-		if (text.includes('<br>')) {
-			text = text.replace(/<br>/, '\n');
-		}
 		const { blocks } = parseDocument(text);
 
 		if (blocks[0].type !== block.type) {
@@ -60,8 +58,7 @@
 
 		if (blocks.length > 1) {
 			// UUhhh ohh, we have a new block
-			await tick();
-			insertBlock(index, blocks[1]);
+			insertBlock(index, blocks.slice(1));
 		}
 	}
 
@@ -85,7 +82,6 @@
 	this={'h' + block.data.weight}
 	class="header m-y-0"
 	on:blur={async () => {
-		await tick();
 		if ($activeIndex === index) {
 			$activeIndex = -1;
 		}
