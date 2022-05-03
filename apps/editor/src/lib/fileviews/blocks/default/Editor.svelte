@@ -57,7 +57,15 @@
 		style="grid-template-rows: repeat({parsed.blocks.length}, min-content)"
 	>
 		{#each parsed.blocks as block, index (block)}
-			<div class="block-wrapper m-y-2 grid grid-cols-[20px_1fr] grid-rows-repeat">
+			<div
+				class="block-wrapper m-y-2 grid grid-cols-[20px_1fr] grid-rows-repeat"
+				on:click={() => {
+					$activeIndex = index;
+				}}
+				on:focus={() => {
+					$activeIndex = index;
+				}}
+			>
 				<div class="m-t-1 i-carbon-menu opacity-0" />
 				<div>
 					{#if !block}

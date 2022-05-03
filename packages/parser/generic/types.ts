@@ -19,7 +19,7 @@ interface DefNotariumBlock {
 }
 
 export type NotariumBlock =
-  | NotariumTextBlock
+  | NotariumParagraphBlock
   | NotariumHeadingBlock
   | NotariumCodeBlock
   | NotariumTableBlock
@@ -32,7 +32,7 @@ export interface NotariumFrontmatterBlock extends DefNotariumBlock {
   data: Record<string, any>;
 }
 
-export interface NotariumTextBlock extends DefNotariumBlock {
+export interface NotariumParagraphBlock extends DefNotariumBlock {
   type: "paragraph";
   data: string[];
 }

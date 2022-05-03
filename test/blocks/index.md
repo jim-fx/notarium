@@ -1,10 +1,15 @@
 # This is my new version
 
-## Use any editor u want?
+## Use any <i>editor</i> u want?
 
 But what if you would want to edit in your terminal?
-r and in your terminal
+r and in **your** termina
+
 maybe this is better than the old one, but, how do we fix this stuuupid debounce error
+
+# r and in your terminal
+
+maybe this is **better** than the old one, but, how do we fix this stuuupid debounce error
 
 ## Or try some inlocks:
 
@@ -16,13 +21,11 @@ $$
 
 ### Or maybe checklists?
 
-- [x] This is a github styled checklist
+- [ ] This is a github styled checklist
 - [ ] With some items on it
 - [ ] that do not mean anything
-- [x] He needs some milk
-- [ ] God damn boyyyyyy
+- [ ] He needs some milk
+- [x] God damn boyyyyyy
 - [x] List Item
 - [x] This is my Test???
-- [ ] please delete this
-- [ ] please delete this
-- [ ] please delete this
+- [x] please delete this

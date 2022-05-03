@@ -4,7 +4,7 @@ import {
   NotariumDocument,
   NotariumHeadingBlock,
   NotariumTableBlock,
-  NotariumTextBlock,
+  NotariumParagraphBlock,
 } from "./types";
 
 import YAML from "yaml";
@@ -15,7 +15,7 @@ export function renderChecklist(b: NotariumChecklistBlock) {
   return b.data.map((v) => `- [${v.checked ? "x" : " "}] ${v.text}`);
 }
 
-export function renderParagraph(b: NotariumTextBlock) {
+export function renderParagraph(b: NotariumParagraphBlock) {
   const data = (b.data || b.md) as string | string[];
   return Array.isArray(data) ? data : data.split("\n");
 }

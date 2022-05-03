@@ -1,12 +1,16 @@
 <script lang="ts">
 	import type { NotariumChecklistBlock } from '@notarium/parser/generic/types';
 
-	import { tick } from 'svelte';
+	import { getContext, tick } from 'svelte';
+	import type { Writable } from 'svelte/store';
 	import { scale } from 'svelte/transition';
 
 	export let block: NotariumChecklistBlock;
 
-	export let edit = false;
+	const activeIndex = getContext<Writable<number>>('activeIndex');
+	export let index: number;
+
+	$: edit = $activeIndex === index;
 
 	const defaultItem = { checked: false, text: 'List Item' };
 
@@ -66,11 +70,7 @@
 			<button transition:scale class="mr-2 text-xs" on:click={() => handleRemove(i)}>✕</button>
 		{/if}
 
-		{#if edit}
-			<input type="checkbox" class="text-blue-light" bind:checked={item.checked} />
-		{:else}
-			<input type="checkbox" class="text-blue-light" checked={item.checked} disabled />
-		{/if}
+		<input type="checkbox" class="text-blue-light" bind:checked={item.checked} />
 
 		{#if edit}
 			<p

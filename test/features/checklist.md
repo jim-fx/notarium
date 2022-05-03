@@ -5,5 +5,3 @@ Just writing black text on a white screen and watching the words appear in front
 Forming like flocks of birds agains a white background.
 
 ## This is my test 2
-
-

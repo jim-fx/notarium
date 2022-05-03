@@ -26,7 +26,13 @@ export function parseLines(lines: string[]): NotariumBlock[] {
 
   const close = () => {
     if (!currentBlock.data.length) return;
-    output.push(currentBlock);
+
+    if (output[output.length - 1]?.type === "paragraph" && currentBlock.type === "paragraph") {
+      output[output.length - 1].data.push("", ...currentBlock.data);
+    } else {
+      output.push(currentBlock);
+    }
+
     currentBlock = {
       type: "paragraph",
       data: [],

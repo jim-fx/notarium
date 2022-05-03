@@ -33,13 +33,16 @@ That has two lines.
 	const text = localStore.get('editor-text', defaultText);
 
 	let type = 'def';
+	let debug = localStore.get('editor-debug', false);
 
 	$: Editor = getParser(type);
 </script>
 
 <button on:click={() => (type = type === 'def' ? 'dictionary' : 'def')}>s</button>
 <button on:click={() => ($text = defaultText)}>reset</button>
+<label for="debug" />
+<input type="checkbox" bind:checked={$debug} name="" id="debug" />
 
 {type}
 
-<svelte:component this={Editor} {text} debug />
+<svelte:component this={Editor} {text} debug={$debug} />

@@ -33,6 +33,10 @@
 	let text = block.data.text;
 	$: text && edit && handleTextUpdate();
 	async function handleTextUpdate() {
+		if (text.includes('<br>')) {
+			text = text.replace(/<br>/g, '\n');
+		}
+
 		const { blocks } = parseDocument(text);
 
 		if (blocks[0].type !== block.type) {

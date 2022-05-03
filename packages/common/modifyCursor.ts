@@ -1,4 +1,4 @@
-export function getCaretPosition(editableDiv: HTMLDivElement) {
+export function getCaretPosition(editableDiv: HTMLElement) {
   let caretPos = 0,
     sel: Selection,
     range: Range;

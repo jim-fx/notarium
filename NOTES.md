@@ -222,6 +222,8 @@ Maybe this is prematurely optimized, need to do some testing how much memory tha
 
 ## For search:
 
+Errror in this word.
+
 [https://www.npmjs.com/package/keyword-extractor](Extract keywords) so that we don't have to do fulltext search
 
 # AuthN
@@ -261,7 +263,7 @@ We need to somehow resolve the current config
 
 ## What Flags are useful?
 
-**protected**
+**Protected**
 Can not be deleted
 
 **read: (everyone|owners|readers|nobody)**

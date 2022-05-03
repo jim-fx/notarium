@@ -102,6 +102,7 @@ importers:
       '@unocss/core': ^0.32.8
       '@unocss/preset-icons': ^0.32.8
       '@unocss/preset-uno': ^0.32.8
+      bytemd: ^1.13.1
       cm6-theme-material-dark: ^0.1.0
       diff-match-patch: ^1.0.5
       eslint: ^8.14.0
@@ -157,6 +158,7 @@ importers:
       '@replit/codemirror-vim': 0.20.0_489b2a2fd1e6e6652f5fb9deecb0c675
       '@unocss/core': 0.32.8
       '@unocss/preset-icons': 0.32.8
+      bytemd: 1.13.1
       cm6-theme-material-dark: 0.1.0
       diff-match-patch: 1.0.5
       highlight.js: 11.5.1
@@ -870,6 +872,12 @@ packages:
       '@types/node': 17.0.31
     dev: true
 
+  /@types/codemirror/5.60.5:
+    resolution: {integrity: sha512-TiECZmm8St5YxjFUp64LK0c8WU5bxMDt9YaAek1UqUb9swrSCoJhh92fWu1p3mTEqlHjhB5sY7OFBhWroJXZVg==}
+    dependencies:
+      '@types/tern': 0.23.4
+    dev: false
+
   /@types/connect/3.4.35:
     resolution: {integrity: sha512-cdeYyv4KWoEgpBISTxWvqYsVy444DOqehiF3fM3ne10AmJ62RSyNkUnxMJXHQWRQQX2eR94m5y1IZyDwBjV9FQ==}
     dependencies:
@@ -883,6 +891,10 @@ packages:
   /@types/diff-match-patch/1.0.32:
     resolution: {integrity: sha512-bPYT5ECFiblzsVzyURaNhljBH2Gh1t9LowgUwciMrNAhFewLkHT2H0Mto07Y4/3KCOGZHRQll3CTtQZ0X11D/A==}
     dev: true
+
+  /@types/estree/0.0.51:
+    resolution: {integrity: sha512-CuPgU6f3eT/XgKKPqKd/gLZV1Xmvf1a2R5POBOGQa6uv82xpls89HU5zKeVoyR8XzHd1RGNOlQlvUe3CFkjWNQ==}
+    dev: false
 
   /@types/express-serve-static-core/4.17.28:
     resolution: {integrity: sha512-P1BJAEAW3E2DJUlkgq4tOL3RyMunoWXqbSCygWo5ZIWTjUgN1YnaXWW4VWl/oc8vs/XoYibEGBKP0uZyF4AHig==}
@@ -984,6 +996,12 @@ packages:
     dependencies:
       '@types/node': 17.0.31
     dev: true
+
+  /@types/tern/0.23.4:
+    resolution: {integrity: sha512-JAUw1iXGO1qaWwEOzxTKJZ/5JxVeON9kvGZ/osgZaJImBnyjyn0cjovPsf6FNLmyGY8Vw9DoXZCMlfMkMwHRWg==}
+    dependencies:
+      '@types/estree': 0.0.51
+    dev: false
 
   /@types/trouter/3.1.1:
     resolution: {integrity: sha512-XTpWPg/bsGt2oHRmNFfq6kjXDJgeX14pPVFq/PutOe83OFiwrSNP9pV0V2j5O+L/r2XiXRlOZPJtyaOAX5fCBQ==}
@@ -1457,6 +1475,12 @@ packages:
     dependencies:
       base64-js: 1.5.1
       ieee754: 1.2.1
+    dev: false
+
+  /bytemd/1.13.1:
+    resolution: {integrity: sha512-Sd8vq6/viHlkFmgZBgDRvnPiY5nomSqexirJ3hUDKbg+0MILMJkXNtXAxp25aT0hpG6jOm4asO8rSOxVTdZF0w==}
+    dependencies:
+      '@types/codemirror': 5.60.5
     dev: false
 
   /cac/6.7.12:
